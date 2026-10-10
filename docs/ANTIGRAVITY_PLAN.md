@@ -1,27 +1,45 @@
 # Backend in Antigravity: the plan
 
-Aryan builds the backend in Antigravity on his Windows PC. Claude keeps working on the page in `web/`. This file is the order of work. Each step is one prompt, one check, one commit.
+Updated Saturday 10 October, 12:30 PM IST. Aryan finishes and deploys the backend in Antigravity on his Windows PC. Claude keeps working on the page in `web/` and the docs. Each step below is one prompt (or one deploy), one check and one commit.
+
+## Where things stand
+
+Most of the backend is already written and merged into `main`: 126 tests pass and `sam validate --lint` passes. **Nothing is deployed yet**, so the first job is to deploy, not to write code.
+
+| Part | State | What's left |
+| --- | --- | --- |
+| The answer clock (`statemachine/incident.asl.json`, `src/incident/`): page, climb JE → AE → EE + DM, answer, warn, close | Built, tested | Deploy (step 1) |
+| Judge path (`POST /demo/runs`, `/demo/answer`, `GET /demo/runs/current`) and the control-room form (`POST /incidents`) | Built, tested | Deploy |
+| Public reads: `/incidents`, `/incidents/{id}/timeline`, `/incidents/{id}/execution` | Built, tested | One real execution history for the skipped test (step 2) |
+| SACHET in, FMISC gauges in, GloFAS fallback, "Nadi ka haal" (`/stretch`, `/gauges`) | Built, tested on real SACHET captures | Real FMISC and Open-Meteo captures (step 2) |
+| CAP 1.2 drafts out, always Exercise (`/cap/rss.xml`, `/cap/{file}`), checked against the OASIS XSD | Built, tested | — |
+| WhatsApp through End User Messaging Social, SNS intake, delivery climb; Telegram switchable | Built, tested | Link the number and switch it on (step 3) |
+| Help run and relief teams for the live map (`src/help/`, `src/api/help.py`, `statemachine/help.asl.json`) | **Half built, not in the template** | Step 4 |
+| `/map/{stretch}` and the daily satellite Lambda (`src/sat/`) | Not started | Step 5 (the page keeps the 3 October grid if cut) |
+| IRS Form 001 briefing, voice notes, roll-call, geofence check-in | Not started | Step 6, in cut order |
+| CloudWatch dashboard, evidence run, `docs/DEPLOY.md` | Not started | Step 7 |
 
 ## Who touches what
 
-| Antigravity (backend) | Claude (page) |
+| Antigravity (backend) | Claude (page and docs) |
 | --- | --- |
-| `template.yaml`, `statemachine/`, `src/`, `tests/`, `data/`, `Makefile`, `docs/DEPLOY.md` | `web/` only |
+| `template.yaml`, `statemachine/`, `src/`, `tests/`, `scripts/`, `data/`, `Makefile`, `docs/DEPLOY.md` | `web/`, `README.md`, `docs/` except `DEPLOY.md` |
 | Never edits `web/`, except `web/.env.local` on your PC (never committed) | Never edits the backend files |
 
-`docs/SPEC.md` is the contract between the two halves. If either side changes a route or a field, it changes SPEC and `web/src/types.ts` in the same commit. **Run `git pull` before every prompt**, because Claude pushes page work to `main` too.
+`docs/SPEC.md` is the contract. If either side changes a route or a field, it changes SPEC and `web/src/types.ts` in the same commit. **Run `git pull` before every prompt**, because Claude pushes page work to `main` too.
 
 ## Time left (deadline Sunday 5 PM IST)
 
 | By | Done when | If it slips |
 | --- | --- | --- |
-| Sat 4 PM | Steps 0 to 2 deployed: the clock runs on AWS from the page's judge path | Nothing else matters until this works |
-| Sat 8 PM | Steps 3 to 4: SACHET, gauges, "Nadi ka haal", CAP drafts. WhatsApp sends and receives (step 5) | At 8 PM with no WhatsApp: tell Antigravity "switch the channel to Telegram per SPEC" |
-| Sat 11 PM | Step 6 (help run and teams) deployed; record video clips | Drop step 7 |
-| Sun 11 AM | Step 7 if there's time; step 8 evidence | Cut list below |
+| Sat 3 PM | Step 1: the stack is deployed and `make fast-incident` passes; the page's judge path runs a real clock on AWS | Nothing else matters until this works |
+| Sat 5 PM | Step 2: real fixtures captured, all tests run | Keep the skips, say so in the README |
+| Sat 8 PM | Step 3: WhatsApp sends and receives; "Haijalpur" and TEST answer | At 8 PM with no WhatsApp: switch to Telegram (step 3b) |
+| Sat 11 PM | Step 4: help run and teams live; two phones see each other. Record video clips | Page stays on its sample help data, labelled |
+| Sun 11 AM | Steps 5 to 7 as time allows | Cut list below |
 | Sun 3 PM | Freeze. README, video, submit | |
 
-Cut, in this order, if late: voice notes, roll-call, geofence (keep a distance check), IRS briefing (use a template), the satellite Lambda (the page keeps the 3 October grid). **Never cut:** the clock that climbs, the judge path, "Nadi ka haal", the live SACHET alert, the CAP draft, the AWS view on the page.
+**Cut, in this order, if late:** voice notes, roll-call, geofence (keep a distance check), IRS briefing (use a template), the satellite Lambda. **Never cut:** the clock that climbs, the judge path, "Nadi ka haal", the live SACHET alert, the CAP draft, the AWS view on the page.
 
 ## Step 0: set up your PC (about 40 minutes, no AI needed)
 
@@ -33,114 +51,151 @@ winget install -e --id Amazon.SAM-CLI
 winget install -e --id Python.Python.3.12
 winget install -e --id OpenJS.NodeJS.LTS
 winget install -e --id Git.Git
-# open a new PowerShell window, then:
-aws configure            # region ap-south-1, output json
-aws sts get-caller-identity
+# close PowerShell, open a new window, then:
+aws configure                      # your access key, region ap-south-1, output json
+aws sts get-caller-identity        # must print your account, not an error
 git clone https://github.com/its-aryansingh/bandh_prahari
 cd bandh_prahari
-py -3.12 -m venv .venv; .\.venv\Scripts\Activate.ps1
-pip install pytest boto3 cfn-lint
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1       # if blocked: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+pip install -r requirements-dev.txt
+pytest -q                          # expect: 126 passed, 3 skipped
+sam validate --lint --region ap-south-1
 ```
 
-Then, in the AWS console (region Mumbai):
-1. **Billing → Budgets:** a $5 monthly budget with an email alert.
-2. **Bedrock:** check that the model you'll use answers. `aws bedrock list-inference-profiles --region ap-south-1` lists the IDs you can put in `MODEL_ID`.
-3. **AWS End User Messaging → Social messaging → Add WhatsApp phone number.** Use a number that is not on WhatsApp now. Meta reviews the display name, which can take hours, so start this first.
+In the AWS console, region **Asia Pacific (Mumbai)**:
+1. **Billing → Budgets:** a $5 monthly cost budget with an email alert.
+2. **Bedrock:** `aws bedrock list-inference-profiles --region ap-south-1` lists the model IDs you can use later (step 6). Not needed for steps 1 to 4.
+3. **AWS End User Messaging → Social messaging → Add WhatsApp phone number.** Use a number that is not on WhatsApp now. Meta reviews the display name, which can take hours, so start this now.
 
-Open the folder in Antigravity. Under its rules or customisations, add a workspace rule:
+Open the folder in Antigravity and add a workspace rule (in its rules or customisations settings):
 
-> Follow AGENTS.md and docs/SPEC.md exactly. Only edit backend files (template.yaml, statemachine/, src/, tests/, data/, Makefile, docs/). Never edit web/. Never run sam deploy, never print or commit secrets, phone numbers or account IDs. After every task run `pytest -q` and `sam validate --lint`, then tell me what you could not verify.
+> Follow AGENTS.md and docs/SPEC.md exactly. Only edit backend files (template.yaml, statemachine/, src/, tests/, scripts/, data/, Makefile, docs/DEPLOY.md). Never edit web/. Never run sam deploy, never print or commit secrets, phone numbers or account IDs. Small diffs, never refactor unasked. After every task run `pytest -q` and `sam validate --lint --region ap-south-1`, then tell me what you could not verify.
 
-Pick its strongest model and keep the agent asking before it runs terminal commands.
+Pick its strongest model and keep it asking before it runs terminal commands. Note which models you used: the README must name every AI tool.
 
-## The prompts
-
-Paste them one at a time. After each, read the diff, run the check yourself, then commit with the message given.
-
-### Step 1: skeleton and the clock (target 2 hours)
-
-```
-Read AGENTS.md and docs/SPEC.md (sections "Repository layout", "Data: one DynamoDB table", "The incident run", "The public API"). Write a short plan first: files and the test that proves each.
-
-Build:
-1. template.yaml (SAM, ap-south-1): HTTP API, the DynamoDB table "bp" with the keys in SPEC, the S3 bucket with Object Lock (governance, 1 day) and versioning, 180-day log groups for every function, least-privilege IAM with no "*".
-2. src/rules/priority.py: pure functions exactly as SPEC's priority table, with one pytest per row in tests/test_priority.py. Nobody can lower a priority.
-3. statemachine/incident.asl.json, Standard: page the JE, wait with arn:aws:states:::lambda:invoke.waitForTaskToken and TimeoutSecondsPath, climb to the AE, then the EE and DM; the "get ready" warning goes out at once without waiting. Name states in plain English (the graph is on camera). Tokens stored in DynamoDB under a short wait ID.
-4. src/api/public.py for GET /stretch, /gauges, /incidents?status=open, /incidents/{id}/timeline, /incidents/{id}/execution (GetExecutionHistory), POST /incidents and POST /replay. POST /incidents (the page's control-room form, which is also the judges' way to start a real run) and POST /replay start runs whose roster is the fictional demo roster, with 60-second clocks, throttled; they never message a real phone. Seed one finished run with the ID INC-0930-14 (the night the page replays) from data/replay.json. Responses match web/src/types.ts and the files in web/mock/ exactly.
-5. Channel calls go through src/channels/ only. For this step the channel is a "screen" channel that just writes the message to the timeline.
-Run pytest -q and sam validate --lint.
-```
-
-Check: `pytest -q` and `sam validate --lint` pass. Then deploy it yourself:
+## Step 1: deploy what's built (about 30 minutes, no AI unless it breaks)
 
 ```powershell
 sam build
-sam deploy --guided   # stack bandh-prahari, region ap-south-1, allow IAM role creation, save to samconfig.toml
+sam deploy --guided
 ```
 
-Copy the `ApiUrl` output. In `web/`, create `.env.local` with `VITE_API_BASE=<ApiUrl>`, run `npm ci; npm run dev`, open the page, and file a report from the control-room form. Then open the Step Functions console and watch the run climb. Commit with `backend: skeleton, rules and the answer clock`, then push.
+Answer the prompts like this:
 
-### Step 2: the page's AWS view (30 minutes)
+| Prompt | Answer |
+| --- | --- |
+| Stack name | `bp` (the Makefile expects it) |
+| Region | `ap-south-1` |
+| Channel | `screen` (messages are only drawn on the page for now) |
+| Outbound | `off` |
+| DemoDailyCap | `300` |
+| WhatsAppPhoneNumberHex, MetaApiVersion | press Enter (defaults) |
+| AllowedOrigin | `*` for now; the Amplify URL later |
+| Confirm changes / allow role creation | `y` |
+| Functions without authorization… Is this okay? | `y` (the public routes are meant to be open and are throttled) |
+| Save arguments to samconfig.toml | `y` (it's git-ignored) |
 
-```
-The page calls GET /incidents/{id}/execution and GET /incidents/{id}/timeline for the replay (INC-0930-14) and for runs started from the control-room form (see web/src/api.ts, web/src/sections/replay.ts and web/src/sections/control.ts). Make sure both return what those files expect, including state names and timestamps, and add CORS for the Amplify domain and localhost:5173. Add a pytest that loads a recorded execution history from tests/fixtures/ and checks the mapping.
-```
+Then:
 
-Check: the replay and a control-room run show real execution steps on your local page. Commit with `backend: execution and timeline for the page`.
-
-### Step 3: the government feeds (2 hours)
-
-```
-Build src/gov/sachet.py (SACHET's Bihar CAP/RSS feed), src/gov/fmisc.py (the department's gauges from gis.fmiscwrdbihar.gov.in) and src/river/poll.py (GloFAS through Open-Meteo as the fallback), on EventBridge Scheduler schedules as SPEC says. Keep the last good reading, skip water levels of -4, dedupe alerts on their identifier, store GAUGE# and ALERT# rows.
-First capture real responses with scripts/fetch_fixtures.ps1 into tests/fixtures/ and test the parsers against those, never invented data.
-Then "Nadi ka haal": a village name (fuzzy match on data/villages.csv) returns today's nearest reading in Hindi with source and time, "Yeh ek chhatra pariyojana hai, sarkari chetavani nahi" and the helplines 1070 and 1800 345 6145.
-```
-
-Run `.\scripts\fetch_fixtures.ps1` when it asks; it needs your Indian internet connection. Deploy, then check that `GET /gauges` shows today's reading. Commit with `backend: SACHET, gauges and Nadi ka haal`.
-
-### Step 4: out to the government (1 hour)
-
-```
-src/gov/cap.py: CAP 1.2 drafts for each warning level as SPEC maps them (Monitor, Prepare, Evacuate, AllClear). status is always Exercise and every headline starts "Demo, not a real warning". Validate against the OASIS CAP 1.2 XSD in a test (save the XSD in tests/fixtures/). Serve GET /cap/rss.xml and GET /cap/{id}.xml. Nothing is ever sent to SACHET or any government system.
+```powershell
+python scripts/seed.py --dry-run    # look at what it will write
+python scripts/seed.py
+$api = aws cloudformation describe-stacks --stack-name bp --region ap-south-1 --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text
+python scripts/fast_incident.py $api   # about two minutes; must end with every step passing
 ```
 
-Commit with `backend: CAP 1.2 Exercise drafts`.
+Check on the page: in `web/`, create `.env.local` with `VITE_API_BASE=<the ApiUrl>`, run `npm ci`, then `npm run dev`, and open http://localhost:5173. In the judge panel of the control-room section, press "रन शुरू करें / Start a run" and watch it climb in the Step Functions console. Record 20 seconds of that for the video.
 
-### Step 5: WhatsApp (1 to 2 hours, once your number is linked)
+If anything fails, paste the exact error into Antigravity: "Fix only this. Don't refactor. Tell me what you changed." Commit any fix as `backend: <what changed>`.
 
-```
-src/channels/whatsapp.py and src/intake/handler.py exactly per SPEC "How a message moves" and "WhatsApp rules": boto3 client "socialmessaging" (send_whatsapp_message, get_whatsapp_message_media, post_whatsapp_message_media), inbound on SNS, the intake handler returns fast and hands slow work off asynchronously, dedupe on the WhatsApp message ID, button IDs carry the short wait ID, delivery status events go into the timeline. The TEST path makes the sender both worker and engineer on one-minute clocks. Phone numbers of the demo roster come from SSM, never from git. Keep src/channels/telegram.py with the same interface so one setting switches the channel.
-If you are unsure of any parameter of these APIs, say so and leave a TODO with the AWS doc link. Don't guess.
-```
+## Step 2: real fixtures (20 minutes)
 
-Put the roster numbers in SSM yourself (`aws ssm put-parameter --type SecureString ...`), deploy, then send "Haijalpur" and then "TEST" from your phone. Commit with `backend: WhatsApp channel and intake`.
-
-### Step 6: help requests and relief teams for the live map (2 hours)
-
-```
-Build the live map's backend exactly per SPEC "The live map": POST /help, GET /help (public gets by_village counts only; relief and district role tokens from SSM also get pins), POST /help/{id}/claim, POST /help/{id}/rescued, GET /teams, POST /teams/{id}/position with the Amazon Location tracker bp-teams, and statemachine/help.asl.json with the same clock pattern (60 s / 2 min demo clocks). No names or phone numbers anywhere; phones only as sha256. Responses match web/mock/help.json and web/mock/teams.json.
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\fetch_fixtures.ps1
+# the execution ARN of step 1's run is in the Step Functions console (state machine "IncidentRun…", the latest execution)
+python -c "import boto3,json,sys; h=boto3.client('stepfunctions',region_name='ap-south-1').get_execution_history(executionArn=sys.argv[1],maxResults=1000); open('tests/fixtures/sfn_history.json','w',encoding='utf-8').write(json.dumps({'events':h['events']},default=str,ensure_ascii=False,indent=1))" <execution ARN>
+pytest -q
 ```
 
-Deploy. Open the page on two phones, one as परिवार and one as राहत दल (enter the role token on the relief phone). The family's request should reach the relief phone within a few seconds. Commit with `backend: help run, teams and positions`.
-
-### Step 7: if there's time
-
-Ask for one at a time:
-- "Voice notes: Transcribe hi-IN and the Strands drafter per SPEC; the tap sets the sign, the AI only drafts; Polly Kajal voice for warnings."
-- "Check-ins with BatchEvaluateGeofences, the night roll-call per SPEC, and the IRS Form 001 briefing."
-- "src/sat/grid.py, the daily satellite Lambda per SPEC, writing map/haijalpur/latest.json; GET /map/{stretch} returns it."
-- "CloudWatch: metrics for minutes-to-answer and climbs, two alarms, one dashboard."
-
-### Step 8: evidence (30 minutes)
+(Don't use PowerShell's `>` to save JSON: it writes UTF-16 and the tests can't read it.) The three skipped tests run on their own once the files exist. If any fail, the prompt:
 
 ```
-Write docs/DEPLOY.md (Windows PowerShell, from nothing to a live URL, with the outputs I should see and teardown) and a Makefile target that runs five replays and prints the measured times from CloudWatch, for the README's Evidence section.
+I captured real responses: tests/fixtures/fmisc/, tests/fixtures/glofas/ and tests/fixtures/sfn_history.json (from today's deployed run). These tests now fail: <paste pytest's output>. Fix the parsers for the real shape; don't change the captured files and don't invent data. Check that a water level of -4 is still skipped.
 ```
+
+Check: `pytest -q` shows 0 skipped. Commit `tests: real FMISC, Open-Meteo and execution captures`.
+
+## Step 3: WhatsApp (1 to 2 hours, once your number is linked)
+
+In the console, under End User Messaging → Social messaging, open your WhatsApp Business account and set its **event destination** to the `InboundTopicArn` output of the stack. Copy the phone number ID (the part after `phone-number-id/` in the number's ARN).
+
+Put the demo roster's numbers in SSM, one per role in `data/roster.json` (your phone and friends' phones only, people who agreed):
+
+```powershell
+aws ssm put-parameter --region ap-south-1 --type SecureString --name /bp/roster/je --value "+91XXXXXXXXXX"
+# repeat for each name under /bp/roster/ and /bp/mukhiya/ that data/roster.json lists
+python scripts/seed.py
+```
+
+Every roster phone sends "join" to your WhatsApp number first (WhatsApp only lets you message people who wrote to you in the last 24 hours). Then redeploy with the channel on:
+
+```powershell
+sam deploy --parameter-overrides Channel=whatsapp Outbound=on WhatsAppPhoneNumberHex=<the id>
+```
+
+Check: send "Haijalpur" (today's reading in Hindi with its source), then "TEST" (you become worker and engineer on one-minute clocks; don't answer the first page and watch it climb). Commit any fix as `backend: <what changed>`.
+
+**Step 3b, only if WhatsApp isn't working by 8 PM.** Make a bot with @BotFather in Telegram, then:
+
+```powershell
+aws ssm put-parameter --region ap-south-1 --type SecureString --name /bp/telegram/token --value "<bot token>"
+aws ssm put-parameter --region ap-south-1 --type SecureString --name /bp/telegram/hook-secret --value "<any long random string>"
+sam deploy --parameter-overrides Channel=telegram Outbound=on
+```
+
+and ask Antigravity: "Give me the exact setWebhook command for our Telegram bot, pointing at POST /telegram/hook with the secret token header, per src/intake/telegram_hook.py." Say why in the README.
+
+## Step 4: help requests and relief teams (2 hours)
+
+```
+The help run is half built: src/help/core.py, src/help/run.py, src/help/teams.json, src/api/help.py and statemachine/help.asl.json exist but are not in template.yaml. Finish it exactly per docs/SPEC.md "How a message moves" step 9 and "The live map": write a short plan first.
+1. Add the help run state machine (Standard; waitForTaskToken with TimeoutSecondsPath; demo clocks 60 s and 2 min) and its Lambdas to template.yaml, least-privilege roles, 180-day log groups.
+2. Routes: POST /help, GET /help?status=open (public: by_village counts only; relief and district tokens from SSM /bp/tokens/* also get pins), POST /help/{id}/claim, POST /help/{id}/rescued, GET /teams, POST /teams/{id}/position.
+3. Amazon Location: one tracker bp-teams (BatchUpdateDevicePosition, ListDevicePositions), and the 200 m geofence on the family's pin. If you are unsure of any parameter, say so and leave a TODO with the AWS doc link; until it works, the "पहुँच गए" button ends the on-site wait.
+4. No names or phone numbers anywhere; phones only as sha256. Responses match web/mock/help.json, web/mock/teams.json and web/src/types.ts exactly.
+5. Tests from SPEC: a late team climbs to the next team and the request still closes as rescued; GET /help without a token returns no pins.
+```
+
+Then put the role tokens in SSM (`/bp/tokens/relief`, `/bp/tokens/district`, long random strings), deploy, and open the page on two phones with `?role=relief` on one. A family's request should reach the relief phone within a few seconds. Commit `backend: help run, teams and positions`.
+
+## Step 5: the satellite Lambda (1 to 2 hours, cut if late)
+
+```
+Build src/sat/grid.py exactly per docs/SPEC.md "The live map" (the grid): the daily Lambda (60 s timeout, EventBridge Scheduler every morning) searches Earth Search STAC sentinel-2-l2a for the bbox, reduces the least cloudy pass of the last ten days to the 56 x 46 grid the way tools/build_map.py does (NDWI > 0.05, SCL 3, 8, 9, 10 masked as cloud), writes map/haijalpur/<date>.json and latest.json to S3 and a MAP# row. GET /map/{stretch} returns latest.json. Its role reads only the public buckets and writes only map/*. Keep Sentinel-1 a TODO. Test the grid's shape against tools/build_map.py on a saved window of one real scene. If rasterio is too big for a Lambda zip, say so and propose the smallest option before building.
+```
+
+## Step 6: if there's time, one prompt at a time
+
+- "The IRS Form 001 briefing per SPEC: GET /briefing/{id} renders an HTML page from the timeline. Fill it from the timeline first; the Strands agent only adds the narrative if Bedrock answers (MODEL_ID env var)."
+- "Voice notes per SPEC: Transcribe hi-IN and the Strands drafter. The tap sets the sign; the AI only drafts and never sets a priority. Polly Kajal for warnings. 30 to 60 s timeouts."
+- "The high-water roll-call per SPEC, started by a SACHET alert or a reading above danger level."
+- "The check-in: a 200 m distance check in the Lambda now; BatchEvaluateGeofences only if you can confirm its parameters from the AWS docs."
+
+## Step 7: evidence and the deploy guide (30 minutes)
+
+```
+1. CloudWatch: a metric for minutes-to-answer and for climbs, two alarms, one dashboard, all in template.yaml.
+2. A Makefile target "evidence" that runs five judge-path replays and prints median and worst tap-to-page time from CloudWatch, for the README's Evidence section.
+3. docs/DEPLOY.md: Windows PowerShell, from nothing to a live URL, with the outputs I should see at each step, and teardown (sam delete, then empty the bucket after its 1-day lock).
+```
+
+Run `make evidence` (or the Python behind it) and send the numbers to Claude for the README.
 
 ## Putting the page live
 
-Use Amplify Hosting: connect the GitHub repo, set the app root to `web`, the build command to `npm ci && npm run build`, the output to `dist`, and the environment variable `VITE_API_BASE` to your `ApiUrl`. Every push to `main` redeploys.
+Amplify Hosting in the console: connect the GitHub repo, branch `main`, app root `web`, build command `npm ci && npm run build`, output directory `dist`, environment variable `VITE_API_BASE` = your `ApiUrl`. Every push to `main` redeploys. Then redeploy the stack with `AllowedOrigin=<the Amplify URL>`.
 
 ## When something breaks
 
-Paste the exact error into Antigravity with: "Fix only this. Don't refactor. Tell me what you changed." If the page and the API disagree, SPEC and `web/src/types.ts` decide.
+Paste the exact error into Antigravity: "Fix only this. Don't refactor. Tell me what you changed." If the page and the API disagree, SPEC and `web/src/types.ts` decide; tell Claude and it fixes the page side.
