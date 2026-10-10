@@ -26,7 +26,7 @@ def handler(event: dict, _ctx=None) -> dict:
         reason=reason,
         briefing=link,
     )
-    for p in roster.people(inc["km"], 4, channel):
+    for p in roster.people(inc["km"], 4, channel, inc):
         if p["role"] == "district_control_room":
             send_text(
                 channel,

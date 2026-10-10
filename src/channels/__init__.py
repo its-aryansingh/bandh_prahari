@@ -41,30 +41,60 @@ def _held(channel: str, to: dict, incident_id: str | None, what: str) -> dict:
     return {"held": True}
 
 
-def send_text(channel: str, to: dict, msg: dict, *, incident_id: str | None = None) -> dict:
+def _call(channel: str, to: dict, incident_id: str | None, what: str, fn, *args) -> dict:
+    """Send through the channel. A send that fails is written down and never stops the run:
+    a page nobody received is caught by the delivery check, which makes the clock climb."""
     mod = _module(channel)
-    return mod.send_text(to, msg, incident_id=incident_id) if mod else _held(channel, to, incident_id, "text")
+    if not mod:
+        return _held(channel, to, incident_id, what)
+    try:
+        return getattr(mod, fn)(to, *args, incident_id=incident_id)
+    except Exception as e:  # noqa: BLE001  (NotAllowed, a missing number, the service refusing)
+        if channel == "screen":
+            raise
+        if incident_id:
+            db.event(
+                incident_id,
+                "send_failed",
+                f"{to.get('role')} को संदेश नहीं गया",
+                f"The message to the {to.get('role')} did not go out",
+                to=to.get("role"),
+                channel=channel,
+                error=type(e).__name__,
+            )
+        print({"send_failed": type(e).__name__, "detail": str(e)[:200], "role": to.get("role"), "channel": channel})
+        return {"failed": type(e).__name__}
+
+
+def send_text(channel: str, to: dict, msg: dict, *, incident_id: str | None = None) -> dict:
+    return _call(channel, to, incident_id, "text", "send_text", msg)
 
 
 def send_buttons(channel: str, to: dict, msg: dict, buttons: list[dict], *, incident_id: str | None = None) -> dict:
     """buttons: [{"id", "hi", "en"}], at most 3; titles are cut to 20 characters by the channel."""
     if len(buttons) > 3:
         raise ValueError("WhatsApp allows at most three reply buttons")
-    mod = _module(channel)
-    return mod.send_buttons(to, msg, buttons, incident_id=incident_id) if mod else _held(channel, to, incident_id, "buttons")
+    return _call(channel, to, incident_id, "buttons", "send_buttons", msg, buttons)
 
 
 def send_list(channel: str, to: dict, msg: dict, button: dict, rows: list[dict], *, incident_id: str | None = None) -> dict:
     """rows: [{"id", "hi", "en", "desc_hi"?, "desc_en"?}], at most 10."""
     if len(rows) > 10:
         raise ValueError("WhatsApp lists hold at most ten rows")
-    mod = _module(channel)
-    return mod.send_list(to, msg, button, rows, incident_id=incident_id) if mod else _held(channel, to, incident_id, "list")
+    return _call(channel, to, incident_id, "list", "send_list", msg, button, rows)
 
 
 def send_audio(channel: str, to: dict, s3_key: str, *, incident_id: str | None = None, caption: dict | None = None) -> dict:
     mod = _module(channel)
-    return mod.send_audio(to, s3_key, incident_id=incident_id, caption=caption) if mod else _held(channel, to, incident_id, "audio")
+    if not mod:
+        return _held(channel, to, incident_id, "audio")
+    try:
+        return mod.send_audio(to, s3_key, incident_id=incident_id, caption=caption)
+    except Exception as e:  # noqa: BLE001
+        if channel == "screen":
+            raise
+        print({"send_failed": type(e).__name__, "detail": str(e)[:200], "role": to.get("role")})
+        return {"failed": type(e).__name__}
 
 
 def describe(result: Any) -> str:

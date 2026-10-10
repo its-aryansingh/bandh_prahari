@@ -38,8 +38,8 @@ def handler(event: dict, _ctx=None) -> dict:
     camp_hi, camp_en = seg.get("camp_hi", "पंचायत भवन (नमूना)"), seg.get("camp_en", "Panchayat bhawan (sample)")
     hi, en = words.level_message(level, inc["km"], camp_hi, camp_en)
     msg = {"hi": hi, "en": en}
-    people = roster.village_contacts(villages, channel)
-    if channel != "screen":
+    people = roster.village_contacts(villages, channel, inc)
+    if channel != "screen" and not inc.get("test_to"):
         for v in villages:
             people.extend(subscribers(v))
     button = [{"id": f"r:{inc['id']}:{level}", "hi": words.BUTTONS["ready"][0], "en": words.BUTTONS["ready"][1]}]

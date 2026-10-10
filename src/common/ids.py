@@ -21,6 +21,10 @@ def incident_id(km: int, prefix: str = "INC") -> str:
     return f"{prefix}-{t:%m%d-%H%M}-{int(km)}-{short_id(3)}"
 
 
+def digits(phone: str) -> str:
+    return "".join(c for c in str(phone) if c.isdigit())
+
+
 def phone_hash(phone: str) -> str:
     """Counts and "Ho gaya" taps are keyed by this, never by the number."""
     digits = "".join(c for c in str(phone) if c.isdigit())

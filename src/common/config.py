@@ -21,3 +21,13 @@ REGION = env("AWS_REGION", "ap-south-1")
 # Demo (judge path) clocks, in seconds, and how many demo runs a day.
 DEMO_PAGE_S = int(env("DEMO_PAGE_S", "60"))
 DEMO_DAILY_CAP = int(env("DEMO_DAILY_CAP", "300"))
+
+# WhatsApp (AWS End User Messaging Social): the phone-number-id to send from, and Meta's API version.
+WA_ORIGINATION_ID = env("WA_ORIGINATION_ID", "")
+META_API_VERSION = env("META_API_VERSION", "v20.0")
+# Telegram, the fallback channel: the bot token lives in SSM under this name.
+TELEGRAM_TOKEN_PARAM = env("TELEGRAM_TOKEN_PARAM", "/bp/telegram/token")
+WORKER_FUNCTION = env("WORKER_FUNCTION", "")
+DELIVERY_FUNCTION_ARN = env("DELIVERY_FUNCTION_ARN", "")
+SCHEDULER_ROLE_ARN = env("SCHEDULER_ROLE_ARN", "")
+DELIVERY_CHECK_S = int(env("DELIVERY_CHECK_S", "120"))

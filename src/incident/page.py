@@ -9,7 +9,9 @@ seconds, until src/incident/answer.py calls SendTaskSuccess or SendTaskFailure.
 from __future__ import annotations
 
 from channels import send_buttons, send_text
+from channels import whatsapp
 from common import clock, db, ids, roster, words
+from incident import delivery
 
 CLIMB_REASON = {
     "States.Timeout": ("कोई जवाब नहीं आया", "No answer in time"),
@@ -51,7 +53,7 @@ def page(event: dict) -> dict:
     level = int(event["level"])
     timeout_s = int(event["timeout"])
     channel = inc.get("channel", "screen")
-    people = roster.people(inc["km"], level, channel)
+    people = roster.people(inc["km"], level, channel, inc)
     if not people:
         db.event(
             inc["id"],
@@ -106,11 +108,13 @@ def page(event: dict) -> dict:
     }
     for p in people:
         send_buttons(channel, p, msg, _buttons(wait_id, ["onway", "notmine"]), incident_id=inc["id"])
+    if channel != "screen":
+        delivery.schedule(wait_id, inc["id"])
     # the levels below stay copied, so nobody can say they didn't know
     if level > 1:
         cc = {"hi": f"कॉपी: किमी {inc['km']} की बात अब {roster.role_hi(roles[0])} के पास है।", "en": f"Copy: km {inc['km']} is now with the {roster.role_en(roles[0]).lower()}."}
         for lower in range(1, level):
-            for p in roster.people(inc["km"], lower, channel):
+            for p in roster.people(inc["km"], lower, channel, inc):
                 send_text(channel, p, cc, incident_id=inc["id"])
     return {"wait": wait_id}
 
@@ -137,12 +141,18 @@ def onsite(event: dict) -> dict:
         "hi": f"किमी {inc['km']} पहुँचकर लोकेशन पिन और एक फ़ोटो भेजें। {mins} मिनट हैं।",
         "en": f"When you reach km {inc['km']}, send a location pin and a photo. You have {mins} minutes.",
     }
-    to = roster.person(inc["km"], role, int(ans.get("level", 1)), channel)
+    to = roster.person(inc["km"], role, int(ans.get("level", 1)), channel, inc)
     if channel == "screen":
         # on screen the button stands in for the pin; a real check-in needs a pin within 200 m
         send_buttons(channel, to, msg, _buttons(wait_id, ["onsite"]), incident_id=inc["id"])
     else:
         send_text(channel, to, msg, incident_id=inc["id"])
+        # the location pin from this phone answers the on-site wait (intake/worker.py)
+        phone = whatsapp.phone_of(to)
+        if phone:
+            db.table().put_item(
+                Item={"PK": f"CONV#{ids.digits(phone)}", "SK": "ONSITE", "wait": wait_id, "incident": inc["id"], "km": inc["km"], "ttl": clock.epoch() + timeout_s + 3600}
+            )
     return {"wait": wait_id}
 
 
@@ -168,7 +178,7 @@ def hold(event: dict) -> dict:
         "hi": f"किमी {inc['km']}: अभी क्या हाल है? हर {mins} मिनट पर बताएँ।",
         "en": f"Km {inc['km']}: how does it stand now? Tell us every {mins} minutes.",
     }
-    to = roster.person(inc["km"], role, int(ans.get("level", 1)), channel)
+    to = roster.person(inc["km"], role, int(ans.get("level", 1)), channel, inc)
     send_buttons(channel, to, msg, _buttons(wait_id, ["holding", "secured", "breached"]), incident_id=inc["id"])
     return {"wait": wait_id}
 

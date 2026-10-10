@@ -54,9 +54,11 @@ def role_en(role: str) -> str:
     return ROLE_NAMES.get(role, (role, role))[1]
 
 
-def people(km: int, level: int, channel: str) -> list[dict]:
-    """The people to ask at a level: [{role, name, ssm?}]."""
+def people(km: int, level: int, channel: str, inc: dict | None = None) -> list[dict]:
+    """The people to ask at a level: [{role, name, ssm?}]. A TEST run asks its sender at every level."""
     roles = LEVELS[level]
+    if inc and inc.get("test_to"):
+        return [{"role": r, "name": f"{role_en(r)} (TEST)", "phone": inc["test_to"]} for r in roles]
     if channel == "screen":
         return [{"role": r, "name": DEMO[r]["name"]} for r in roles]
     res = db.table().query(KeyConditionExpression=Key("PK").eq(f"SEG#{int(km)}") & Key("SK").begins_with("ROSTER#"))
@@ -64,16 +66,18 @@ def people(km: int, level: int, channel: str) -> list[dict]:
     return [{"role": i["role"], "name": i.get("name", role_en(i["role"])), "ssm": i.get("ssm")} for i in found if i.get("role") in roles]
 
 
-def person(km: int, role: str, level: int, channel: str) -> dict:
+def person(km: int, role: str, level: int, channel: str, inc: dict | None = None) -> dict:
     """The one person who answered (by role), for the messages that follow their answer."""
-    for p in people(km, level, channel):
+    for p in people(km, level, channel, inc):
         if p["role"] == role:
             return p
     return {"role": role, "name": DEMO.get(role, {}).get("name", "") if channel == "screen" else role_en(role)}
 
 
-def village_contacts(villages: list[str], channel: str) -> list[dict]:
-    """Mukhiya and ward members behind the stretch. Demo: the drawn phones."""
+def village_contacts(villages: list[str], channel: str, inc: dict | None = None) -> list[dict]:
+    """Mukhiya and ward members behind the stretch. Demo: the drawn phones. TEST: the sender."""
+    if inc and inc.get("test_to"):
+        return [{"role": "mukhiya", "name": "Mukhiya (TEST)", "phone": inc["test_to"]}]
     if channel == "screen":
         return [{"role": "mukhiya", "name": DEMO["mukhiya"]["name"]}, {"role": "ward_member", "name": DEMO["ward_member"]["name"]}]
     out: list[dict] = []
@@ -87,3 +91,9 @@ def village_contacts(villages: list[str], channel: str) -> list[dict]:
 def allowed(phone_hash: str) -> bool:
     """Only numbers on the demo roster ever get a warning or a page this weekend (ALLOW#<sha256>)."""
     return "Item" in db.table().get_item(Key={"PK": f"ALLOW#{phone_hash}", "SK": "META"})
+
+
+def roles_of(phone_hash: str) -> list[str]:
+    """The roles a demo-roster number plays (scripts/seed.py writes them); [] if not on the roster."""
+    item = db.table().get_item(Key={"PK": f"ALLOW#{phone_hash}", "SK": "META"}).get("Item")
+    return list(item.get("roles", [])) if item else []

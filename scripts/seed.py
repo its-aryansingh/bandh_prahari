@@ -59,14 +59,17 @@ def items(region: str, with_allowlist: bool = True) -> list[dict]:
         out.append({"PK": f"SUB#{m['village']}", "SK": "ROLE#mukhiya", "role": "mukhiya", "name": m["name"], "ssm": m["ssm"]})
     if with_allowlist:
         ssm = boto3.client("ssm", region_name=region)
-        names = [r["ssm"] for r in roster["roles"]] + [m["ssm"] for m in roster.get("mukhiyas", [])]
-        for name in names:
+        who = [(r["ssm"], r["role"]) for r in roster["roles"]] + [(m["ssm"], "mukhiya") for m in roster.get("mukhiyas", [])]
+        allow: dict[str, set] = {}
+        for name, role in who:
             try:
                 phone = ssm.get_parameter(Name=name, WithDecryption=True)["Parameter"]["Value"]
             except ssm.exceptions.ParameterNotFound:
-                print(f"  (no {name} in SSM yet: that role gets nothing)")
+                print(f"  (no {name} in SSM yet: the {role} gets nothing)")
                 continue
-            out.append({"PK": f"ALLOW#{phone_hash(phone)}", "SK": "META", "why": "demo roster"})
+            allow.setdefault(phone_hash(phone), set()).add(role)
+        # ALLOW#<sha256>: the numbers that may ever get a page or a warning, and the roles they play
+        out.extend({"PK": f"ALLOW#{h}", "SK": "META", "why": "demo roster", "roles": sorted(r)} for h, r in allow.items())
     return out
 
 

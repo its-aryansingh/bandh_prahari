@@ -64,7 +64,8 @@ def handler(event: dict, _ctx=None) -> dict:
     key = None
     if config.BUCKET_NAME:
         key = f"timelines/{inc['id']}.json"
-        body = json.dumps({"incident": db.get_incident(inc["id"]), "events": db.timeline(inc["id"]), "summary": s}, ensure_ascii=False, indent=1)
+        record = {k: v for k, v in (db.get_incident(inc["id"]) or {}).items() if k != "test_to"}
+        body = json.dumps({"incident": record, "events": db.timeline(inc["id"]), "summary": s}, ensure_ascii=False, indent=1)
         # The bucket's default retention (governance mode) applies to this new object version.
         try:
             # Object Lock buckets refuse uploads without a checksum (Content-MD5 or x-amz-checksum-*)

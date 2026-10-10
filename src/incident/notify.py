@@ -33,7 +33,7 @@ def handler(event: dict, _ctx=None) -> dict:
     msg = {"hi": f"किमी {inc['km']}: {roster.role_hi(role)} {hi}।", "en": f"Km {inc['km']}: the {roster.role_en(role).lower()} {en}."}
     told = 0
     for lvl in sorted({min(level + 1, 3), 4}):
-        for p in roster.people(inc["km"], lvl, channel):
+        for p in roster.people(inc["km"], lvl, channel, inc):
             send_text(channel, p, msg, incident_id=inc["id"])
             told += 1
     return {"told": told}

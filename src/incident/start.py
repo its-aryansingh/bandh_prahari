@@ -69,13 +69,15 @@ def start(
     villages: list[str] | None = None,
     note: str = "",
     reporter: str = "",
+    test_to: str = "",
 ) -> dict:
+    """test_to: the TEST path. The sender is every level of the roster, on one-minute clocks."""
     """Score the report with the rules, write it, and start the run. Returns the incident."""
     seg = db.get_segment(km) or {}
     stretch = rules.Stretch(breach_last_5y=bool(seg.get("breach_last_5y")), vulnerable=bool(seg.get("vulnerable")))
     decision = rules.priority(sign, river_now(seg), stretch, seen)
     inc = {
-        "id": ids.incident_id(km, "DEMO" if demo else "INC"),
+        "id": ids.incident_id(km, "DEMO" if demo else "TEST" if test_to else "INC"),
         "km": int(km),
         "sign": sign,
         "priority": decision.priority,
@@ -88,6 +90,8 @@ def start(
         "villages": villages or [v["name"] if isinstance(v, dict) else v for v in seg.get("villages", [])],
         "note": note[:500],
     }
+    if test_to:
+        inc["test_to"] = ids.digits(test_to)
     db.put_incident(inc)
     who = {"helpline": ("नियंत्रण कक्ष (हेल्पलाइन कॉल)", "Control room (helpline call)"), "screen": ("प्रहरी (डेमो फ़ोन)", "Patrol worker (demo phone)")}
     w_hi, w_en = who.get(source, (roster.role_hi("patrol"), roster.role_en("patrol")))
@@ -104,7 +108,7 @@ def start(
         res = sfn().start_execution(
             stateMachineArn=config.STATE_MACHINE_ARN,
             name=inc["id"],
-            input=json.dumps(run_input(inc, demo), ensure_ascii=False),
+            input=json.dumps(run_input(inc, demo or bool(test_to)), ensure_ascii=False),
         )
     except Exception:
         db.update_incident(inc["id"], status="closed_failed_to_start")
@@ -112,3 +116,8 @@ def start(
     db.update_incident(inc["id"], execution_arn=res["executionArn"])
     inc["execution_arn"] = res["executionArn"]
     return inc
+
+
+def public(inc: dict) -> dict:
+    """The incident without the TEST sender's number."""
+    return {k: v for k, v in inc.items() if k != "test_to"}

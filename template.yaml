@@ -12,6 +12,7 @@ Description: >
 #     Authorization Reference lists no resource type for them.
 #     https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsstepfunctions.html
 #   - the bucket policy's Deny of plain-HTTP requests (a Deny for every principal).
+#   - the KMS key policy for the SNS topic: a key policy's Resource is always "*" (this key).
 # Log streams, S3 prefixes and execution ARNs end in "*" because their names are made at run time.
 
 Parameters:
@@ -30,6 +31,16 @@ Parameters:
     Default: 300
     MinValue: 1
     Description: Most judge-path runs per day.
+  WhatsAppPhoneNumberHex:
+    Type: String
+    Default: "00000000000000000000000000000000"
+    AllowedPattern: "^[0-9a-zA-Z]{1,64}$"
+    Description: The part after "phone-number-id/" in your linked number's ARN (End User Messaging Social console). Not a phone number.
+  MetaApiVersion:
+    Type: String
+    Default: v20.0
+    AllowedPattern: "^v[0-9]+[.][0-9]+$"
+    Description: Meta Graph API version for send_whatsapp_message. Check the supported list before the demo.
   AllowedOrigin:
     Type: String
     Default: "*"
@@ -47,6 +58,8 @@ Globals:
         TABLE_NAME: !Ref Table
         CHANNEL: !Ref Channel
         OUTBOUND: !Ref Outbound
+        WA_ORIGINATION_ID: !Sub "phone-number-id-${WhatsAppPhoneNumberHex}"
+        META_API_VERSION: !Ref MetaApiVersion
 
 Resources:
   # ------------------------------------------------------------------ data
@@ -226,6 +239,15 @@ Resources:
               - Effect: Allow
                 Action: s3:PutObject
                 Resource: !Sub "${Bucket.Arn}/cap/*"
+              - Effect: Allow
+                Action: social-messaging:SendWhatsAppMessage
+                Resource: !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:phone-number-id/${WhatsAppPhoneNumberHex}"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/roster/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/mukhiya/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/token"
 
   PageFunction:
     Type: AWS::Serverless::Function
@@ -235,6 +257,10 @@ Resources:
       Handler: incident.page.handler
       Role: !GetAtt PageRole.Arn
       LoggingConfig: { LogGroup: !Ref PageLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          DELIVERY_FUNCTION_ARN: !GetAtt DeliveryFunction.Arn
+          SCHEDULER_ROLE_ARN: !GetAtt DeliverySchedulerRole.Arn
   PageLogs:
     Type: AWS::Logs::LogGroup
     Properties: { LogGroupName: /aws/lambda/bp-page, RetentionInDays: 180 }
@@ -253,8 +279,23 @@ Resources:
                 Action: [logs:CreateLogStream, logs:PutLogEvents]
                 Resource: !GetAtt PageLogs.Arn
               - Effect: Allow
-                Action: [dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
                 Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: social-messaging:SendWhatsAppMessage
+                Resource: !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:phone-number-id/${WhatsAppPhoneNumberHex}"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/roster/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/mukhiya/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/token"
+              - Effect: Allow
+                Action: scheduler:CreateSchedule
+                Resource: !Sub "arn:${AWS::Partition}:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/default/bp-delivery-*"
+              - Effect: Allow
+                Action: iam:PassRole
+                Resource: !GetAtt DeliverySchedulerRole.Arn
 
   DispatchFunction:
     Type: AWS::Serverless::Function
@@ -284,6 +325,15 @@ Resources:
               - Effect: Allow
                 Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
                 Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: social-messaging:SendWhatsAppMessage
+                Resource: !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:phone-number-id/${WhatsAppPhoneNumberHex}"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/roster/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/mukhiya/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/token"
 
   NotifyFunction:
     Type: AWS::Serverless::Function
@@ -311,8 +361,17 @@ Resources:
                 Action: [logs:CreateLogStream, logs:PutLogEvents]
                 Resource: !GetAtt NotifyLogs.Arn
               - Effect: Allow
-                Action: [dynamodb:Query, dynamodb:PutItem]
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem]
                 Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: social-messaging:SendWhatsAppMessage
+                Resource: !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:phone-number-id/${WhatsAppPhoneNumberHex}"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/roster/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/mukhiya/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/token"
 
   HandoffFunction:
     Type: AWS::Serverless::Function
@@ -340,8 +399,17 @@ Resources:
                 Action: [logs:CreateLogStream, logs:PutLogEvents]
                 Resource: !GetAtt HandoffLogs.Arn
               - Effect: Allow
-                Action: [dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
                 Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: social-messaging:SendWhatsAppMessage
+                Resource: !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:phone-number-id/${WhatsAppPhoneNumberHex}"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/roster/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/mukhiya/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/token"
 
   CloseFunction:
     Type: AWS::Serverless::Function
@@ -692,6 +760,235 @@ Resources:
                 Action: s3:GetObject
                 Resource: !Sub "${Bucket.Arn}/cap/*"
 
+  # ------------------------------------------------------------------ WhatsApp in (End User Messaging Social -> SNS)
+  # Linking the number and pointing its event destination at this topic is done in the console
+  # (docs/DEPLOY.md): CloudFormation has no resource for it.
+  InboundKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Encrypts the WhatsApp inbound topic. End User Messaging Social needs a customer key to publish to it.
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AccountAdmin
+            Effect: Allow
+            Principal: { AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root" }
+            Action: "kms:*"
+            Resource: "*"
+          - Sid: SocialMessagingPublishes
+            Effect: Allow
+            Principal: { Service: social-messaging.amazonaws.com }
+            Action: [kms:GenerateDataKey*, kms:Decrypt]
+            Resource: "*"
+            Condition: { StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId } }
+
+  InboundTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: bp-whatsapp-inbound
+      KmsMasterKeyId: !Ref InboundKey
+
+  InboundTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: [!Ref InboundTopic]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SocialMessagingPublishes
+            Effect: Allow
+            Principal: { Service: social-messaging.amazonaws.com }
+            Action: sns:Publish
+            Resource: !Ref InboundTopic
+            Condition:
+              StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId }
+              ArnLike: { "aws:SourceArn": !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:*" }
+
+  IntakeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-intake
+      Description: SNS intake. Returns fast; dedupes on the message ID; hands messages to the worker
+      Handler: intake.handler.handler
+      Timeout: 10
+      Role: !GetAtt IntakeRole.Arn
+      LoggingConfig: { LogGroup: !Ref IntakeLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          WORKER_FUNCTION: !Ref WorkerFunction
+          CAPTURE: "off"
+      Events:
+        Inbound:
+          Type: SNS
+          Properties: { Topic: !Ref InboundTopic }
+  IntakeLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-intake, RetentionInDays: 180 }
+  IntakeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: intake
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt IntakeLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem]
+                Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt WorkerFunction.Arn
+              - Sid: UndeliveredNoResourceLevelPermissions
+                Effect: Allow
+                Action: states:SendTaskFailure
+                Resource: "*"
+
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-worker
+      Description: What a message does - Nadi ka haal, the two-tap report, answers, TEST, subscriptions
+      Handler: intake.worker.handler
+      Timeout: 30
+      Role: !GetAtt WorkerRole.Arn
+      LoggingConfig: { LogGroup: !Ref WorkerLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !Ref IncidentRun
+  WorkerLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-worker, RetentionInDays: 180 }
+  WorkerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: worker
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt WorkerLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem]
+                Resource: [!GetAtt Table.Arn, !Sub "${Table.Arn}/index/gsi1"]
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref IncidentRun
+              - Sid: AnswerButtonNoResourceLevelPermissions
+                Effect: Allow
+                Action: [states:SendTaskSuccess, states:SendTaskFailure]
+                Resource: "*"
+              - Effect: Allow
+                Action: social-messaging:SendWhatsAppMessage
+                Resource: !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:phone-number-id/${WhatsAppPhoneNumberHex}"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/token"
+
+  DeliveryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-delivery
+      Description: Two minutes after a page, no delivery receipt means Undelivered, and the clock climbs
+      Handler: incident.delivery.handler
+      Role: !GetAtt DeliveryRole.Arn
+      LoggingConfig: { LogGroup: !Ref DeliveryLogs, LogFormat: JSON }
+  DeliveryLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-delivery, RetentionInDays: 180 }
+  DeliveryRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: delivery
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt DeliveryLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:DeleteItem]
+                Resource: !GetAtt Table.Arn
+              - Sid: UndeliveredNoResourceLevelPermissions
+                Effect: Allow
+                Action: states:SendTaskFailure
+                Resource: "*"
+  DeliverySchedulerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: scheduler.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition: { StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId } }
+      Policies:
+        - PolicyName: invoke-delivery-check
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt DeliveryFunction.Arn
+
+  TelegramHookFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-telegram-hook
+      Description: The Telegram fallback's webhook; does nothing until its secret is in SSM
+      Handler: intake.telegram_hook.handler
+      Role: !GetAtt TelegramHookRole.Arn
+      LoggingConfig: { LogGroup: !Ref TelegramHookLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          WORKER_FUNCTION: !Ref WorkerFunction
+      Events:
+        Hook:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: POST, Path: /telegram/hook }
+  TelegramHookLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-telegram-hook, RetentionInDays: 180 }
+  TelegramHookRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: telegram-hook
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt TelegramHookLogs.Arn
+              - Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt WorkerFunction.Arn
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/hook-secret"
+
 Outputs:
   ApiUrl:
     Description: Put this in the site's VITE_API_BASE
@@ -702,3 +999,6 @@ Outputs:
     Value: !Ref Bucket
   IncidentRunArn:
     Value: !Ref IncidentRun
+  InboundTopicArn:
+    Description: Set this as the WhatsApp business account's event destination
+    Value: !Ref InboundTopic

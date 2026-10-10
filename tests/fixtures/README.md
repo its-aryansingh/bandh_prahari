@@ -10,6 +10,8 @@ AGENTS.md: parsers are tested against real captured responses, never invented on
 | fmisc/layer1_gandak.json, layer0_gandak.json | FMISC gauge layers, Gandak stations | not yet: the cloud build machine was refused. Run scripts/fetch_fixtures.ps1 |
 | glofas/flood_api.json | Open-Meteo Flood API, the Gandak cell | not yet: same. Run scripts/fetch_fixtures.ps1 |
 | sfn_history.json | A real GetExecutionHistory response (judge path run) | after the first deploy, see docs/DEPLOY.md |
-| whatsapp/*.json | Real SNS events from End User Messaging Social | after linking the number, see docs/DEPLOY.md |
+| whatsapp/aws_sample_text.sns_message.json | The SNS Message End User Messaging Social publishes (a text) | a real, redacted capture published in aws-samples/sample-whatsapp-end-user-messaging-connect-chat (message_aggregator/sns_message.json) |
+| whatsapp/meta/*.json | Meta webhook entries: buttons, lists, voice, location, statuses | the pywa project's test data (github.com/david-lev/pywa, tests/data/updates, MIT) |
+| whatsapp/ours/*.json | Our own number's events | not yet: set CAPTURE=on on bp-intake after linking the number (docs/DEPLOY.md) |
 
 Tests that need a file not yet captured are skipped, and say which script to run.

@@ -22,7 +22,12 @@ ASL = json.loads(ASL_TEXT)
 WAIT = "arn:aws:states:::lambda:invoke.waitForTaskToken"
 
 # The only statements allowed Resource "*" (see the IAM notes at the top of template.yaml).
-STAR_OK = {("DemoApiRole", "AnswerButtonNoResourceLevelPermissions")}
+STAR_OK = {
+    ("DemoApiRole", "AnswerButtonNoResourceLevelPermissions"),
+    ("WorkerRole", "AnswerButtonNoResourceLevelPermissions"),
+    ("IntakeRole", "UndeliveredNoResourceLevelPermissions"),
+    ("DeliveryRole", "UndeliveredNoResourceLevelPermissions"),
+}
 
 
 def of_type(t):
@@ -92,9 +97,9 @@ def test_no_star_in_iam_except_the_documented_ones():
                 assert (name, st.get("Sid")) in STAR_OK, (name, st)
 
 
-def test_only_the_api_functions_can_answer_or_start_a_run():
+def test_only_the_judge_route_and_the_worker_can_answer():
     can_answer = {n for n, r in of_type("AWS::IAM::Role").items() for st in _statements(r) if "states:SendTaskSuccess" in st["Action"]}
-    assert can_answer == {"DemoApiRole"}
+    assert can_answer == {"DemoApiRole", "WorkerRole"}
 
 
 def test_judge_routes_are_throttled():
@@ -163,3 +168,15 @@ def test_state_names_match_the_spec():
     spec = (ROOT / "docs" / "SPEC.md").read_text()
     for name in re.findall(r"^\| `(\w+)` \|", spec[spec.index("## The incident run") : spec.index("## The agent")], re.M):
         assert name in ASL["States"], name
+
+
+def test_whatsapp_send_is_scoped_to_our_number():
+    for name, role in of_type("AWS::IAM::Role").items():
+        for st in _statements(role):
+            if "social-messaging:SendWhatsAppMessage" in str(st["Action"]):
+                assert "phone-number-id/${WhatsAppPhoneNumberHex}" in json.dumps(st["Resource"]), name
+
+
+def test_inbound_topic_is_encrypted_with_a_customer_key():
+    assert RES["InboundTopic"]["Properties"]["KmsMasterKeyId"] == {"Ref": "InboundKey"}
+    assert RES["InboundKey"]["Properties"]["EnableKeyRotation"] is True

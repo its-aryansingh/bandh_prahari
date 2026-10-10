@@ -26,7 +26,7 @@ def handler(event: dict, _ctx=None) -> dict:
         to=role,
     )
     channel = inc.get("channel", "screen")
-    to = roster.person(inc["km"], role, int(ans.get("level", 1)), channel)
+    to = roster.person(inc["km"], role, int(ans.get("level", 1)), channel, inc)
     send_text(
         channel,
         to,
