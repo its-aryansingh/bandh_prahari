@@ -14,7 +14,7 @@ const INK2 = "#4B5080";
 
 const W = 640;
 const H = 320;
-const M = { l: 54, r: 18, t: 40, b: 44 };
+const M = { l: 54, r: 18, t: 56, b: 44 };
 const PW = W - M.l - M.r;
 const PH = H - M.t - M.b;
 const YMAX = 8000;
@@ -81,8 +81,9 @@ export function initRiver(g: Gauges): void {
     <path class="line-fc" fill="none" stroke="${FORECAST}" stroke-width="2" stroke-dasharray="5 5" stroke-linecap="round"/>
     <g class="marks"></g>
     <g class="peak-label" opacity="1">
-      <path d="M${x(peakI)} ${y(data[peakI].q) - 8}V${M.t - 14}h18" fill="none" stroke="${INK}" stroke-width="1.2"/>
-      <text x="${x(peakI) + 22}" y="${M.t - 10}" font-size="13" fill="${INK}"><tspan class="hi">29 सितंबर: ${num(data[peakI].q)}। उस रात हैजलपुर में बाँध टूटा।</tspan><tspan class="en">29 Sep: ${num(data[peakI].q)}. The embankment broke at Haijalpur that night.</tspan></text>
+      <path d="M${x(peakI)} ${y(data[peakI].q) - 8}V${M.t - 30}h-14" fill="none" stroke="${INK}" stroke-width="1.2"/>
+      <text x="${x(peakI) - 18}" y="${M.t - 34}" font-size="13" fill="${INK}" text-anchor="end"><tspan class="hi" font-weight="700">29 सितंबर: ${num(data[peakI].q)}</tspan><tspan class="en" font-weight="700">29 Sep: ${num(data[peakI].q)}</tspan></text>
+      <text x="${x(peakI) - 18}" y="${M.t - 18}" font-size="12.5" fill="${INK2}" text-anchor="end"><tspan class="hi">उस रात हैजलपुर में बाँध टूटा</tspan><tspan class="en">The bank broke at Haijalpur that night</tspan></text>
     </g>
     ${ticks}
     <path class="cross" d="" stroke="${INK}" stroke-width="1" opacity="0"/>

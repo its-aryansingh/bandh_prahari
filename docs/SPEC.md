@@ -30,6 +30,7 @@ The product's one idea, its name: **Jawab Ghadi (जवाब घड़ी), the
    Recipients: the mukhiya, ward members and families subscribed to that village. `PostWhatsAppMessageMedia` uploads the MP3; the mukhiya also gets "Gaon ke loudspeaker par chalaayen" (play it on the village loudspeaker). "Ho gaya" taps are stored as READY#<incident>/<level>#<sha256(phone)>; the ward member gets a running count per ward ("18 of 25 households ready") and who hasn't replied yet. The mukhiya can cancel a false alarm with one tap; everything is logged. Outcome metric: share of subscribed households ready before the water.
 7. **Roll-call.** When an official reading is above danger level, or SACHET carries a CWC flood alert for a gauge, a two-hourly night schedule starts for the stretches near it. Each worker gets "km 14: sab theek?" with "Theek hai" and "Samasya hai". No answer in 20 minutes nudges the junior engineer.
 8. **Phone-in.** The control-room form (kilometre, sign, caller, note) goes through the same rules into the same run.
+9. **Help (मदद).** A family sends a WhatsApp location pin with the word "मदद" (or the control room logs a helpline call, or the live map's family view sends one). `POST /help` stores HELP#<id> with the pin, the number of people, elderly and children, and needs (boat, medicine, food, cattle); never a name, and the phone number only as sha256 for deduplication. It starts the help run (below): the nearest free relief team is asked; "मैं जा रहा हूँ" claims it and starts a 20-minute clock; if the team isn't on site in time the run asks the next team and tells the district control room; "सुरक्षित" closes it. The family gets the nearest relief camp, a dry route to it, and the team's minutes to arrive, as Hindi text plus a Polly voice note.
 
 ## Repository layout
 
@@ -49,8 +50,13 @@ src/
   river/poll.py             Open-Meteo (GloFAS) pull, roll-call schedules
   rollcall/ask.py           "sab theek?" and the nudge
   api/public.py             REST for the page and the control room
+  help/                     open, claim, rescued, and the help run's page and climb
+  teams/position.py         POST /teams/{id}/position to the Location tracker; GET /teams
+  sat/grid.py               the daily satellite Lambda: the live map's grid to S3
+statemachine/help.asl.json  the help run (same clock pattern as the incident run)
 data/                       stretch.geojson, villages.csv, roster.json, replay.json
-web/                        Vite + TypeScript + MapLibre page on Amplify
+tools/build_map.py          builds the static grid (DEM, land cover) once; the Lambda adds water daily
+web/                        Vite + TypeScript page on Amplify; the live map is a canvas-2D isometric renderer
 tests/                      pytest; tests/fixtures/ holds real captured responses
 Makefile                    build, deploy, test, seed, fast-incident
 ```
@@ -71,6 +77,10 @@ Makefile                    build, deploy, test, seed, fast-incident
 | `SUB#<village>` | `<phone>` | A family subscribed to a village's warnings, with consent time; cleared after the season |
 | `READY#<incident>` | `<level>#<sha256(phone)>` | A household's "Ho gaya" for a warning level, with the time; feeds the ward member's count |
 | `CONV#<phone>` | `STATE` | Where a reporter is in the two-tap flow; TTL after 30 minutes |
+| `HELP#<id>` | `META` | A family's call for help: village, pin, people, elderly, children, needs, status, team, deadline, execution ARN, sha256(phone); TTL after the season |
+| `HELP#<id>` | `EV#<time>#<kind>` | raised, paged, claimed, climb, arrived, rescued |
+| `TEAM#<id>` | `META` | A relief team (Aapda Mitra boat, embankment ambulance, SDRF): kind, crew, speed, status, its device ID on the tracker. No member names |
+| `MAP#<stretch>` | `<date>` | S3 key of that day's grid JSON and the satellite passes in it |
 
 One GSI on status and priority feeds the control room. Media and nightly timeline snapshots go to an S3 bucket with Object Lock: governance mode, one-day retention this weekend.
 
@@ -138,8 +148,52 @@ A Strands agent on Bedrock: Nova Lite through its cross-region profile, or Nova 
 | `POST /replay` | Starts a replay run (pages drawn on screen, 60×), one run at a time |
 | `GET /cap/rss.xml`, `GET /cap/{id}.xml` | Our CAP drafts |
 | `GET /briefing/{id}` | The IRS Form 001 briefing (HTML) |
+| `GET /map/{stretch}` | The live map's grid (see "The live map"): today's JSON from S3 |
+| `GET /help?status=open` | Help requests. Public: `by_village` counts only. With a relief or district role token: also `requests` with exact pins |
+| `POST /help` | A call for help from the family view or the control room (the WhatsApp "मदद" pin takes the same path through intake) |
+| `POST /help/{id}/claim` | "मैं जा रहा हूँ": a team takes the request; the 20-minute clock starts (role token) |
+| `POST /help/{id}/rescued` | "सुरक्षित": the family is safe; the run closes (role token) |
+| `GET /teams` | Relief teams and their latest positions, from `ListDevicePositions` on the tracker |
+| `POST /teams/{id}/position` | A team's phone reports where it is; the Lambda calls `BatchUpdateDevicePosition` (role token) |
 
 Judge path: sending a village name (for example "Haijalpur") returns today's real river reading; sending TEST on WhatsApp makes the sender both worker and engineer, on one-minute clocks. Any other text gets a Hindi and English help menu.
+
+## The live map (सजीव नक़्शा)
+
+The public page's map: the stretch as an isometric, blocky diorama in Madhubani style (web/DESIGN.md), useful to the district, to relief groups (Yuva Aapda Mitra volunteers, the embankment ambulance, SDRF) and to families. The two blueprints in docs/reference/ describe the pilot; this is the weekend's slice.
+
+**The grid (`GET /map/{stretch}`).** 56 × 46 cells of about 200 m over the Haijalpur stretch (bbox 85.000–85.110 E, 25.905–25.995 N), row-major from the north-west corner. Shape: `web/src/types.ts` `MapGrid`; sample: `web/mock/map.haijalpur.json`. All of it is AWS Open Data:
+- `elev_dm`: Copernicus DEM GLO-30 (s3://copernicus-dem-30m), mean per cell, decimetres. The DEM is a surface model, so the page brings tree and roof cells down to the fields around them.
+- `cls`, `built`: ESA WorldCover 2021 v200 (s3://esa-worldcover): the commonest class per cell and the share of built-up 10 m pixels.
+- `s2`: the least cloudy Sentinel-2 L2A pass of the last ten days (Earth Search STAC on AWS, collection `sentinel-2-l2a`, COGs in s3://sentinel-cogs): `water` = percent of the cell with NDWI (green B03, near-infrared B08) above 0.05, after masking SCL classes 3, 8, 9 and 10 (cloud shadow, cloud, cirrus); `cloud` = percent masked.
+- `s1`: Sentinel-1 GRD radar, which sees through cloud: VV backscatter below a threshold as water. TODO: confirm the Earth Search collection ID (expected `sentinel-1-grd`) at https://earth-search.aws.element84.com/v1/collections; the GRD files are requester-pays (s3://sentinel-s1-l1c, https://registry.opendata.aws/sentinel-1/), so the Lambda's reads carry the requester-pays flag and the account pays the transfer. Null until it runs.
+
+`tools/build_map.py` builds the static parts once. **The daily satellite Lambda** (`src/sat/grid.py`, Python 3.12, 60 s timeout, on an EventBridge Scheduler schedule every morning) searches STAC for new passes over the bbox, reduces them to the grid, writes `map/<stretch>/<date>.json` and `map/<stretch>/latest.json` to S3 and a MAP# row; `GET /map/{stretch}` returns latest. Its IAM role reads only those public buckets and writes only `map/*`. Every pass keeps its scene ID and date, and the page says that satellites come back every few days.
+
+**What the page draws from it, honestly labelled.**
+- Observed water from the latest pass, with its date and a note on the revisit time; cloudy cells drawn as clouds.
+- A what-if flood tied to the official gauge: for a reading at Rewaghat, water fills cells connected to the river whose ground is below the water surface (the surface falls downstream with the river's slope from the DEM). The embankment holds unless the person assumes a breach (km 14). Labelled "a rough sketch, not a hydraulic model". The pilot replaces the drawn bank with surveyed crest levels.
+- The embankments as ridges (assumed 4 m crest), our kilometre stones on the right (Saran) bank, the villages on their built-up cells and relief camps on the highest dry ground nearby, all marked approximate or sample.
+- Safe routes over dry cells (walking to a camp) and team routes (boats float, the tractor keeps to dry ground and the crest).
+
+**Three views.** परिवार (public): river state, the family's own request and its progress, counts per village. राहत दल: requests nearest first, "मैं जा रहा हूँ", "सुरक्षित". ज़िला: flooded area, homes at risk, open requests, teams, minutes to reach, village readiness (READY#), and what just happened.
+
+**Privacy (DPDP).** The public view shows counts per village only. Exact pins go only to relief and district callers, who send a role token kept in SSM (pilot: Cognito with MFA). No names or phone numbers anywhere in HELP#, TEAM#, the API or the page. Team positions come only from team phones on duty; nobody else is tracked. HELP# rows expire after the season.
+
+**Positions (Amazon Location Service).** One tracker, `bp-teams`. `POST /teams/{id}/position` calls `BatchUpdateDevicePosition` (DeviceId = the team ID, Position = [lon, lat], SampleTime, Accuracy.Horizontal); `GET /teams` calls `ListDevicePositions` and joins TEAM# rows. A help request puts a 200 m circle geofence around the family's pin (`PutGeofence`); the tracker is linked to the geofence collection (`AssociateTrackerConsumer`), so a team's ENTER event on EventBridge ends the run's on-site wait, like the engineer's check-in.
+
+**The help run (Step Functions, Standard, `statemachine/help.asl.json`).** The same answer clock as the incident run: waits use `lambda:invoke.waitForTaskToken` with `TimeoutSecondsPath`, button IDs carry a short wait ID, and every step is written to `HELP#<id>/EV#`.
+
+| State | What it does | Clock, real / demo |
+| --- | --- | --- |
+| `OpenHelpRequest` | Writes HELP#, finds the camp and the dry route, puts the 200 m geofence on the pin | |
+| `AskNearestTeam` | Asks the nearest free team (minutes by route); waits for "मैं जा रहा हूँ" | 10 min / 60 s, then `AlertDistrictControlRoom` and ask again |
+| `AwaitTeamOnSite` | Waits for the geofence ENTER event (or the team's "पहुँच गए") | 20 min / 2 min |
+| `AskNextTeam` | On timeout: asks the next nearest free team, tells the district; the late team keeps going and whoever arrives first counts | loops to `AwaitTeamOnSite` |
+| `AwaitFamilySafe` | Waits for "सुरक्षित" | |
+| `CloseHelpRequest` | Closes HELP#, removes the geofence, tells the family and the ward member | |
+
+The demo on the page plays the same states on mock data with a clock of one second per minute; with `VITE_API_BASE` set it reads the real API every 15 seconds.
 
 ## Seed data
 
@@ -158,6 +212,7 @@ Judge path: sending a village name (for example "Haijalpur") returns today's rea
 - **CAP:** every draft passes the OASIS CAP 1.2 XSD and is marked Exercise.
 - **Whole run:** `make fast-incident` drives a P1 on demo clocks and asserts report, page, timeout, climb, answer, warning, on site, close.
 - **Evidence run:** 50 incidents on demo clocks; median and p95 tap-to-page time from CloudWatch, for the README.
+- **Live map:** the satellite Lambda's grid has the same shape as `tools/build_map.py`'s, tested on a saved window of one real scene; SCL cloud classes are masked. A help request on demo clocks with a late team climbs to the next team and still closes as rescued. `GET /help` without a role token returns no pins.
 
 ## Decision gates
 

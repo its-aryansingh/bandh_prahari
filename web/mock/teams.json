@@ -1,0 +1,50 @@
+{
+ "as_of": "2026-10-10T05:00:00+05:30",
+ "sample": true,
+ "tracker": "bp-teams",
+ "_note": "Positions as Amazon Location Service would return them from the tracker (ListDevicePositions). Sample teams for the demo.",
+ "teams": [
+  {
+   "id": "T-BOAT-1",
+   "kind": "boat",
+   "name_hi": "आपदा मित्र नाव",
+   "name_en": "Aapda Mitra boat",
+   "crew": 3,
+   "lat": 25.9529,
+   "lon": 85.0599,
+   "at": "2026-10-10T04:59:00+05:30",
+   "status": "on_the_way",
+   "help_id": "HELP-0516",
+   "speed_kmh": 8,
+   "sample": true
+  },
+  {
+   "id": "T-TRAC-1",
+   "kind": "tractor",
+   "name_hi": "बाँध एम्बुलेंस",
+   "name_en": "Embankment ambulance",
+   "crew": 10,
+   "lat": 25.9647,
+   "lon": 85.0638,
+   "at": "2026-10-10T04:58:00+05:30",
+   "status": "free",
+   "help_id": null,
+   "speed_kmh": 10,
+   "sample": true
+  },
+  {
+   "id": "T-SDRF-1",
+   "kind": "sdrf",
+   "name_hi": "SDRF मोटरबोट",
+   "name_en": "SDRF motorboat",
+   "crew": 6,
+   "lat": 25.9392,
+   "lon": 85.0756,
+   "at": "2026-10-10T04:59:00+05:30",
+   "status": "on_the_way",
+   "help_id": "HELP-0513",
+   "speed_kmh": 9,
+   "sample": true
+  }
+ ]
+}

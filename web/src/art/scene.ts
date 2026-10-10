@@ -228,14 +228,14 @@ export function heroScene(): string {
     </g>
     ${fr.over}
     <g id="hs-bubble" class="bubble" style="transform-origin:392px 204px">
-      <path d="${rr(380, 140, 214, 60, 14)}" fill="${C.white}" ${S()}/>
+      <path d="${rr(370, 140, 226, 60, 14)}" fill="${C.white}" ${S()}/>
       <path d="M392 199l-4 14 15-13" fill="${C.white}" ${S()}/>
       <path d="M392 198.5h12" stroke="${C.white}" stroke-width="3.5"/>
       <g fill="${C.neel2}">${[6, 11, 16, 9, 13, 18, 10, 7, 12, 5]
-        .map((hgt, i) => `<rect x="${394 + i * 5.2}" y="${170 - hgt / 2}" width="3" height="${hgt}" rx="1.5"/>`)
+        .map((hgt, i) => `<rect x="${382 + i * 5}" y="${170 - hgt / 2}" width="3" height="${hgt}" rx="1.5"/>`)
         .join("")}</g>
-      <text x="450" y="165" class="svg-label" font-size="15" fill="${C.neel}"><tspan class="hi">किमी 14: पानी उबल रहा है</tspan><tspan class="en">km 14: water boiling up</tspan></text>
-      <text x="450" y="185" class="svg-small" font-size="12" fill="${C.neel2}"><tspan class="hi">मटमैला है, 0:07</tspan><tspan class="en">It's muddy. 0:07</tspan></text>
+      <text x="436" y="165" class="svg-label" font-size="14" fill="${C.neel}"><tspan class="hi">किमी 14: पानी उबल रहा है</tspan><tspan class="en">km 14: water boiling up</tspan></text>
+      <text x="436" y="185" class="svg-small" font-size="12" fill="${C.neel2}"><tspan class="hi">मटमैला है, 0:07</tspan><tspan class="en">It's muddy. 0:07</tspan></text>
     </g>
   </svg>`;
 }
@@ -430,8 +430,9 @@ export function morningScene(variant: "before" | "after"): string {
     <defs>${fr.defs}</defs>
     <g clip-path="${fr.clip}">
       <rect x="0" y="0" width="${NW}" height="${NH}" fill="${C.haldiTint}"/>
-      ${sun(820, 110, 30)}
-      ${cloud(110, 60, 1, C.white)}
+      ${sun(860, 92, 30)}
+      ${cloud(140, 70, 1, C.white)}
+      <g transform="${MORNING_ZOOM}">
       <path d="M16 506C80 512 200 510 270 470L300 ${G}H944V524H16z" fill="${C.mittiTint}"/>
       <path d="M16 316H${(300 + ((G - 316) * 72) / 130).toFixed(1)}L300 ${G}L270 470C200 510 80 512 16 506Z" fill="${C.gandak}"/>
       <path d="M${N.riverToe} ${G}L${N.topL} 300L430 300L440 420L470 420L482 300L${N.topR} 300L${N.landToe} ${G}Z" fill="${C.mitti}" ${S()}/>
@@ -440,7 +441,17 @@ export function morningScene(variant: "before" | "after"): string {
       <path d="M440 316L440 420H470L470 316ZM${N.landToe - 30} ${flood}H${N.moundX + 4}C${N.moundX + 12} ${flood} ${N.moundX + 14} ${G} ${N.moundX + 14} ${G}H${N.landToe - 40}Z" fill="${C.gandak}" opacity=".88"/>
       <path d="M${N.landToe - 30} ${flood}q8-4 16 0t16 0t16 0t16 0t16 0t16 0t16 0t16 0t16 0t16 0t16 0t16 0t16 0" fill="none" stroke="${C.gandakTint}" stroke-width="2.2" stroke-linecap="round"/>
       ${floating}
+      </g>
     </g>
     ${fr.over}
   </svg>`;
 }
+
+/** The mornings are about the family, so the picture zooms to the village side of the bank. */
+const MORNING_ZOOM = (() => {
+  const x0 = 418;
+  const x1 = 952;
+  const y0 = 232;
+  const s = (NW - 32) / (x1 - x0);
+  return `translate(16 16) scale(${s.toFixed(4)}) translate(${-x0} ${-y0})`;
+})();

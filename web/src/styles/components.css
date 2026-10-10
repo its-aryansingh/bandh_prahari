@@ -219,7 +219,7 @@ html[data-lang="en"] .km, html[data-lang="both"] .km { font-size: 14px; }
 }
 
 /* Mock-data notice, stamped at the corner of the page. */
-.mock-stamp { position: fixed; left: 10px; bottom: 10px; z-index: 50; --tilt: -4deg; background: var(--white); font-size: 12.5px; padding: 1px 8px; }
+.mock-note { padding: 1px 8px; border: 1.5px solid var(--haldi); border-radius: 6px; color: var(--haldi); font-weight: 700; font-size: 13px; white-space: nowrap; }
 
 /* ---------- footer ---------- */
 .site-foot { background: var(--neel); color: var(--chuna); padding-block: 56px 40px; }

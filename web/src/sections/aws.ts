@@ -25,7 +25,7 @@ const SERVICES = [
 const LAYERS = [
   { icon: "phone", tone: C.kesarTint, hi: "लोग: WhatsApp पर प्रहरी, गाँव, इंजीनियर", en: "People: patrol, villages, engineers on WhatsApp" },
   { icon: "stamp", tone: C.white, hi: "नियम: प्राथमिकता कोड तय करता है, AI नहीं", en: "Rules: code sets the priority, not the AI" },
-  { icon: "pin", tone: C.gandakTint, hi: "AWS: Step Functions, Lambda, DynamoDB, Location", en: "AWS: Step Functions, Lambda, DynamoDB, Location" },
+  { icon: "pin", tone: C.gandakTint, hi: "AWS: Step Functions, Lambda, DynamoDB, Location", en: "AWS runs the clock and keeps the record" },
   { icon: "doc", tone: C.haldiTint, hi: "सरकारी डेटा: SACHET, FMISC, CAP, IRS 001", en: "Government data: SACHET, FMISC, CAP, IRS 001" },
 ];
 
@@ -44,8 +44,16 @@ export function initAws(): void {
   show(3);
 
   // Icons swell around the pointer and ease back with distance (Gaussian falloff, as in the kit).
-  const BASE = innerWidth < 640 ? 34 : 44;
-  const AMP = innerWidth < 640 ? 16 : 26;
+  // Their size comes from the dock's own width, with room left for the swell, so it never spills.
+  let BASE = 44;
+  let AMP = 24;
+  const fit = () => {
+    const gap = 5;
+    const room = dock.clientWidth - 22 - gap * (btns.length - 1);
+    BASE = Math.max(20, Math.min(46, room / (btns.length + 1.5)));
+    AMP = BASE * 0.55;
+    size(null);
+  };
   const size = (px: number | null) =>
     btns.forEach((b) => {
       if (px === null) {
@@ -57,7 +65,8 @@ export function initAws(): void {
       const s = BASE + AMP * Math.exp(-(((c - px) / 70) ** 2));
       b.style.setProperty("--s", `${s.toFixed(1)}px`);
     });
-  size(null);
+  fit();
+  new ResizeObserver(fit).observe(dock);
   let raf = 0;
   if (!reducedMotion()) {
     dock.addEventListener("pointermove", (e) => {
@@ -88,9 +97,14 @@ export function initAws(): void {
   const stage = $("#layers-stage");
   stage.innerHTML = LAYERS.map((l, i) => `<div class="layer" style="--i:${i};background:${l.tone};z-index:${10 - i}">${icon(l.icon)}<span class="pair">${bi(l.hi, l.en)}</span></div>`).join("");
   const btn = $<HTMLButtonElement>("#layers-btn");
-  btn.addEventListener("click", () => {
-    const open = !stage.classList.contains("open");
+  // Open by default, so every layer can be read; the button stacks them back into one system.
+  const set = (open: boolean) => {
     stage.classList.toggle("open", open);
     btn.setAttribute("aria-pressed", String(open));
-  });
+    btn.innerHTML = open
+      ? `<span class="bi">${bi("परतें मिलाएँ", "Stack the layers")}</span>`
+      : `<span class="bi">${bi("परतें खोलें", "Pull the layers apart")}</span>`;
+  };
+  set(true);
+  btn.addEventListener("click", () => set(!stage.classList.contains("open")));
 }

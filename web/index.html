@@ -37,6 +37,7 @@
       </a>
       <nav class="nav" aria-label="पन्ने के हिस्से / Sections">
         <a href="#nadi"><span class="hi">नदी का हाल</span><span class="en solo">River today</span></a>
+        <a href="#naksha"><span class="hi">सजीव नक़्शा</span><span class="en solo">Live map</span></a>
         <a href="#chetavani"><span class="hi">चेतावनियाँ</span><span class="en solo">Warnings</span></a>
         <a href="#raat"><span class="hi">उस रात</span><span class="en solo">The night</span></a>
         <a href="#control"><span class="hi">कंट्रोल रूम</span><span class="en solo">Control room</span></a>
@@ -151,6 +152,25 @@
             </p>
           </div>
         </div>
+      </div>
+    </section>
+
+    <!-- ================= LIVE MAP ================= -->
+    <section class="band naksha" id="naksha">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">सजीव नक़्शा: पानी कहाँ, कौन फँसा, मदद कहाँ</span><span class="en">Live map: where the water is, who is stuck, where help is</span></h2>
+          <p class="lead pair">
+            <span class="hi">हैजलपुर के पास गंडक का 10 किलोमीटर का हिस्सा, AWS पर खुले उपग्रह डेटा से बना: ज़मीन की ऊँचाई, खेत, गाँव, और उपग्रह ने जहाँ पानी देखा। परिवार मदद माँगता है, सबसे पास का राहत दल "मैं जा रहा हूँ" दबाता है, और 20 मिनट में न पहुँचे तो घड़ी अगली टीम से माँगती है।</span>
+            <span class="en">A 10 km stretch of the Gandak near Haijalpur, built from open satellite data on AWS: the height of the ground, the fields, the villages, and where the satellite saw water. A family asks for help, the nearest relief team taps "On my way", and if it isn't there in 20 minutes the clock asks the next team.</span>
+          </p>
+        </div>
+      </div>
+      <div class="wrap wide">
+        <div class="lm" id="lm" data-role="family">
+          <p class="lm-loading small">नक़्शा बन रहा है… / Building the map…</p>
+        </div>
+        <p class="tiny dim pair lm-sources" id="lm-sources"></p>
       </div>
     </section>
 
@@ -335,9 +355,14 @@
             <div class="dock-detail" id="dock-detail" aria-live="polite"></div>
           </div>
           <div class="layers card" id="layers">
-            <div class="layers-stage" id="layers-stage"></div>
-            <button class="btn small paper" type="button" id="layers-btn" aria-pressed="false">
-              <span class="bi"><span class="hi">परतें खोलें</span><span class="en">Pull the layers apart</span></span>
+            <h3 class="display h3 bi" style="--shade: var(--gandak)"><span class="hi">चार परतें, एक घड़ी</span><span class="en">Four layers, one clock</span></h3>
+            <div class="layers-stage open" id="layers-stage"></div>
+            <p class="small pair layers-note">
+              <span class="hi">ऊपर से नीचे: लोग पूछते और बताते हैं, नियम प्राथमिकता तय करते हैं, AWS घड़ी चलाता है, और नीचे सरकार का अपना डेटा है।</span>
+              <span class="en">Top to bottom: people ask and report, rules set the priority, AWS runs the clock, and the government's own data sits underneath.</span>
+            </p>
+            <button class="btn small paper" type="button" id="layers-btn" aria-pressed="true">
+              <span class="bi"><span class="hi">परतें मिलाएँ</span><span class="en">Stack the layers</span></span>
             </button>
           </div>
         </div>

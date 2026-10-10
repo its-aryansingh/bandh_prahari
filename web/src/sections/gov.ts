@@ -8,18 +8,18 @@ import type { Gauges } from "../types";
 
 const W = 960;
 const H = 330;
-interface Node { x: number; y: number; hi: string; en: string; sub_hi: string; sub_en: string; tone: string }
+interface Node { x: number; y: number; hi: string; en: string; sub_hi: string; sub_en: string; tone: string; both: string }
 const INS: Node[] = [
-  { x: 120, y: 54, hi: "SACHET", en: "SACHET", sub_hi: "CWC, IMD की चेतावनियाँ (CAP 1.2)", sub_en: "CWC and IMD alerts (CAP 1.2)", tone: C.haldiTint },
-  { x: 120, y: 132, hi: "FMISC गेज", en: "FMISC gauges", sub_hi: "विभाग की जल-स्तर रीडिंग", sub_en: "The department's water levels", tone: C.haldiTint },
-  { x: 120, y: 210, hi: "रोस्टर", en: "Roster", sub_hi: "विभाग की शीट: कौन, किस किमी पर", sub_en: "The department's sheet: who, which km", tone: C.haldiTint },
-  { x: 120, y: 288, hi: "लोग", en: "People", sub_hi: "WhatsApp रिपोर्ट, हेल्पलाइन कॉल", sub_en: "WhatsApp reports, helpline calls", tone: C.kesarTint },
+  { x: 120, y: 54, hi: "SACHET", en: "SACHET", sub_hi: "CWC, IMD की चेतावनियाँ (CAP 1.2)", sub_en: "CWC and IMD alerts (CAP 1.2)", tone: C.haldiTint, both: "CWC and IMD alerts" },
+  { x: 120, y: 132, hi: "FMISC गेज", en: "FMISC gauges", sub_hi: "विभाग की जल-स्तर रीडिंग", sub_en: "The department's water levels", tone: C.haldiTint, both: "FMISC gauges: water levels" },
+  { x: 120, y: 210, hi: "रोस्टर", en: "Roster", sub_hi: "विभाग की शीट: कौन, किस किमी पर", sub_en: "Who is on duty at which km", tone: C.haldiTint, both: "Roster: who is on which km" },
+  { x: 120, y: 288, hi: "लोग", en: "People", sub_hi: "WhatsApp रिपोर्ट, हेल्पलाइन कॉल", sub_en: "WhatsApp reports, helpline calls", tone: C.kesarTint, both: "People: WhatsApp, helpline" },
 ];
 const OUTS: Node[] = [
-  { x: 840, y: 54, hi: "गाँव", en: "Villages", sub_hi: "हिंदी आवाज़ में चेतावनी", sub_en: "Warnings as Hindi voice notes", tone: C.kesarTint },
-  { x: 840, y: 132, hi: "CAP ड्राफ़्ट", en: "CAP drafts", sub_hi: "'Exercise', SACHET के ढाँचे में", sub_en: "Marked Exercise, in SACHET's shape", tone: C.dhaanTint },
-  { x: 840, y: 210, hi: "IRS फ़ॉर्म 001", en: "IRS Form 001", sub_hi: "ज़िले की ब्रीफ़िंग", sub_en: "The district's briefing", tone: C.dhaanTint },
-  { x: 840, y: 288, hi: "मुहर लगा रिकॉर्ड", en: "Locked record", sub_hi: "राहत सूची के लिए, बदला नहीं जा सकता", sub_en: "For the relief list, can't be edited", tone: C.dhaanTint },
+  { x: 840, y: 54, hi: "गाँव", en: "Villages", sub_hi: "हिंदी आवाज़ में चेतावनी", sub_en: "Warnings as Hindi voice notes", tone: C.kesarTint, both: "Villages: Hindi voice warnings" },
+  { x: 840, y: 132, hi: "CAP ड्राफ़्ट", en: "CAP drafts", sub_hi: "'Exercise', SACHET के ढाँचे में", sub_en: "Marked Exercise, in SACHET's shape", tone: C.dhaanTint, both: "CAP drafts, marked Exercise" },
+  { x: 840, y: 210, hi: "IRS फ़ॉर्म 001", en: "IRS Form 001", sub_hi: "ज़िले की ब्रीफ़िंग", sub_en: "The district's briefing", tone: C.dhaanTint, both: "IRS Form 001: district briefing" },
+  { x: 840, y: 288, hi: "मुहर लगा रिकॉर्ड", en: "Locked record", sub_hi: "राहत सूची के लिए, बदला नहीं जा सकता", sub_en: "For the relief list, can't be edited", tone: C.dhaanTint, both: "A locked record for relief" },
 ];
 const HUB = { x: 480, y: 171 };
 
@@ -39,10 +39,13 @@ export function initGov(g: Gauges): void {
   const host = $("#gov-flow");
   const pillW = 236;
   const pill = (n: Node, side: "in" | "out", i: number) => `<g class="gnode" data-k="${side}${i}">
-      <rect class="gring" x="${n.x - pillW / 2 - 4}" y="${n.y - 30}" width="${pillW + 8}" height="60" rx="20" fill="none" stroke="${side === "in" ? C.haldiDeep : C.dhaan}" stroke-width="2" opacity="0"/>
-      <rect x="${n.x - pillW / 2}" y="${n.y - 26}" width="${pillW}" height="52" rx="16" fill="${n.tone}" stroke="${C.neel}" stroke-width="2.2"/>
-      <text x="${n.x - pillW / 2 + 14}" y="${n.y - 4}" font-size="16" fill="${C.neel}"><tspan class="hi">${n.hi}</tspan><tspan class="en">${n.en}</tspan></text>
-      <text x="${n.x - pillW / 2 + 14}" y="${n.y + 15}" font-size="12.5" fill="${C.neel2}" font-weight="600"><tspan class="hi">${esc(n.sub_hi)}</tspan><tspan class="en">${esc(n.sub_en)}</tspan></text>
+      <rect class="gring" x="${n.x - pillW / 2 - 4}" y="${n.y - 34}" width="${pillW + 8}" height="68" rx="20" fill="none" stroke="${side === "in" ? C.haldiDeep : C.dhaan}" stroke-width="2" opacity="0"/>
+      <rect x="${n.x - pillW / 2}" y="${n.y - 30}" width="${pillW}" height="60" rx="16" fill="${n.tone}" stroke="${C.neel}" stroke-width="2.2"/>
+      <g class="g-rows">
+        <text x="${n.x - pillW / 2 + 14}" y="${n.y - 4}" font-size="16" fill="${C.neel}"><tspan class="hi">${n.hi}</tspan><tspan class="en">${n.en}</tspan></text>
+        <text x="${n.x - pillW / 2 + 14}" y="${n.y + 15}" font-size="12.5" fill="${C.neel2}" font-weight="600"><tspan class="hi">${esc(n.sub_hi)}</tspan><tspan class="en">${esc(n.sub_en)}</tspan></text>
+      </g>
+      <text class="g-en" x="${n.x - pillW / 2 + 14}" y="${n.y + 23}" font-size="11" fill="${C.neel2}" font-weight="600"><tspan class="both-only" lang="en">${esc(n.both)}</tspan></text>
     </g>`;
   const ins = INS.map((n) => bez(n.x + pillW / 2, n.y, HUB.x - 74, HUB.y));
   const outs = OUTS.map((n) => bez(HUB.x + 74, HUB.y, n.x - pillW / 2, n.y));
@@ -53,10 +56,11 @@ export function initGov(g: Gauges): void {
     ${INS.map((n, i) => pill(n, "in", i)).join("")}${OUTS.map((n, i) => pill(n, "out", i)).join("")}
     <g class="hub">
       <circle class="hubring" cx="${HUB.x}" cy="${HUB.y}" r="78" fill="none" stroke="${C.kesar}" stroke-width="3" opacity="0"/>
-      <rect x="${HUB.x - 74}" y="${HUB.y - 62}" width="148" height="124" rx="24" fill="${C.chuna}" stroke="${C.neel}" stroke-width="2.6"/>
+      <rect x="${HUB.x - 74}" y="${HUB.y - 62}" width="148" height="128" rx="24" fill="${C.chuna}" stroke="${C.neel}" stroke-width="2.6"/>
       <svg x="${HUB.x - 28}" y="${HUB.y - 54}" width="56" height="56" viewBox="0 0 64 64">${logoMark().replace(/<svg[^>]*>|<\/svg>/g, "")}</svg>
       <text x="${HUB.x}" y="${HUB.y + 26}" text-anchor="middle" font-family="Yatra One" font-size="19" fill="${C.neel}">बाँध प्रहरी</text>
-      <text x="${HUB.x}" y="${HUB.y + 46}" text-anchor="middle" font-size="12" fill="${C.neel2}" font-weight="600"><tspan class="hi">नियम + जवाब घड़ी</tspan><tspan class="en">Rules + answer clock</tspan></text>
+      <text x="${HUB.x}" y="${HUB.y + 44}" text-anchor="middle" font-size="12" fill="${C.neel2}" font-weight="600"><tspan class="hi">नियम + जवाब घड़ी</tspan><tspan class="en">Rules + answer clock</tspan></text>
+      <text x="${HUB.x}" y="${HUB.y + 57}" text-anchor="middle" font-size="10.5" fill="${C.neel2}" font-weight="600"><tspan class="both-only" lang="en">Rules + answer clock</tspan></text>
     </g>
   </svg>`;
   const svg = host.querySelector("svg")!;

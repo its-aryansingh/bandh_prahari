@@ -1,20 +1,49 @@
 // The page talks to the public API in docs/SPEC.md. With no VITE_API_BASE it runs on
 // the mock JSON in web/mock/, which has the same shapes, and says so on screen.
 
-import type { Execution, Gauges, Incident, Incidents, NewIncident, Stretch, Timeline } from "./types";
+import type {
+  Execution,
+  Gauges,
+  HelpList,
+  HelpRequest,
+  Incident,
+  Incidents,
+  MapGrid,
+  NewHelp,
+  NewIncident,
+  Stretch,
+  TeamPosition,
+  Teams,
+  Timeline,
+} from "./types";
 import stretchMock from "../mock/stretch.json";
 import gaugesMock from "../mock/gauges.json";
 import incidentsMock from "../mock/incidents.json";
 import timelineMock from "../mock/timeline.INC-0930-14.json";
 import executionMock from "../mock/execution.INC-0930-14.json";
+import helpMock from "../mock/help.json";
+import teamsMock from "../mock/teams.json";
 
 const BASE: string = (import.meta.env.VITE_API_BASE ?? "").replace(/\/$/, "");
 export const usingMocks = BASE === "";
 
-async function get<T>(path: string, mock: unknown): Promise<T> {
+/** A relief or district role token unlocks exact pins (GET /help) and team actions. */
+const auth = (token?: string): Record<string, string> => (token ? { authorization: `Bearer ${token}` } : {});
+
+async function get<T>(path: string, mock: unknown, token?: string): Promise<T> {
   if (usingMocks) return structuredClone(mock) as T;
-  const res = await fetch(BASE + path, { headers: { accept: "application/json" } });
+  const res = await fetch(BASE + path, { headers: { accept: "application/json", ...auth(token) } });
   if (!res.ok) throw new Error(`${path} answered ${res.status}`);
+  return (await res.json()) as T;
+}
+
+async function post<T>(path: string, body: unknown, token?: string): Promise<T> {
+  const res = await fetch(BASE + path, {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json", ...auth(token) },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`POST ${path} answered ${res.status}`);
   return (await res.json()) as T;
 }
 
@@ -24,6 +53,14 @@ export const api = {
   openIncidents: () => get<Incidents>("/incidents?status=open", incidentsMock),
   timeline: (id: string) => get<Timeline>(`/incidents/${encodeURIComponent(id)}/timeline`, timelineMock),
   execution: (id: string) => get<Execution>(`/incidents/${encodeURIComponent(id)}/execution`, executionMock),
+
+  /** The live map's grid: terrain, land cover and the latest satellite water (daily Lambda). */
+  map: async (stretch: string) =>
+    get<MapGrid>(`/map/${encodeURIComponent(stretch)}`, usingMocks ? (await import("../mock/map.haijalpur.json")).default : null),
+  /** Open help requests. Without a relief or district token, counts per village only. */
+  help: (token?: string) => get<HelpList>("/help?status=open", helpMock, token),
+  /** Relief teams' latest positions from the Amazon Location Service tracker. */
+  teams: () => get<Teams>("/teams", teamsMock),
 
   /** Control-room form for helpline calls. On mocks the incident lives only in this tab. */
   async createIncident(body: NewIncident): Promise<Incident> {
@@ -44,12 +81,12 @@ export const api = {
         summary_en: body.note ?? "",
       };
     }
-    const res = await fetch(BASE + "/incidents", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`POST /incidents answered ${res.status}`);
-    return (await res.json()) as Incident;
+    return post<Incident>("/incidents", body);
   },
+
+  // The help actions. On mocks the live map's demo clock plays them out in this tab only.
+  createHelp: (body: NewHelp) => post<HelpRequest>("/help", body),
+  claimHelp: (id: string, team: string, token: string) => post<HelpRequest>(`/help/${encodeURIComponent(id)}/claim`, { team }, token),
+  rescued: (id: string, token: string) => post<HelpRequest>(`/help/${encodeURIComponent(id)}/rescued`, {}, token),
+  teamPosition: (id: string, pos: TeamPosition, token: string) => post<{ ok: true }>(`/teams/${encodeURIComponent(id)}/position`, pos, token),
 };

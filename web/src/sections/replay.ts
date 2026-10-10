@@ -318,7 +318,7 @@ const LN = {
   village: { x: 372, y: 28, face: "village", hi: "3 गाँव", en: "3 villages" },
   je: { x: 372, y: 122, face: "je", hi: "जेई", en: "JE" },
   ae: { x: 530, y: 122, face: "ae", hi: "एई", en: "AE" },
-  ee: { x: 688, y: 122, face: "ee", hi: "ईई (कॉपी)", en: "EE (cc)" },
+  ee: { x: 688, y: 122, face: "ee", hi: "ईई, कॉपी", en: "EE, copied" },
   district: { x: 860, y: 74, face: "dm", hi: "ज़िला", en: "District" },
 } as const;
 type LK = keyof typeof LN;
@@ -333,8 +333,8 @@ const EDGES: { a: LK; b: LK; at: number[]; dash?: boolean }[] = [
 const edgePath = (a: LK, b: LK) => {
   const A = LN[a];
   const B = LN[b];
-  const x1 = A.x + 44;
-  const x2 = B.x - 44;
+  const x1 = A.x + 50;
+  const x2 = B.x - 50;
   const m = (x1 + x2) / 2;
   return { d: `M${x1} ${A.y}C${m} ${A.y} ${m} ${B.y} ${x2} ${B.y}`, p: (t: number): [number, number] => {
     const u = 1 - t;
@@ -348,11 +348,12 @@ function ladderSvg(): string {
     .map((k) => {
       const n = LN[k];
       return `<g class="lnode" data-k="${k}">
-        <rect class="ring" x="${n.x - 46}" y="${n.y - 20}" width="92" height="40" rx="20" fill="none" stroke="${C.kesar}" stroke-width="2" opacity="0"/>
-        <rect class="pill" x="${n.x - 44}" y="${n.y - 18}" width="88" height="36" rx="18" fill="${C.chuna}" stroke="${C.neel}" stroke-width="2"/>
-        <svg x="${n.x - 42}" y="${n.y - 16}" width="32" height="32" viewBox="0 0 48 48">${face(n.face).replace(/<svg[^>]*>|<\/svg>/g, "")}</svg>
-        <text x="${n.x - 6}" y="${n.y + 5}" font-size="13" fill="${C.neel}"><tspan class="hi">${n.hi}</tspan><tspan class="en">${n.en}</tspan></text>
-        <g class="badge" opacity="0"><circle cx="${n.x + 38}" cy="${n.y - 16}" r="10" fill="${C.dhaan}" stroke="${C.neel}" stroke-width="2"/><text class="bt" x="${n.x + 38}" y="${n.y - 11.5}" text-anchor="middle" font-size="13" fill="#fff">✓</text></g>
+        <rect class="ring" x="${n.x - 52}" y="${n.y - 22}" width="104" height="44" rx="22" fill="none" stroke="${C.kesar}" stroke-width="2" opacity="0"/>
+        <rect class="pill" x="${n.x - 50}" y="${n.y - 20}" width="100" height="40" rx="20" fill="${C.chuna}" stroke="${C.neel}" stroke-width="2"/>
+        <svg x="${n.x - 47}" y="${n.y - 16}" width="32" height="32" viewBox="0 0 48 48">${face(n.face).replace(/<svg[^>]*>|<\/svg>/g, "")}</svg>
+        <text class="l-main" x="${n.x - 11}" y="${n.y + 5}" font-size="13" fill="${C.neel}"><tspan class="hi">${n.hi}</tspan><tspan class="en">${n.en}</tspan></text>
+        <text class="l-sub" x="${n.x - 11}" y="${n.y + 13}" font-size="9.5" fill="${C.neel2}"><tspan class="both-only" lang="en">${n.en}</tspan></text>
+        <g class="badge" opacity="0"><circle cx="${n.x + 44}" cy="${n.y - 18}" r="10" fill="${C.dhaan}" stroke="${C.neel}" stroke-width="2"/><text class="bt" x="${n.x + 44}" y="${n.y - 13.5}" text-anchor="middle" font-size="13" fill="#fff">✓</text></g>
       </g>`;
     })
     .join("");

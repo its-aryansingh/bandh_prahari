@@ -14,8 +14,11 @@ The planning/ folder is for the human. Don't read it unless asked.
   Inbound messages arrive on SNS. Channel code lives only in src/channels/;
   everything else calls channels.send_*() so Telegram can replace WhatsApp.
 - Bedrock through the Strands Agents SDK. The model ID comes from env var MODEL_ID.
-- Web: Vite, plain TypeScript and MapLibre in web/. No UI framework, no gradients,
-  no neon, no dark-mode-first. Hindi first, big type.
+- Web: Vite and plain TypeScript in web/, following web/DESIGN.md (Mithila style:
+  indigo ink, flat token fills, Yatra One + Baloo 2). The live map is a canvas-2D
+  isometric renderer of the GET /map grid: no map library, no UI framework, no
+  gradients, no neon, no dark-mode-first. Hindi first, big type. Help pins are never
+  public: the public view shows counts per village only.
 
 ## Hard rules
 - Plain rules in src/rules/priority.py (pure functions) set priority.

@@ -58,16 +58,19 @@ export function initLevels(): void {
   let order = LEVELS.map((l) => l.id);
 
   // Fanned behind the front card, like a hand of cards.
+  // A tight fan: the cards behind peek out by a finger's width, inside the deck's own box.
   const POSE = [
     { x: 0, y: 0, r: 0, s: 1 },
-    { x: 14, y: -16, r: 2.6, s: 0.97 },
-    { x: 26, y: -30, r: 5, s: 0.94 },
-    { x: 36, y: -42, r: 7.2, s: 0.91 },
+    { x: 6, y: -11, r: 1.4, s: 0.975 },
+    { x: 11, y: -20, r: 2.6, s: 0.95 },
+    { x: 15, y: -28, r: 3.6, s: 0.925 },
   ];
   const layout = () => {
+    // On a phone a rotated card swings past the screen edge, so the deck only steps upward.
+    const narrow = deck.clientWidth < 640;
     cards.forEach((c) => {
       const k = order.indexOf(c.dataset.level as Level);
-      const p = POSE[k];
+      const p = narrow ? { ...POSE[k], x: 0, r: 0 } : POSE[k];
       c.style.zIndex = String(10 - k);
       c.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${p.r}deg) scale(${p.s})`;
       c.setAttribute("aria-hidden", String(k !== 0));
@@ -75,7 +78,7 @@ export function initLevels(): void {
       c.querySelectorAll("button").forEach((b) => (b.tabIndex = k === 0 ? 0 : -1));
     });
     const front = cards.find((c) => c.dataset.level === order[0])!;
-    deck.style.minHeight = `${front.offsetHeight + 60}px`;
+    deck.style.minHeight = `${front.offsetHeight + 34}px`;
   };
 
   const select = (id: Level, focus = false) => {
