@@ -4,6 +4,7 @@ import "./styles/base.css";
 import "./styles/components.css";
 import "./styles/sections.css";
 import "./styles/overlays.css";
+import "./styles/livemap.css";
 
 import { api, usingMocks } from "./api";
 import { logoMark } from "./art/ghadi";
@@ -60,6 +61,28 @@ async function main() {
   initLive(gauges);
   initHero();
   initNadi(stretch, gauges);
+  // The live map (and its grid) loads only as it nears the screen, so a phone on mobile data
+  // gets the top of the page first.
+  const loadMap = () =>
+    import("./sections/livemap")
+      .then((m) => m.initLiveMap(stretch, gauges))
+      .catch((err) => {
+        console.error(err);
+        const lm = document.querySelector("#lm");
+        if (lm) lm.innerHTML = `<p class="lm-loading small">${bi("नक़्शा नहीं बन पाया। पन्ना दोबारा खोलें।", "The map didn't load. Reload the page.")}</p>`;
+      });
+  if (typeof IntersectionObserver === "undefined") loadMap();
+  else {
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        loadMap();
+      },
+      { rootMargin: "900px 0px" },
+    );
+    io.observe($("#naksha"));
+  }
   initLevels();
   initReplay();
   initReveal();

@@ -1,0 +1,191 @@
+{
+ "as_of": "2026-10-10T05:00:00+05:30",
+ "sample": true,
+ "_note": "Synthetic requests for the demo (sample). The public API returns by_village only; requests with exact pins need a relief or district role. No names or phone numbers, ever.",
+ "answer_min": 20,
+ "by_village": [
+  {
+   "village": "Haijalpur",
+   "open": 2,
+   "on_the_way": 1,
+   "safe": 0,
+   "ready": 18,
+   "households": 25
+  },
+  {
+   "village": "Parmanand Chhapra",
+   "open": 1,
+   "on_the_way": 0,
+   "safe": 1,
+   "ready": 22,
+   "households": 31
+  },
+  {
+   "village": "Naukraha",
+   "open": 1,
+   "on_the_way": 1,
+   "safe": 0,
+   "ready": 9,
+   "households": 19
+  }
+ ],
+ "requests": [
+  {
+   "id": "HELP-0517",
+   "village": "Haijalpur",
+   "lat": 25.9568,
+   "lon": 85.0501,
+   "people": 5,
+   "elderly": 1,
+   "children": 2,
+   "needs": [
+    "boat"
+   ],
+   "channel": "whatsapp",
+   "status": "open",
+   "team": null,
+   "raised": "2026-10-10T04:54:00+05:30",
+   "claimed": null,
+   "deadline": null,
+   "arrived": null,
+   "rescued": null,
+   "climbs": 0,
+   "sample": true
+  },
+  {
+   "id": "HELP-0516",
+   "village": "Haijalpur",
+   "lat": 25.951,
+   "lon": 85.0521,
+   "people": 4,
+   "elderly": 0,
+   "children": 1,
+   "needs": [
+    "boat",
+    "food"
+   ],
+   "channel": "whatsapp",
+   "status": "claimed",
+   "team": "T-BOAT-1",
+   "raised": "2026-10-10T04:51:00+05:30",
+   "claimed": "2026-10-10T04:57:00+05:30",
+   "deadline": "2026-10-10T05:17:00+05:30",
+   "arrived": null,
+   "rescued": null,
+   "climbs": 0,
+   "sample": true
+  },
+  {
+   "id": "HELP-0515",
+   "village": "Haijalpur",
+   "lat": 25.9471,
+   "lon": 85.056,
+   "people": 3,
+   "elderly": 1,
+   "children": 0,
+   "needs": [
+    "medical"
+   ],
+   "channel": "helpline",
+   "status": "open",
+   "team": null,
+   "raised": "2026-10-10T04:56:00+05:30",
+   "claimed": null,
+   "deadline": null,
+   "arrived": null,
+   "rescued": null,
+   "climbs": 0,
+   "sample": true
+  },
+  {
+   "id": "HELP-0514",
+   "village": "Parmanand Chhapra",
+   "lat": 25.9725,
+   "lon": 85.0383,
+   "people": 6,
+   "elderly": 2,
+   "children": 2,
+   "needs": [
+    "boat",
+    "animals"
+   ],
+   "channel": "whatsapp",
+   "status": "open",
+   "team": null,
+   "raised": "2026-10-10T04:58:00+05:30",
+   "claimed": null,
+   "deadline": null,
+   "arrived": null,
+   "rescued": null,
+   "climbs": 0,
+   "sample": true
+  },
+  {
+   "id": "HELP-0511",
+   "village": "Parmanand Chhapra",
+   "lat": 25.9686,
+   "lon": 85.0363,
+   "people": 4,
+   "elderly": 0,
+   "children": 2,
+   "needs": [
+    "boat"
+   ],
+   "channel": "whatsapp",
+   "status": "rescued",
+   "team": "T-TRAC-1",
+   "raised": "2026-10-10T04:02:00+05:30",
+   "claimed": "2026-10-10T04:05:00+05:30",
+   "deadline": "2026-10-10T04:25:00+05:30",
+   "arrived": "2026-10-10T04:19:00+05:30",
+   "rescued": "2026-10-10T04:23:00+05:30",
+   "climbs": 0,
+   "sample": true
+  },
+  {
+   "id": "HELP-0513",
+   "village": "Naukraha",
+   "lat": 25.9158,
+   "lon": 85.0619,
+   "people": 7,
+   "elderly": 1,
+   "children": 3,
+   "needs": [
+    "boat",
+    "medical"
+   ],
+   "channel": "whatsapp",
+   "status": "claimed",
+   "team": "T-SDRF-1",
+   "raised": "2026-10-10T04:45:00+05:30",
+   "claimed": "2026-10-10T04:48:00+05:30",
+   "deadline": "2026-10-10T05:08:00+05:30",
+   "arrived": null,
+   "rescued": null,
+   "climbs": 0,
+   "sample": true
+  },
+  {
+   "id": "HELP-0512",
+   "village": "Naukraha",
+   "lat": 25.9177,
+   "lon": 85.056,
+   "people": 2,
+   "elderly": 2,
+   "children": 0,
+   "needs": [
+    "food"
+   ],
+   "channel": "helpline",
+   "status": "open",
+   "team": null,
+   "raised": "2026-10-10T04:49:00+05:30",
+   "claimed": null,
+   "deadline": null,
+   "arrived": null,
+   "rescued": null,
+   "climbs": 0,
+   "sample": true
+  }
+ ]
+}
