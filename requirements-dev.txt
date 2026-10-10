@@ -4,3 +4,4 @@ moto[dynamodb,s3]>=5
 cfn-lint>=1.30
 aws-sam-cli>=1.130
 boto3
+lxml  # the CAP 1.2 schema test
