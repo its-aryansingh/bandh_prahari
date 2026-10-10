@@ -82,7 +82,7 @@ def main() -> None:
             print(r["PK"], r["SK"])
         return
     table = boto3.resource("dynamodb", region_name=a.region).Table(a.table)
-    with table.batch_writer() as b:
+    with table.batch_writer(overwrite_by_pkeys=["PK", "SK"]) as b:  # two roles may share a test phone
         for r in rows:
             b.put_item(Item=r)
     print(f"wrote {len(rows)} rows to {a.table}")

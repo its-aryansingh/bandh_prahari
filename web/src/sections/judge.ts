@@ -140,8 +140,12 @@ export function initJudge(): void {
       return watch(r.incident);
     }
     start.disabled = false;
-    if (r.status === 429) say("आज के डेमो पूरे हो गए। कल फिर आएँ।", "Today's demo runs are used up. Come back tomorrow.");
-    else say("अभी नहीं चल सका, थोड़ी देर में फिर कोशिश करें।", "Couldn't start just now; try again in a moment.");
+    if (r.status === 429 && r.error === "daily_cap") say("आज के डेमो पूरे हो गए। कल फिर आएँ।", "Today's demo runs are used up. Come back tomorrow.");
+    else {
+      // the API's own throttle (429 without our body), or a brief error: maybe someone else just started one
+      say("अभी नहीं चल सका, कुछ सेकंड में फिर कोशिश करें।", "Couldn't start just now; try again in a few seconds.");
+      void api.demoCurrent().then((c) => c.incident && watch(c.incident)).catch(() => undefined);
+    }
   });
   $("#judge-phones").addEventListener("click", async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>("button[data-wait]");

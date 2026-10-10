@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import json
 import re
+import time
 
 import boto3
+from botocore.exceptions import ClientError
 
 from common import clock, db, http
 
@@ -100,11 +102,32 @@ def history_to_states(events: list[dict]) -> list[dict]:
     return [s for s in out if s["name"] in SHOWN]
 
 
+# Every open judge tab polls the same run: answer from a few seconds' cache so the page never
+# drains Step Functions' GetExecutionHistory quota. On throttling, serve the last good copy.
+_cache: dict[str, tuple[float, dict]] = {}
+CACHE_S = 3.0
+
+
 def execution(incident_id: str) -> dict | None:
     inc = db.get_incident(incident_id)
     if not inc or not inc.get("execution_arn"):
         return None
-    arn = inc["execution_arn"]
+    hit = _cache.get(incident_id)
+    if hit and time.time() - hit[0] < CACHE_S:
+        return hit[1]
+    try:
+        out = _execution(inc["execution_arn"])
+    except ClientError as e:
+        if hit and e.response.get("Error", {}).get("Code") == "ThrottlingException":
+            return hit[1]
+        raise
+    _cache[incident_id] = (time.time(), out)
+    if len(_cache) > 200:
+        _cache.pop(next(iter(_cache)))
+    return out
+
+
+def _execution(arn: str) -> dict:
     events: list[dict] = []
     kwargs = {"executionArn": arn, "maxResults": 1000, "includeExecutionData": True}
     while True:
