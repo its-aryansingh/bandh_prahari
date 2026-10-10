@@ -1,0 +1,11 @@
+.aws-sam/
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+web/dist/
+.env
+samconfig.toml
+data/roster.local.json
+video-assets/
+planning/

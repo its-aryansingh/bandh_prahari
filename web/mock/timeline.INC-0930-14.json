@@ -1,0 +1,367 @@
+{
+ "incident": {
+  "id": "INC-0930-14",
+  "km": 14,
+  "sign": "boil_soil",
+  "priority": "P1",
+  "status": "closed_breached",
+  "villages": [
+   "Haijalpur",
+   "Parmanand Chhapra",
+   "Naukraha"
+  ],
+  "reenactment": true,
+  "note_hi": "पुनर्निर्मित: रिपोर्टें अभिनय हैं। नदी, गाँव और तारीख़ असली हैं।",
+  "note_en": "Re-enactment: the reports are acted; the river, villages and date are real."
+ },
+ "events": [
+  {
+   "at": "2026-09-29T23:40:12+05:30",
+   "kind": "report",
+   "actor": "patrol",
+   "media": [
+    "voice",
+    "photo",
+    "pin"
+   ],
+   "km": 14,
+   "transcript_hi": "किमी 14 पर पानी उबल रहा है, मटमैला है",
+   "transcript_roman": "km 14 par paani ubal raha hai, matmaila hai",
+   "text_hi": "प्रहरी ने वॉइस नोट, फ़ोटो और लोकेशन भेजी",
+   "text_en": "Patrol worker sends a voice note, a photo and a location pin"
+  },
+  {
+   "at": "2026-09-29T23:40:31+05:30",
+   "kind": "draft",
+   "actor": "agent",
+   "km": 14,
+   "sign": "boil_soil",
+   "text_hi": "AI का मसौदा: किमी 14, ज़मीन वाली ढलान के नीचे मिट्टी वाला उबाल",
+   "text_en": "AI draft: km 14, a boil carrying soil at the land-side toe"
+  },
+  {
+   "at": "2026-09-29T23:40:50+05:30",
+   "kind": "confirm",
+   "actor": "patrol",
+   "text_hi": "प्रहरी ने एक टैप में पुष्टि की",
+   "text_en": "Patrol worker confirms with one tap"
+  },
+  {
+   "at": "2026-09-29T23:40:51+05:30",
+   "kind": "priority",
+   "actor": "rules",
+   "priority": "P1",
+   "text_hi": "नियम: मिट्टी वाला उबाल = P1",
+   "text_en": "Rules: boil carrying soil = P1"
+  },
+  {
+   "at": "2026-09-29T23:41:02+05:30",
+   "kind": "warning",
+   "actor": "system",
+   "level": "taiyaar",
+   "villages": [
+    "Haijalpur",
+    "Parmanand Chhapra",
+    "Naukraha"
+   ],
+   "recipients": 61,
+   "cap_id": "CAP-INC-0930-14-1",
+   "text_hi": "तैयार रहें: 3 गाँवों के मुखिया, वार्ड सदस्य और 49 परिवार",
+   "text_en": "Get ready: mukhiyas, ward members and 49 families in 3 villages"
+  },
+  {
+   "at": "2026-09-29T23:41:03+05:30",
+   "kind": "page",
+   "actor": "system",
+   "to": "junior_engineer",
+   "deadline_min": 10,
+   "text_hi": "जेई को पेज, 10 मिनट में जवाब",
+   "text_en": "Junior engineer paged, 10 minutes to answer"
+  },
+  {
+   "at": "2026-09-29T23:41:06+05:30",
+   "kind": "delivered",
+   "actor": "whatsapp",
+   "to": "junior_engineer",
+   "text_hi": "जेई तक पहुँचा, पढ़ा नहीं",
+   "text_en": "Delivered to the junior engineer, not read"
+  },
+  {
+   "at": "2026-09-29T23:43:10+05:30",
+   "kind": "ready",
+   "level": "taiyaar",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 3,
+   "of": 25,
+   "text_hi": "वार्ड 7: 3/25 घर तैयार",
+   "text_en": "Ward 7: 3 of 25 homes ready"
+  },
+  {
+   "at": "2026-09-29T23:45:02+05:30",
+   "kind": "ready",
+   "level": "taiyaar",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 7,
+   "of": 25,
+   "text_hi": "वार्ड 7: 7/25 घर तैयार",
+   "text_en": "Ward 7: 7 of 25 homes ready"
+  },
+  {
+   "at": "2026-09-29T23:47:30+05:30",
+   "kind": "ready",
+   "level": "taiyaar",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 9,
+   "of": 25,
+   "text_hi": "वार्ड 7: 9/25 घर तैयार",
+   "text_en": "Ward 7: 9 of 25 homes ready"
+  },
+  {
+   "at": "2026-09-29T23:50:12+05:30",
+   "kind": "ready",
+   "level": "taiyaar",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 12,
+   "of": 25,
+   "text_hi": "वार्ड 7: 12/25 घर तैयार",
+   "text_en": "Ward 7: 12 of 25 homes ready"
+  },
+  {
+   "at": "2026-09-29T23:51:03+05:30",
+   "kind": "climb",
+   "actor": "system",
+   "from": "junior_engineer",
+   "to": "assistant_engineer",
+   "cc": [
+    "executive_engineer"
+   ],
+   "reason": "no_answer",
+   "text_hi": "10 मिनट, कोई जवाब नहीं। एई को पेज, ईई को कॉपी",
+   "text_en": "10 minutes, no answer. Assistant engineer paged, executive engineer copied"
+  },
+  {
+   "at": "2026-09-29T23:52:10+05:30",
+   "kind": "read",
+   "actor": "whatsapp",
+   "to": "assistant_engineer",
+   "text_hi": "एई ने पढ़ा",
+   "text_en": "Assistant engineer read it"
+  },
+  {
+   "at": "2026-09-29T23:53:02+05:30",
+   "kind": "answer",
+   "actor": "assistant_engineer",
+   "button": "on_my_way",
+   "text_hi": "एई: \"मैं जा रहा हूँ\"",
+   "text_en": "Assistant engineer: \"On my way\""
+  },
+  {
+   "at": "2026-09-29T23:53:15+05:30",
+   "kind": "dispatch",
+   "actor": "system",
+   "what": "embankment_ambulance",
+   "sandbags": 400,
+   "text_hi": "बाँध एम्बुलेंस (ट्रैक्टर, 10 मज़दूर) और 400 बोरियाँ रवाना",
+   "text_en": "Embankment ambulance (tractor, 10 workers) and 400 sandbags dispatched"
+  },
+  {
+   "at": "2026-09-29T23:55:40+05:30",
+   "kind": "ready",
+   "level": "taiyaar",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 16,
+   "of": 25,
+   "text_hi": "वार्ड 7: 16/25 घर तैयार",
+   "text_en": "Ward 7: 16 of 25 homes ready"
+  },
+  {
+   "at": "2026-09-29T23:59:05+05:30",
+   "kind": "ready",
+   "level": "taiyaar",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 18,
+   "of": 25,
+   "text_hi": "वार्ड 7: 18/25 घर तैयार",
+   "text_en": "Ward 7: 18 of 25 homes ready"
+  },
+  {
+   "at": "2026-09-30T00:20:00+05:30",
+   "kind": "ready",
+   "level": "taiyaar",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 21,
+   "of": 25,
+   "text_hi": "वार्ड 7: 21/25 घर तैयार",
+   "text_en": "Ward 7: 21 of 25 homes ready"
+  },
+  {
+   "at": "2026-09-30T00:35:40+05:30",
+   "kind": "checkin",
+   "actor": "assistant_engineer",
+   "geofence": "ENTER",
+   "distance_m": 120,
+   "text_hi": "एई पहुँचे: लोकेशन और फ़ोटो, जगह से 120 मी.",
+   "text_en": "Assistant engineer on site: pin and photo, 120 m from the spot"
+  },
+  {
+   "at": "2026-09-30T00:52:00+05:30",
+   "kind": "action",
+   "actor": "assistant_engineer",
+   "text_hi": "उबाल के चारों ओर बोरियों का घेरा बना",
+   "text_en": "Sandbag ring built around the boil"
+  },
+  {
+   "at": "2026-09-30T01:05:00+05:30",
+   "kind": "hold",
+   "actor": "assistant_engineer",
+   "status": "ok",
+   "text_hi": "हर 30 मिनट की हाज़िरी: ठीक",
+   "text_en": "30-minute check-in: holding"
+  },
+  {
+   "at": "2026-09-30T01:10:00+05:30",
+   "kind": "ready",
+   "level": "taiyaar",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 23,
+   "of": 25,
+   "text_hi": "वार्ड 7: 23/25 घर तैयार",
+   "text_en": "Ward 7: 23 of 25 homes ready"
+  },
+  {
+   "at": "2026-09-30T01:35:00+05:30",
+   "kind": "hold",
+   "actor": "assistant_engineer",
+   "status": "ok",
+   "text_hi": "हर 30 मिनट की हाज़िरी: ठीक",
+   "text_en": "30-minute check-in: holding"
+  },
+  {
+   "at": "2026-09-30T02:05:00+05:30",
+   "kind": "hold",
+   "actor": "assistant_engineer",
+   "status": "ok",
+   "text_hi": "हर 30 मिनट की हाज़िरी: ठीक",
+   "text_en": "30-minute check-in: holding"
+  },
+  {
+   "at": "2026-09-30T02:10:20+05:30",
+   "kind": "report",
+   "actor": "patrol",
+   "km": 14,
+   "sign": "top_slumping",
+   "transcript_hi": "ऊपर से बाँध धँस रहा है",
+   "transcript_roman": "upar se baandh dhans raha hai",
+   "text_hi": "दूसरी रिपोर्ट: बाँध की ऊपरी सतह धँस रही है",
+   "text_en": "Second report: the top of the embankment is slumping"
+  },
+  {
+   "at": "2026-09-30T02:11:30+05:30",
+   "kind": "confirm_breach",
+   "actor": "assistant_engineer",
+   "text_hi": "एई ने \"टूट रहा है\" दबाया",
+   "text_en": "Assistant engineer taps \"Breaching\""
+  },
+  {
+   "at": "2026-09-30T02:11:35+05:30",
+   "kind": "warning",
+   "actor": "system",
+   "level": "nikal_chalo",
+   "villages": [
+    "Haijalpur",
+    "Parmanand Chhapra",
+    "Naukraha"
+   ],
+   "recipients": 61,
+   "cap_id": "CAP-INC-0930-14-2",
+   "camp_hi": "पंचायत भवन (नमूना)",
+   "camp_en": "Panchayat bhawan (sample)",
+   "text_hi": "निकल चलो: राहत शिविर पंचायत भवन, मुखिया के लाउडस्पीकर पर भी",
+   "text_en": "Move now: relief camp at the panchayat bhawan, also on the mukhiya's loudspeaker"
+  },
+  {
+   "at": "2026-09-30T02:11:36+05:30",
+   "kind": "page",
+   "actor": "system",
+   "to": "district_control_room",
+   "cc": [
+    "flood_fighting_force",
+    "central_flood_control_room"
+   ],
+   "text_hi": "ज़िला नियंत्रण कक्ष और बाढ़ संघर्षात्मक बल को पेज",
+   "text_en": "District control room and flood-fighting force paged"
+  },
+  {
+   "at": "2026-09-30T02:13:10+05:30",
+   "kind": "answer",
+   "actor": "district_control_room",
+   "button": "on_my_way",
+   "text_hi": "ज़िला: \"टीम भेज रहे हैं\"",
+   "text_en": "District: \"Sending a team\""
+  },
+  {
+   "at": "2026-09-30T02:20:00+05:30",
+   "kind": "ready",
+   "level": "nikal_chalo",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 9,
+   "of": 25,
+   "text_hi": "वार्ड 7: 9/25 घर शिविर में",
+   "text_en": "Ward 7: 9 of 25 homes at the camp"
+  },
+  {
+   "at": "2026-09-30T02:35:00+05:30",
+   "kind": "ready",
+   "level": "nikal_chalo",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 17,
+   "of": 25,
+   "text_hi": "वार्ड 7: 17/25 घर शिविर में",
+   "text_en": "Ward 7: 17 of 25 homes at the camp"
+  },
+  {
+   "at": "2026-09-30T02:50:00+05:30",
+   "kind": "ready",
+   "level": "nikal_chalo",
+   "village": "Haijalpur",
+   "ward": 7,
+   "count": 22,
+   "of": 25,
+   "text_hi": "वार्ड 7: 22/25 घर शिविर में",
+   "text_en": "Ward 7: 22 of 25 homes at the camp"
+  },
+  {
+   "at": "2026-09-30T03:20:00+05:30",
+   "kind": "breach",
+   "actor": "assistant_engineer",
+   "km": 14,
+   "text_hi": "किमी 14 पर बाँध टूटा",
+   "text_en": "The embankment breaches at km 14"
+  },
+  {
+   "at": "2026-09-30T05:40:00+05:30",
+   "kind": "close",
+   "actor": "district_control_room",
+   "status": "breached",
+   "text_hi": "घटना बंद: टूटा, ज़िला को सौंपा (IRS फ़ॉर्म 001)",
+   "text_en": "Closed as breached, handed to the district (IRS Form 001)"
+  },
+  {
+   "at": "2026-09-30T05:41:00+05:30",
+   "kind": "report_written",
+   "actor": "agent",
+   "text_hi": "रिपोर्ट अपने आप बनी: किसे कब पता था",
+   "text_en": "The report writes itself: who knew what, when"
+  }
+ ]
+}

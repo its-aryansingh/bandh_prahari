@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml-stylesheet title="XSL_formatting" type="text/xsl" href="feed.xsl"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Bihar: CAP Disaster Alert Feeds</title>
+    <description>CAP Integrated Alert System Warning Updates</description>
+    <language>en</language>
+    <link>https://sachet.ndma.gov.in/cap_public_website/rss/rss_bihar.xml</link>
+    <atom:link href="https://sachet.ndma.gov.in/cap_public_website/rss/rss_bihar.xml" rel="self" type="application/rss+xml"/>
+    <copyright>public domain</copyright>
+    <pubDate>Tue, 15 Sep 2026 09:01:53 GMT</pubDate>
+    <item>
+      <title>अगले 3 घंटों (05:15 AM से 08:15 AM) में आपके क्षेत्र में कुछ स्थानों पर मध्यम दर्जे की मेघ गर्जन, वज्रपात तथा वर्षा के साथ (30-40 kmph) तेज हवा होने की प्रबल संभावना है।</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791589048773016</link>
+      <author>controlroom@ndma.gov.in (IMD Patna)</author>
+      <guid isPermaLink="false">1791589048773016</guid>
+      <pubDate>Fri, 09 Oct 2026 23:37:30 GMT</pubDate>
+    </item>
+    <item>
+      <title>अगले 3 घंटों (04:55 AM से 07:55 AM) में आपके क्षेत्र में कुछ स्थानों पर मध्यम दर्जे की मेघ गर्जन, वज्रपात तथा वर्षा के साथ (30-40 kmph) तेज हवा होने की प्रबल संभावना है।</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791587972238016</link>
+      <author>controlroom@ndma.gov.in (IMD Patna)</author>
+      <guid isPermaLink="false">1791587972238016</guid>
+      <pubDate>Fri, 09 Oct 2026 23:19:33 GMT</pubDate>
+    </item>
+    <item>
+      <title>अगले 3 घंटों (03:50 AM से 06:50 AM) में आपके क्षेत्र में कुछ स्थानों पर मध्यम दर्जे की मेघ गर्जन तथा वर्षा होने के साथ (30-40 kmph) तेज हवा चलने की प्रबल संभावना है।</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791583900398016</link>
+      <author>controlroom@ndma.gov.in (IMD Patna)</author>
+      <guid isPermaLink="false">1791583900398016</guid>
+      <pubDate>Fri, 09 Oct 2026 22:22:04 GMT</pubDate>
+    </item>
+    <item>
+      <title>अगले 3 घंटों (02:50 AM से 05:50 AM) में आपके क्षेत्र में कुछ स्थानों पर हल्के  दर्जे की मेघ गर्जन तथा वज्रपात के साथ (30-40 kmph) तेज हवा होने की संभावना है।</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791580620954016</link>
+      <author>controlroom@ndma.gov.in (IMD Patna)</author>
+      <guid isPermaLink="false">1791580620954016</guid>
+      <pubDate>Fri, 09 Oct 2026 22:20:52 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Adhwara Group at Kamtaul in Darbhanga district of Bihar continues to flow in above normal flood situation at 6:00 pm today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791550123298016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791550123298016</guid>
+      <pubDate>Fri, 09 Oct 2026 12:48:44 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Bagmati at Benibad in Muzaffarpur district of Bihar continues to flow in above normal flood situation at 6:00 pm today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791550123104016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791550123104016</guid>
+      <pubDate>Fri, 09 Oct 2026 12:48:44 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ghaghra at Darauli in Siwan district of Bihar continues to flow in above normal flood situation at 4:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791522233727016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791522233727016</guid>
+      <pubDate>Fri, 09 Oct 2026 05:03:55 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ganga at Hathidah in Patna district of Bihar continues to flow in above normal flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791522232919016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791522232919016</guid>
+      <pubDate>Fri, 09 Oct 2026 05:03:54 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ganga at Patna Gandhighat in Patna district of Bihar continues to flow in above normal flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791522232733016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791522232733016</guid>
+      <pubDate>Fri, 09 Oct 2026 05:03:54 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ganga at Kahalgaon in Bhagalpur district of Bihar continues to flow in severe flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791522232049016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791522232049016</guid>
+      <pubDate>Fri, 09 Oct 2026 05:03:53 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Kosi at Kursela in Katihar district of Bihar continues to flow in above normal flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791519805064016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791519805064016</guid>
+      <pubDate>Fri, 09 Oct 2026 04:23:28 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Kosi at Baltara in Khagaria district of Bihar continues to flow in above normal flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791519805292016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791519805292016</guid>
+      <pubDate>Fri, 09 Oct 2026 04:23:27 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Bagmati at Benibad in Muzaffarpur district of Bihar continues to flow in above normal flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791519804501016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791519804501016</guid>
+      <pubDate>Fri, 09 Oct 2026 04:23:27 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Adhwara Group at Kamtaul in Darbhanga district of Bihar continues to flow in above normal flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791519804906016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791519804906016</guid>
+      <pubDate>Fri, 09 Oct 2026 04:23:27 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Burhi Gandak at Khagaria in Khagaria district of Bihar continues to flow in severe flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791519804026016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791519804026016</guid>
+      <pubDate>Fri, 09 Oct 2026 04:23:27 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Gandak at Dumariaghat in Gopalganj district of Bihar continues to flow in severe flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791519803955016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791519803955016</guid>
+      <pubDate>Fri, 09 Oct 2026 04:23:26 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Adhwara Group at Kamtaul in Darbhanga district of Bihar continues to flow in above normal flood situation at 6:00 pm today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791464185423016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791464185423016</guid>
+      <pubDate>Thu, 08 Oct 2026 12:56:26 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Bagmati at Benibad in Muzaffarpur district of Bihar continues to flow in above normal flood situation at 6:00 pm today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791464185173016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791464185173016</guid>
+      <pubDate>Thu, 08 Oct 2026 12:56:26 GMT</pubDate>
+    </item>
+    <item>
+      <title>अगले 3 घंटों (12:45 PM से 03:45 PM) में आपके क्षेत्र में कुछ स्थानों पर हल्के से मध्यम दर्जे की मेघ गर्जन तथा वर्षा के साथ (30-40 kmph) तेज हवा होने की संभावना है।</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791443536834016</link>
+      <author>controlroom@ndma.gov.in (IMD Patna)</author>
+      <guid isPermaLink="false">1791443536834016</guid>
+      <pubDate>Thu, 08 Oct 2026 07:17:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ghaghra at Darauli in Siwan district of Bihar continues to flow in above normal flood situation at 4:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791438206279016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791438206279016</guid>
+      <pubDate>Thu, 08 Oct 2026 05:43:28 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Sone at Maner in Patna district of Bihar continues to flow in above normal flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791438206059016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791438206059016</guid>
+      <pubDate>Thu, 08 Oct 2026 05:43:28 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ganga at Bhagalpur in Bhagalpur district of Bihar continues to flow in above normal flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791438205788016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791438205788016</guid>
+      <pubDate>Thu, 08 Oct 2026 05:43:28 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ganga at Hathidah in Patna district of Bihar continues to flow in above normal flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791438205142016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791438205142016</guid>
+      <pubDate>Thu, 08 Oct 2026 05:43:27 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ganga at Patna Gandhighat in Patna district of Bihar continues to flow in above normal flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791438204936016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791438204936016</guid>
+      <pubDate>Thu, 08 Oct 2026 05:43:27 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ganga at Munger in Munger district of Bihar continues to flow in above normal flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791438205412016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791438205412016</guid>
+      <pubDate>Thu, 08 Oct 2026 05:43:27 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Ganga at Kahalgaon in Bhagalpur district of Bihar continues to flow in severe flood situation at 8:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791438204331016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791438204331016</guid>
+      <pubDate>Thu, 08 Oct 2026 05:43:25 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Kosi at Baltara in Khagaria district of Bihar continues to flow in above normal flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791433508507016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791433508507016</guid>
+      <pubDate>Thu, 08 Oct 2026 04:25:10 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Adhwara Group at Kamtaul in Darbhanga district of Bihar continues to flow in above normal flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791433508212016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791433508212016</guid>
+      <pubDate>Thu, 08 Oct 2026 04:25:10 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Bagmati at Benibad in Muzaffarpur district of Bihar continues to flow in above normal flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791433507948016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791433507948016</guid>
+      <pubDate>Thu, 08 Oct 2026 04:25:09 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Gandak at Dumariaghat in Gopalganj district of Bihar continues to flow in above normal flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791433507748016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791433507748016</guid>
+      <pubDate>Thu, 08 Oct 2026 04:25:09 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Kosi at Kursela in Katihar district of Bihar continues to flow in severe flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791433507593016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791433507593016</guid>
+      <pubDate>Thu, 08 Oct 2026 04:25:09 GMT</pubDate>
+    </item>
+    <item>
+      <title>River Burhi Gandak at Khagaria in Khagaria district of Bihar continues to flow in severe flood situation at 6:00 am today.</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791433507383016</link>
+      <author>controlroom@ndma.gov.in (CWC)</author>
+      <guid isPermaLink="false">1791433507383016</guid>
+      <pubDate>Thu, 08 Oct 2026 04:25:08 GMT</pubDate>
+    </item>
+    <item>
+      <title>अगले 3 घंटों (08:25 AM से 11:25 AM) में आपके क्षेत्र में कुछ स्थानों पर मध्यम दर्जे की मेघ गर्जन तथा वर्षा होने की प्रबल संभावना है।</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791427812994016</link>
+      <author>controlroom@ndma.gov.in (IMD Patna)</author>
+      <guid isPermaLink="false">1791427812994016</guid>
+      <pubDate>Thu, 08 Oct 2026 02:52:36 GMT</pubDate>
+    </item>
+    <item>
+      <title>अगले 3 घंटों (07:30 AM से 10:30 AM) में आपके क्षेत्र में कुछ स्थानों पर हल्के से मध्यम दर्जे की मेघ गर्जन तथा वर्षा होने की संभावना है।</title>
+      <description/>
+      <category>Met</category>
+      <link>https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791427218892016</link>
+      <author>controlroom@ndma.gov.in (IMD Patna)</author>
+      <guid isPermaLink="false">1791427218892016</guid>
+      <pubDate>Thu, 08 Oct 2026 02:42:35 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<defs><clipPath id="f"><circle cx="32" cy="35" r="19"/></clipPath></defs>
+<path d="M20 52l-5 7M44 52l5 7" stroke="#1F2350" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M9 21.5a11.5 11.5 0 0 1 15-13.4z" fill="#F7B500" stroke="#1F2350" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M55 21.5a11.5 11.5 0 0 0-15-13.4z" fill="#F7B500" stroke="#1F2350" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
+<path d="M32 13V8M27.5 7.5h9" stroke="#1F2350" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="32" cy="35" r="21.5" fill="#FFFDF8" stroke="#1F2350" stroke-width="3.2" stroke-linejoin="round" stroke-linecap="round"/>
+<g clip-path="url(#f)"><path d="M10 41q5.5-4.4 11 0t11 0 11 0 11 0V60H10z" fill="#3A8DB4"/></g>
+<path d="M32 35l-8.4-6M32 35l10.6-8.2" stroke="#1F2350" stroke-width="3.4" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="32" cy="35" r="3" fill="#F27A1A" stroke="#1F2350" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>

@@ -1,0 +1,84 @@
+{
+ "executionArn": "arn:aws:states:ap-south-1:ACCOUNT_ID:execution:incident:INC-0930-14",
+ "type": "STANDARD",
+ "sample": true,
+ "states": [
+  {
+   "name": "OpenIncident",
+   "entered": "2026-09-29T23:40:51+05:30",
+   "exited": "2026-09-29T23:40:52+05:30",
+   "status": "succeeded",
+   "detail": null
+  },
+  {
+   "name": "WarnVillagesGetReady",
+   "entered": "2026-09-29T23:40:52+05:30",
+   "exited": "2026-09-29T23:41:02+05:30",
+   "status": "succeeded",
+   "detail": null
+  },
+  {
+   "name": "PageJuniorEngineer",
+   "entered": "2026-09-29T23:41:02+05:30",
+   "exited": "2026-09-29T23:51:03+05:30",
+   "status": "timed_out",
+   "detail": "States.Timeout, caught: climb"
+  },
+  {
+   "name": "PageAssistantEngineer",
+   "entered": "2026-09-29T23:51:03+05:30",
+   "exited": "2026-09-29T23:53:02+05:30",
+   "status": "succeeded",
+   "detail": "SendTaskSuccess: on_my_way"
+  },
+  {
+   "name": "DispatchRepairTeam",
+   "entered": "2026-09-29T23:53:02+05:30",
+   "exited": "2026-09-29T23:53:15+05:30",
+   "status": "succeeded",
+   "detail": null
+  },
+  {
+   "name": "AwaitEngineerOnSite",
+   "entered": "2026-09-29T23:53:15+05:30",
+   "exited": "2026-09-30T00:35:40+05:30",
+   "status": "succeeded",
+   "detail": "Geofence ENTER"
+  },
+  {
+   "name": "HoldTheStretch",
+   "entered": "2026-09-30T00:35:40+05:30",
+   "exited": "2026-09-30T02:11:30+05:30",
+   "status": "succeeded",
+   "detail": "Breached"
+  },
+  {
+   "name": "WarnVillagesMoveNow",
+   "entered": "2026-09-30T02:11:30+05:30",
+   "exited": "2026-09-30T02:11:35+05:30",
+   "status": "succeeded",
+   "detail": null
+  },
+  {
+   "name": "PageForceAndDistrict",
+   "entered": "2026-09-30T02:11:35+05:30",
+   "exited": "2026-09-30T02:13:10+05:30",
+   "status": "succeeded",
+   "detail": "SendTaskSuccess"
+  },
+  {
+   "name": "HandToDistrict",
+   "entered": "2026-09-30T02:13:10+05:30",
+   "exited": "2026-09-30T05:40:00+05:30",
+   "status": "succeeded",
+   "detail": "IRS Form 001 sent; closed by district"
+  },
+  {
+   "name": "WriteIncidentReport",
+   "entered": "2026-09-30T05:40:00+05:30",
+   "exited": "2026-09-30T05:41:00+05:30",
+   "status": "succeeded",
+   "detail": null
+  }
+ ]
+}

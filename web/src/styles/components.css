@@ -1,0 +1,226 @@
+/* ---------- icons and faces ---------- */
+.ic { width: 1.5em; height: 1.5em; flex: none; }
+.ic.sign { width: 2.2em; height: 1.5em; }
+.face { width: 44px; height: 44px; flex: none; }
+.mark { width: 44px; height: 44px; flex: none; }
+
+/* ---------- buttons: ink fill, coloured shade, press squash ---------- */
+.btn {
+  --shade: var(--kesar);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 22px 10px 18px;
+  border: var(--ink);
+  border-radius: var(--r-btn);
+  background: var(--neel);
+  color: var(--chuna);
+  font: 700 19px/1.15 var(--font-ui);
+  text-align: left;
+  text-decoration: none;
+  box-shadow: 4px 5px 0 var(--shade);
+  transition: transform 0.18s var(--spring-soft), box-shadow 0.18s var(--spring-soft);
+  touch-action: manipulation;
+}
+.btn .ic { width: 26px; height: 26px; }
+.btn:hover { transform: translate(-1px, -2px); box-shadow: 6px 8px 0 var(--shade); }
+.btn:active { transform: translate(3px, 4px) scale(0.985, 1.01); box-shadow: 1px 1px 0 var(--shade); transition-duration: 0.06s; }
+.btn.paper { background: var(--white); color: var(--neel); --shade: var(--neel); }
+.btn.quiet { background: transparent; color: var(--neel); box-shadow: none; border-color: transparent; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; padding-inline: 6px; }
+.btn.quiet:hover, .btn.quiet:active { transform: none; box-shadow: none; }
+.btn.small { min-height: 44px; font-size: 16px; padding: 6px 14px; gap: 8px; box-shadow: 3px 4px 0 var(--shade); }
+.btn.small .ic { width: 20px; height: 20px; }
+.btn[disabled] { opacity: 0.5; pointer-events: none; }
+html[data-lang="both"] .btn .bi > .en { font-size: 0.7em; margin-top: 2px; color: inherit; opacity: 0.8; font-weight: 600; }
+
+/* "हो गया" (done): turns green with a stamp. */
+.done-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 40px; padding: 4px 14px;
+  border: 2px solid var(--dhaan-deep);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--dhaan-deep);
+  font: 700 16px/1.1 var(--font-ui);
+  box-shadow: 2px 3px 0 var(--dhaan-deep);
+  transition: transform 0.16s var(--spring-soft), box-shadow 0.16s, background 0.2s, color 0.2s;
+  touch-action: manipulation;
+}
+.done-btn .ic { width: 18px; height: 18px; opacity: 0.35; }
+.done-btn:active { transform: translate(2px, 3px) scale(0.97); box-shadow: 0 0 0 var(--dhaan-deep); }
+.done-btn[aria-pressed="true"] { background: var(--dhaan); color: var(--white); border-color: var(--neel); box-shadow: 2px 3px 0 var(--neel); animation: stamp 0.5s var(--spring-pop); }
+.done-btn[aria-pressed="true"] .ic { opacity: 1; }
+@keyframes stamp { 0% { transform: scale(1.18) rotate(-4deg); } 100% { transform: none; } }
+
+/* ---------- chips ---------- */
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  min-height: 40px; padding: 4px 14px;
+  border: 2px solid var(--neel);
+  border-radius: 999px;
+  background: var(--white);
+  font: 600 16px/1.2 var(--font-ui);
+  color: var(--neel);
+  transition: transform 0.16s var(--spring-soft), background 0.15s;
+  touch-action: manipulation;
+}
+button.chip:hover { background: var(--haldi-tint); }
+button.chip:active { transform: scale(0.96); }
+.chip[aria-pressed="true"], .chip[aria-selected="true"] { background: var(--neel); color: var(--chuna); }
+.chip .face { width: 26px; height: 26px; margin-left: -8px; }
+
+/* A sticker: a small label slapped on at an angle, like a stamp. */
+.sticker {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 4px 12px;
+  border: 2px solid var(--neel);
+  border-radius: 8px;
+  background: var(--white);
+  font: 700 14px/1.3 var(--font-ui);
+  box-shadow: 3px 3px 0 var(--neel);
+  transform: rotate(var(--tilt, -2deg));
+}
+.sticker.haldi { background: var(--haldi); }
+.sticker.kesar { background: var(--kesar-tint); }
+.sticker.dhaan { background: var(--dhaan-tint); }
+
+/* Rubber stamp: for sample data, Exercise drafts, recorded facts. */
+.stamp {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 2.5px solid currentColor;
+  border-radius: 6px;
+  color: var(--sindoor);
+  font: 700 14px/1.3 var(--font-ui);
+  transform: rotate(var(--tilt, -6deg));
+  background: color-mix(in srgb, var(--white) 70%, transparent);
+  mix-blend-mode: multiply;
+}
+.stamp.dhaan { color: var(--dhaan-deep); }
+.stamp.neel { color: var(--neel-2); }
+
+/* ---------- cards ---------- */
+.card {
+  --shade: var(--neel);
+  position: relative;
+  background: var(--white);
+  border: var(--ink);
+  border-radius: var(--r-card);
+  box-shadow: 5px 6px 0 var(--shade);
+}
+/* Signboard: a painted board with a double frame, like the wall signs in every block office. */
+.signboard {
+  --edge: var(--kesar);
+  position: relative;
+  background: var(--chuna);
+  border: var(--ink);
+  border-radius: 20px 24px 18px 22px;
+  box-shadow: inset 0 0 0 6px var(--edge), inset 0 0 0 8.5px var(--neel), 7px 8px 0 var(--neel);
+  padding: clamp(26px, 4vw, 44px);
+}
+/* Chat bubble, as on the phone. */
+.bubble-in, .bubble-out {
+  position: relative;
+  max-width: 88%;
+  padding: 8px 12px 6px;
+  border: 2px solid var(--neel);
+  border-radius: 14px;
+  background: var(--white);
+  font-size: 15px;
+  line-height: 1.45;
+  box-shadow: 2px 2px 0 var(--neel);
+}
+.bubble-in { border-top-left-radius: 4px; justify-self: start; }
+.bubble-out { border-top-right-radius: 4px; justify-self: end; background: var(--dhaan-tint); }
+.bubble-in .meta, .bubble-out .meta { display: block; text-align: right; font-size: 11.5px; color: var(--neel-2); margin-top: 2px; }
+
+/* The milestone badge: white stone, orange cap, kilometre number. */
+.km {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-grid;
+  place-items: end center;
+  width: 34px; height: 40px;
+  padding-bottom: 5px;
+  border: 2px solid var(--neel);
+  border-radius: 17px 17px 3px 3px;
+  background: var(--white);
+  font: 400 15px/1 var(--font-display);
+  color: var(--neel);
+  flex: none;
+}
+.km::before {
+  content: "";
+  position: absolute; inset: 0 0 58% 0; z-index: -1;
+  background: var(--kesar);
+  border-bottom: 2px solid var(--neel);
+}
+html[data-lang="en"] .km, html[data-lang="both"] .km { font-size: 14px; }
+
+/* Priority stamp. */
+.prio {
+  display: inline-grid; place-items: center;
+  min-width: 44px; height: 30px; padding: 0 8px;
+  border: 2.5px solid currentColor;
+  border-radius: 8px;
+  font: 400 17px/1 var(--font-display);
+  transform: rotate(-4deg);
+  flex: none;
+}
+.prio.P1 { color: var(--sindoor); background: var(--sindoor-tint); }
+.prio.P2 { color: var(--kesar-deep); background: var(--kesar-tint); }
+.prio.P3 { color: var(--haldi-deep); background: var(--haldi-tint); }
+
+/* ---------- live strip ---------- */
+.live-strip {
+  background: var(--neel);
+  color: var(--chuna);
+  font-size: 14.5px;
+  line-height: 1.45;
+}
+.live-strip .wrap { display: flex; align-items: center; gap: 12px; padding-block: 9px; flex-wrap: wrap; }
+.live-strip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--haldi); box-shadow: 0 0 0 3px rgba(247, 181, 0, 0.3); flex: none; animation: live 2.4s ease-in-out infinite; }
+@keyframes live { 50% { box-shadow: 0 0 0 6px rgba(247, 181, 0, 0.12); } }
+.live-strip a { color: var(--haldi); }
+.live-strip .grow { flex: 1 1 22em; min-width: 0; }
+.live-strip .not-official { color: var(--haldi-tint); opacity: 0.85; }
+
+/* ---------- header ---------- */
+.site-head {
+  position: sticky; top: 0; z-index: 40;
+  background: color-mix(in srgb, var(--chuna) 94%, transparent);
+  border-bottom: var(--ink);
+  backdrop-filter: saturate(1.2) blur(6px);
+}
+.site-head .wrap { display: flex; align-items: center; gap: 18px; min-height: 68px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex: none; }
+.brand .mark { width: 42px; height: 42px; }
+.brand-name { font: 400 25px/1 var(--font-display); text-shadow: 0.04em 0.05em 0 var(--kesar); white-space: nowrap; }
+.brand-sub { display: block; font: 600 12px/1.2 var(--font-ui); color: var(--neel-2); margin-top: 3px; }
+.nav { display: none; gap: 4px; margin-left: auto; }
+.nav a { padding: 8px 12px; border-radius: 10px; font-weight: 600; font-size: 16px; text-decoration: none; }
+.nav a:hover { background: var(--haldi-tint); }
+.lang {
+  display: inline-flex; margin-left: auto;
+  border: 2px solid var(--neel); border-radius: 999px; padding: 3px; background: var(--white);
+  flex: none;
+}
+.lang button {
+  border: 0; background: transparent; border-radius: 999px;
+  padding: 4px 11px; min-height: 34px;
+  font: 700 14px/1 var(--font-ui);
+}
+.lang button[aria-pressed="true"] { background: var(--neel); color: var(--chuna); }
+@media (min-width: 1040px) {
+  .nav { display: flex; }
+  .lang { margin-left: 8px; }
+}
+
+/* Mock-data notice, stamped at the corner of the page. */
+.mock-stamp { position: fixed; left: 10px; bottom: 10px; z-index: 50; --tilt: -4deg; background: var(--white); font-size: 12.5px; padding: 1px 8px; }
+
+/* ---------- footer ---------- */
+.site-foot { background: var(--neel); color: var(--chuna); padding-block: 56px 40px; }
+.site-foot a { color: var(--haldi); }

@@ -1,0 +1,32 @@
+// The same colours as styles/tokens.css, for SVG drawn in code.
+export const C = {
+  chuna: "#FFFDF8",
+  white: "#FFFFFF",
+  neel: "#1F2350",
+  neel2: "#4B5080",
+  neel3: "#8A8EB0",
+  haldi: "#F7B500",
+  haldiTint: "#FFF5D1",
+  haldiDeep: "#B07E00",
+  kesar: "#F27A1A",
+  kesarTint: "#FFE9D6",
+  kesarDeep: "#B5550C",
+  sindoor: "#D9342B",
+  sindoorTint: "#FDE3DF",
+  sindoorDeep: "#9A2119",
+  dhaan: "#2E9D50",
+  dhaanTint: "#E2F4E5",
+  dhaanDeep: "#1D6B36",
+  gandak: "#3A8DB4",
+  gandakTint: "#E1F0F7",
+  gandakDeep: "#24607D",
+  mitti: "#C79A5B",
+  mittiDeep: "#94703E",
+  mittiTint: "#EBD5AE",
+  raat: "#1B1E44",
+  skin: "#B87447",
+  skin2: "#9A5E37",
+  boil: "#79938C",
+} as const;
+
+export type Colour = (typeof C)[keyof typeof C];

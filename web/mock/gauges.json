@@ -1,0 +1,286 @@
+{
+ "as_of": "2026-10-10T05:00:00+05:30",
+ "readings": [
+  {
+   "site": "Dumariaghat",
+   "site_hi": "डुमरियाघाट",
+   "river": "Gandak",
+   "district": "Gopalganj",
+   "wl_m": 62.23,
+   "dl_m": 62.22,
+   "hfl_m": 64.36,
+   "hfl_date": "2020-07-24",
+   "trend": "steady",
+   "time": "2026-10-09T06:00:00+05:30",
+   "source": "CWC via SACHET",
+   "source_url": "https://sachet.ndma.gov.in/cap_public_website/FetchXMLFile?identifier=1791519803955016",
+   "sample": false
+  },
+  {
+   "site": "Rewaghat",
+   "site_hi": "रेवाघाट",
+   "river": "Gandak",
+   "district": "Saran",
+   "wl_m": 53.62,
+   "dl_m": 54.41,
+   "trend": "falling",
+   "time": "2026-10-10T03:00:00+05:30",
+   "source": "FMISC (WRD Bihar)",
+   "source_url": "https://fmiscwrdbihar.gov.in/",
+   "sample": true
+  }
+ ],
+ "alerts": [
+  {
+   "identifier": "1791519803955016",
+   "sender": "CWC",
+   "event": "Flood",
+   "severity": "Severe",
+   "urgency": "Expected",
+   "headline": "River Gandak at Dumariaghat in Gopalganj district of Bihar continues to flow in severe flood situation at 6:00 am today.",
+   "description": "At 6:00 am, it was flowing at a level of 62.23 m with steady trend which is 0.01 m above its Danger Level of 62.22 m and 2.13 m below its previous HFL of 64.36 m (24/07/2020).",
+   "area": "Gandak, Dumariaghat, Gopalganj, Bihar",
+   "effective": "2026-10-09T06:00:00+05:30",
+   "expires": "2026-10-10T06:00:00+05:30",
+   "sample": false
+  }
+ ],
+ "glofas": {
+  "cell": "25.975N 85.025E (near Rewaghat, Saran)",
+  "source": "Open-Meteo Flood API (GloFAS)",
+  "unit": "m3/s",
+  "note": "Model estimate, not an official reading. Pulled 10 Oct 2026; dates after 10 Oct are forecast.",
+  "series": [
+   {
+    "date": "2026-09-01",
+    "q": 5271,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-02",
+    "q": 5332,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-03",
+    "q": 5247,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-04",
+    "q": 5139,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-05",
+    "q": 5069,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-06",
+    "q": 5104,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-07",
+    "q": 5163,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-08",
+    "q": 5187,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-09",
+    "q": 5199,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-10",
+    "q": 4999,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-11",
+    "q": 4796,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-12",
+    "q": 4687,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-13",
+    "q": 4602,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-14",
+    "q": 4466,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-15",
+    "q": 4314,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-16",
+    "q": 4265,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-17",
+    "q": 4177,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-18",
+    "q": 4054,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-19",
+    "q": 3971,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-20",
+    "q": 3898,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-21",
+    "q": 3757,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-22",
+    "q": 3613,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-23",
+    "q": 3482,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-24",
+    "q": 3356,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-25",
+    "q": 3250,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-26",
+    "q": 3435,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-27",
+    "q": 4919,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-28",
+    "q": 6636,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-29",
+    "q": 7515,
+    "forecast": false
+   },
+   {
+    "date": "2026-09-30",
+    "q": 7111,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-01",
+    "q": 6251,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-02",
+    "q": 5597,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-03",
+    "q": 5163,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-04",
+    "q": 4841,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-05",
+    "q": 4591,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-06",
+    "q": 4374,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-07",
+    "q": 4206,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-08",
+    "q": 4110,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-09",
+    "q": 3989,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-10",
+    "q": 3836,
+    "forecast": false
+   },
+   {
+    "date": "2026-10-11",
+    "q": 3689,
+    "forecast": true
+   },
+   {
+    "date": "2026-10-12",
+    "q": 3555,
+    "forecast": true
+   },
+   {
+    "date": "2026-10-13",
+    "q": 3427,
+    "forecast": true
+   },
+   {
+    "date": "2026-10-14",
+    "q": 3272,
+    "forecast": true
+   },
+   {
+    "date": "2026-10-15",
+    "q": 3125,
+    "forecast": true
+   },
+   {
+    "date": "2026-10-16",
+    "q": 2971,
+    "forecast": true
+   }
+  ]
+ }
+}

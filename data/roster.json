@@ -1,0 +1,15 @@
+{
+  "_note": "Fictional names. Phone numbers are NOT stored here: each role reads its number from SSM parameter /bp/roster/<role>.",
+  "segments": "all",
+  "roles": [
+    {"level": 1, "role": "junior_engineer",      "name": "JE (demo)",                  "ssm": "/bp/roster/je"},
+    {"level": 2, "role": "assistant_engineer",   "name": "AE (demo)",                  "ssm": "/bp/roster/ae"},
+    {"level": 3, "role": "executive_engineer",   "name": "EE (demo)",                  "ssm": "/bp/roster/ee"},
+    {"level": 4, "role": "flood_fighting_force", "name": "Zone flood-fighting force (demo)", "ssm": "/bp/roster/force"},
+    {"level": 4, "role": "district_control_room","name": "District control room (demo)",    "ssm": "/bp/roster/district"},
+    {"level": 5, "role": "central_flood_control_room", "name": "Central Flood Control Room (demo)", "ssm": "/bp/roster/central"}
+  ],
+  "mukhiyas": [
+    {"village": "Haijalpur", "name": "Mukhiya (demo)", "ssm": "/bp/mukhiya/haijalpur"}
+  ]
+}

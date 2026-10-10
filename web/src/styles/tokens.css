@@ -1,0 +1,49 @@
+/* Baandh Prahari tokens. See web/DESIGN.md.
+   Full-strength haldi, kesar, sindoor and dhaan mean a warning level (IMD's yellow,
+   orange, red, green). Their white tints are for surfaces. Ink is Champaran indigo. */
+:root {
+  --chuna: #fffdf8;
+  --white: #ffffff;
+  --neel: #1f2350;
+  --neel-2: #4b5080;
+  --neel-3: #8a8eb0;
+
+  --haldi: #f7b500;
+  --haldi-tint: #fff5d1;
+  --haldi-deep: #b07e00;
+  --kesar: #f27a1a;
+  --kesar-tint: #ffe9d6;
+  --kesar-deep: #b5550c;
+  --sindoor: #d9342b;
+  --sindoor-tint: #fde3df;
+  --sindoor-deep: #9a2119;
+  --dhaan: #2e9d50;
+  --dhaan-tint: #e2f4e5;
+  --dhaan-deep: #1d6b36;
+  --gandak: #3a8db4;
+  --gandak-tint: #e1f0f7;
+  --gandak-deep: #24607d;
+  --mitti: #c79a5b;
+  --mitti-deep: #94703e;
+  --mitti-tint: #ebd5ae;
+  --raat: #1b1e44;
+
+  --line: 2.5px;
+  --ink: var(--line) solid var(--neel);
+  --r-stage: 22px;
+  --r-card: 16px;
+  --r-btn: 14px;
+
+  --font-display: "Yatra One", "Baloo 2", "Noto Sans Devanagari", system-ui, sans-serif;
+  --font-ui: "Baloo 2", "Noto Sans Devanagari", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --page: 1200px;
+  --gutter: clamp(16px, 4vw, 40px);
+  color-scheme: light;
+}
+
+/* Level colours, set on any element with data-level. */
+[data-level="saavdhan"] { --lv: var(--haldi); --lv-tint: var(--haldi-tint); --lv-deep: var(--haldi-deep); --lv-ink: var(--neel); }
+[data-level="taiyaar"] { --lv: var(--kesar); --lv-tint: var(--kesar-tint); --lv-deep: var(--kesar-deep); --lv-ink: var(--neel); }
+[data-level="nikal_chalo"] { --lv: var(--sindoor); --lv-tint: var(--sindoor-tint); --lv-deep: var(--sindoor-deep); --lv-ink: var(--white); }
+[data-level="khatra_tala"] { --lv: var(--dhaan); --lv-tint: var(--dhaan-tint); --lv-deep: var(--dhaan-deep); --lv-ink: var(--white); }

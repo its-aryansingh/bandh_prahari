@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="hi" data-lang="both">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>बाँध प्रहरी: गाँव को 1 मिनट में ख़बर</title>
+  <meta name="description" content="Baandh Prahari: a Hindi WhatsApp line for families behind Bihar's flood embankments. The village hears in 1 minute; the engineer on duty answers in 10, or it climbs. A student project for Environmental Hacks 2026, not an official warning service." />
+  <meta name="theme-color" content="#1f2350" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Yatra+One&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <a class="sr-only" href="#nadi">नदी का हाल पर जाएँ / Skip to river status</a>
+
+  <!-- Proof of life: the latest official reading, from GET /gauges -->
+  <div class="live-strip" id="live">
+    <div class="wrap">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="grow pair" id="live-text">
+        <span class="hi" lang="hi">गंडक, डुमरियाघाट (गोपालगंज): ख़तरे के निशान से 1 से.मी. ऊपर, 62.23 मी.। स्रोत: CWC, SACHET पर, 9 अक्टूबर सुबह 6 बजे।</span>
+        <span class="en" lang="en">Gandak at Dumariaghat (Gopalganj): 1 cm above danger level, at 62.23 m. Source: CWC on SACHET, 9 Oct, 6 AM.</span>
+      </span>
+      <span class="not-official solo"><span class="hi">छात्र परियोजना, सरकारी चेतावनी नहीं</span><span class="en">Student project, not an official warning</span></span>
+    </div>
+  </div>
+
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="#top" aria-label="बाँध प्रहरी, Baandh Prahari">
+        <span id="brand-mark"></span>
+        <span>
+          <span class="brand-name">बाँध प्रहरी</span>
+          <span class="brand-sub">Baandh Prahari</span>
+        </span>
+      </a>
+      <nav class="nav" aria-label="पन्ने के हिस्से / Sections">
+        <a href="#nadi"><span class="hi">नदी का हाल</span><span class="en solo">River today</span></a>
+        <a href="#chetavani"><span class="hi">चेतावनियाँ</span><span class="en solo">Warnings</span></a>
+        <a href="#raat"><span class="hi">उस रात</span><span class="en solo">The night</span></a>
+        <a href="#control"><span class="hi">कंट्रोल रूम</span><span class="en solo">Control room</span></a>
+        <a href="#sarkar"><span class="hi">सरकार से जुड़ाव</span><span class="en solo">Government</span></a>
+        <a href="#aws">AWS</a>
+      </nav>
+      <div class="lang" role="group" aria-label="भाषा / Language">
+        <button type="button" data-lang="hi" aria-pressed="false">हिंदी</button>
+        <button type="button" data-lang="both" aria-pressed="true">दोनों</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= HERO ================= -->
+    <section class="hero" id="top">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="sticker haldi" style="--tilt:-2.5deg"><span class="hi">WhatsApp पर, हिंदी में, आवाज़ के साथ</span><span class="en">On WhatsApp, in Hindi, with voice</span></p>
+          <h1 class="display h1 bi" id="hero-title">
+            <span class="hi">1 मिनट में गाँव को ख़बर, 10 में इंजीनियर का जवाब।</span>
+            <span class="en">The village hears in 1 minute. The engineer answers in 10.</span>
+          </h1>
+          <p class="lead pair">
+            <span class="hi">बिहार के बाढ़ वाले बाँधों के पीछे रहने वाले परिवारों के लिए एक हिंदी WhatsApp नंबर। रोज़ नदी का हाल पूछिए। ख़तरा दिखे तो एक वॉइस नोट भेजिए: गाँव को उसी मिनट बचाव के क़दम मिलते हैं, और ड्यूटी वाले इंजीनियर को 10 मिनट में जवाब देना होता है, वरना बात अगले अफ़सर तक जाती है।</span>
+            <span class="en">A Hindi WhatsApp line for families behind Bihar's flood embankments. Ask how your river is, any day. If you see danger, send one voice note: the village gets the precaution steps that minute, and the engineer on duty must answer within 10 minutes, or it climbs to the next officer.</span>
+          </p>
+          <div class="hero-cta">
+            <button class="btn" type="button" id="play-hero" data-replay="0">
+              <svg class="ic" viewBox="0 0 40 40" aria-hidden="true"><path d="M13 8.5l19 11.5-19 11.5z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+              <span class="bi"><span class="hi">उस रात को दोबारा चलाएँ</span><span class="en">Replay the night, 70 seconds</span></span>
+            </button>
+            <a class="btn paper" href="#nadi" id="ask-river">
+              <span class="bi"><span class="hi">नदी का हाल पूछें</span><span class="en">Ask about the river</span></span>
+            </a>
+          </div>
+          <p class="small dim pair hero-note">
+            <span class="hi">कोई ऐप नहीं, कोई लॉगिन नहीं। यह छात्र परियोजना है, सरकारी चेतावनी नहीं।</span>
+            <span class="en">No app, no login. A student project, not an official warning.</span>
+          </p>
+        </div>
+
+        <figure class="hero-art">
+          <div class="hero-badge" id="hero-badge">
+            <div class="hero-ghadi" id="hero-ghadi"></div>
+            <p class="hero-badge-name bi"><span class="hi">जवाब घड़ी</span><span class="en">The answer clock</span></p>
+          </div>
+          <div class="hero-scene" id="hero-scene"></div>
+          <figcaption class="small pair">
+            <span class="hi">हैजलपुर, मकेर प्रखंड, सारण। 29–30 सितंबर 2026 की रात गंडक ने यहाँ बाँध तोड़ा।</span>
+            <span class="en">Haijalpur, Maker block, Saran. The Gandak broke the embankment here on the night of 29–30 September 2026.</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="wrap">
+        <div class="ghadi-rule signboard">
+          <p class="display h3 bi"><span class="hi">जवाब घड़ी: हर ख़तरे का एक ज़िम्मेदार, एक समय-सीमा, और अगला व्यक्ति।</span><span class="en">Jawab Ghadi, the answer clock: every warning sign gets an owner, a deadline, and a next person.</span></p>
+          <ol class="ladder" id="hero-ladder" aria-label="किसका जवाब कब / Who must answer, and when"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= NADI KA HAAL ================= -->
+    <section class="band tint-haldi" id="nadi">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">नदी का हाल, रोज़</span><span class="en">How's the river? Ask any day.</span></h2>
+          <p class="lead pair">
+            <span class="hi">अपने गाँव का नाम भेजिए। नज़दीकी सरकारी गेज की ताज़ा रीडिंग हिंदी में आती है, आवाज़ के साथ। जो नंबर लोग रोज़ इस्तेमाल करते हैं, वही बाढ़ की रात पहले से फ़ोन में सेव होता है।</span>
+            <span class="en">Send your village's name. The latest reading at the nearest official gauge comes back in Hindi, with a voice note. The number people use every day is the one already saved on the night of the flood.</span>
+          </p>
+        </div>
+
+        <div class="nadi-grid">
+          <div class="chat card" id="nadi-chat" aria-live="polite">
+            <div class="chat-head">
+              <span class="chat-avatar" id="nadi-avatar"></span>
+              <span>
+                <strong>बाँध प्रहरी</strong>
+                <span class="tiny dim solo"><span class="hi">नदी का हाल, चेतावनी, रिपोर्ट</span><span class="en">River status, warnings, reports</span></span>
+              </span>
+            </div>
+            <div class="chat-body" id="nadi-thread">
+              <div class="bubble-in">
+                <span class="pair"><span class="hi">नमस्ते! अपने गाँव का नाम लिखिए, जैसे हैजलपुर।</span><span class="en">Hello! Type your village's name, like Haijalpur.</span></span>
+              </div>
+            </div>
+            <div class="chat-chips" id="nadi-chips" aria-label="गाँव चुनें / Pick a village"></div>
+            <form class="chat-compose" id="nadi-form" autocomplete="off">
+              <label class="sr-only" for="nadi-input">गाँव का नाम / Village name</label>
+              <input id="nadi-input" name="q" type="text" placeholder="गाँव का नाम… / Village name…" />
+              <button class="send" type="submit" aria-label="भेजें / Send">
+                <svg class="ic" viewBox="0 0 40 40" aria-hidden="true"><path d="M6 20L34 7l-7 27-7-10z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+              </button>
+            </form>
+          </div>
+
+          <div class="river card" id="river-card">
+            <div class="river-head">
+              <h3 class="display h3 bi"><span class="hi">गंडक में पानी, 1 सितंबर से</span><span class="en">Water in the Gandak since 1 September</span></h3>
+              <div class="seg" role="group" aria-label="चार्ट / Chart">
+                <button type="button" class="chip" data-mode="bars" aria-pressed="true"><span class="hi">रोज़</span><span class="en solo">Daily</span></button>
+                <button type="button" class="chip" data-mode="line" aria-pressed="false"><span class="hi">रुझान</span><span class="en solo">Trend</span></button>
+              </div>
+            </div>
+            <div class="river-chart" id="river-chart"></div>
+            <p class="tiny dim pair" id="river-note">
+              <span class="hi">बहाव, घन मीटर प्रति सेकंड। रेवाघाट के पास का मॉडल अनुमान (GloFAS, Open-Meteo), सरकारी रीडिंग नहीं। 10 अक्टूबर के बाद पूर्वानुमान।</span>
+              <span class="en">Discharge in m³/s. A model estimate near Rewaghat (GloFAS via Open-Meteo), not an official reading. After 10 October it is a forecast.</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= THE FOUR WARNINGS ================= -->
+    <section class="band" id="chetavani">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">एक संदेश पर कोई घर नहीं छोड़ता। इसलिए हर चेतावनी में छोटे काम हैं।</span><span class="en">Nobody leaves home on one message. So every warning asks for small steps.</span></h2>
+        </div>
+        <div class="levels-grid">
+          <aside class="levels-side">
+            <blockquote class="signboard evidence" style="--edge: var(--haldi)">
+              <p class="pair">
+                <span class="hi">2025 में कोसी के 38 गाँवों के 1,081 परिवारों में से 671 पानी बढ़ने की ख़बर के बाद भी घर पर रहे, मवेशी और सामान की चिंता में। सिर्फ़ 26% तक सरकारी चेतावनी पहुँची थी।</span>
+                <span class="en">In a 2025 survey of 1,081 families in 38 Kosi villages, 671 stayed home even after hearing the water was rising, fearing for their animals and belongings. Only 26% had received an official alert.</span>
+              </p>
+              <footer class="tiny"><a href="https://www.downtoearth.org.in/amp/story/natural-disasters/kosi-floodplains-survey-reveals-glaring-issues-in-bihars-flood-management-62-respondents-neglected-by-relief-measures" target="_blank" rel="noopener">Down To Earth</a></footer>
+            </blockquote>
+            <p class="imd pair small">
+              <span class="hi">रंग वही हैं जो मौसम विभाग (IMD) की चेतावनियों में होते हैं: पीला यानी जानकारी रखें, नारंगी यानी तैयार रहें, लाल यानी कार्रवाई करें, हरा यानी कोई चेतावनी नहीं।</span>
+              <span class="en">The colours are IMD's own warning code: yellow, be aware; orange, be prepared; red, take action; green, no advisory.</span>
+            </p>
+            <div class="level-pick" role="tablist" aria-label="चेतावनी का स्तर / Warning level" id="level-pick"></div>
+          </aside>
+          <div class="deck" id="level-deck"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= THE NIGHT ================= -->
+    <section class="band tint-kesar" id="raat">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">29–30 सितंबर की रात, दोबारा</span><span class="en">The night of 29–30 September, replayed</span></h2>
+          <p class="lead pair">
+            <span class="hi">उस रात हैजलपुर में बाँध टूटा। अगर बाँध प्रहरी होता तो वह रात कैसे चलती, 70 सेकंड में देखिए: रिपोर्ट, पेज, चुप्पी, अगला अफ़सर, जवाब, गाँव की तैयारी, और निकल चलो।</span>
+            <span class="en">The embankment broke at Haijalpur that night. See in 70 seconds how the night would have run with Baandh Prahari: report, page, silence, the climb, an answer, the village getting ready, and the move.</span>
+          </p>
+        </div>
+        <div class="poster card" id="poster">
+          <div class="poster-art" id="poster-art"></div>
+          <button class="poster-play btn" type="button" id="play-poster" data-replay="0">
+            <svg class="ic" viewBox="0 0 40 40" aria-hidden="true"><path d="M13 8.5l19 11.5-19 11.5z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span class="bi"><span class="hi">रात दोबारा चलाएँ</span><span class="en">Replay the night</span></span>
+          </button>
+        </div>
+        <ol class="chapters" id="chapters" aria-label="रात के पड़ाव / Chapters of the night"></ol>
+        <p class="small dim pair">
+          <span class="hi">पुनर्निर्मित: रिपोर्टें अभिनय हैं। नदी, गाँव और तारीख़ असली हैं। घड़ी तेज़ चलती है।</span>
+          <span class="en">A re-enactment: the reports are acted; the river, villages and date are real. The clock runs fast.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= TWO NIGHTS ================= -->
+    <section class="band" id="do-raatein">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">पानी वही, सुबह अलग</span><span class="en">The same water, a different morning</span></h2>
+          <p class="lead pair">
+            <span class="hi">बाँध प्रहरी बाँध को टूटने से नहीं रोक सकता। वह गाँव को वह घंटा देता है जिसमें अनाज मचान पर, मवेशी ऊँचाई पर और कागज़ात थैली में पहुँच जाएँ।</span>
+            <span class="en">Baandh Prahari can't stop a breach. It gives the village the hour it needs to get the grain onto the machaan, the cattle onto high ground and the papers into a bag.</span>
+          </p>
+        </div>
+        <div class="reveal-grid">
+          <figure class="reveal-card card" style="--shade: var(--neel)">
+            <div class="reveal-art" id="reveal-before"></div>
+            <figcaption class="pair"><span class="hi"><strong>बिना ख़बर के</strong>: पानी घर में, अनाज भीगा, मवेशी फँसे।</span><span class="en"><strong>Without warning</strong>: water in the house, the grain soaked, the cattle stuck.</span></figcaption>
+          </figure>
+          <figure class="reveal-card card" style="--shade: var(--dhaan-deep)">
+            <div class="reveal-art" id="reveal-after">
+              <div class="chik" id="chik" aria-hidden="true"></div>
+            </div>
+            <figcaption class="pair"><span class="hi"><strong>एक घंटा पहले ख़बर के साथ</strong>: अनाज मचान पर, मवेशी टीले पर, परिवार शिविर में।</span><span class="en"><strong>With an hour's warning</strong>: grain on the machaan, cattle on the mound, the family at the camp.</span></figcaption>
+            <button class="btn small chik-btn" type="button" id="chik-btn" aria-controls="reveal-after" aria-expanded="false">
+              <span class="bi"><span class="hi">चिक उठाएँ</span><span class="en">Raise the blind</span></span>
+            </button>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= WHO GETS WHAT ================= -->
+    <section class="band tint-dhaan" id="kise-kya">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">एक घटना, हर किसी को अपने काम का संदेश</span><span class="en">One incident, and each person gets the message they can act on</span></h2>
+        </div>
+        <div class="tabs card" id="who">
+          <div class="tab-bar" role="tablist" aria-label="किसे क्या मिलता है / Who gets what">
+            <span class="tab-pill" aria-hidden="true"></span>
+          </div>
+          <div class="tab-panel" id="who-panel" role="tabpanel"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CONTROL ROOM ================= -->
+    <section class="band" id="control">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">कंट्रोल रूम: हेल्पलाइन की कॉल भी उसी घड़ी पर</span><span class="en">Control room: helpline calls go on the same clock</span></h2>
+          <p class="lead pair">
+            <span class="hi">जिनके पास WhatsApp नहीं, वे 1800 345 6145 पर फ़ोन करते हैं। कंट्रोल रूम कॉल यहाँ दर्ज करता है, और वही नियम, वही घड़ी, वही अगला अफ़सर।</span>
+            <span class="en">People without WhatsApp call 1800 345 6145. The control room logs the call here, and it runs on the same rules, the same clock and the same next officer.</span>
+          </p>
+        </div>
+        <div class="control-grid">
+          <div class="register card" id="register">
+            <div class="register-head">
+              <h3 class="display h3 bi"><span class="hi">खुली घटनाएँ</span><span class="en">Open incidents</span></h3>
+              <span class="stamp neel" id="register-sample"><span class="hi">नमूना</span><span class="en solo">Sample</span></span>
+            </div>
+            <ol class="register-rows" id="register-rows"></ol>
+            <button class="ready-tile" type="button" id="ready-tile" aria-haspopup="dialog">
+              <span class="ready-dots" id="ready-dots" aria-hidden="true"></span>
+              <span class="ready-text">
+                <span class="num ready-count" id="ready-count">18/25</span>
+                <span class="bi en-quiet"><span class="hi">हैजलपुर, वार्ड 7: घर तैयार</span><span class="en">Haijalpur, ward 7: homes ready</span></span>
+              </span>
+            </button>
+          </div>
+
+          <form class="phonein card" id="phonein" style="--shade: var(--kesar)">
+            <h3 class="display h3 bi"><span class="hi">कॉल दर्ज करें</span><span class="en">Log a helpline call</span></h3>
+            <fieldset class="signs-field">
+              <legend class="pair small"><span class="hi">कौन-सा ख़तरा दिखा?</span><span class="en">What did the caller see?</span></legend>
+              <div class="sign-grid" id="sign-grid"></div>
+            </fieldset>
+            <div class="row2">
+              <label class="field">
+                <span class="pair small"><span class="hi">किलोमीटर</span><span class="en">Kilometre</span></span>
+                <select id="pi-km" name="km"></select>
+              </label>
+              <label class="field">
+                <span class="pair small"><span class="hi">गाँव</span><span class="en">Village</span></span>
+                <select id="pi-village" name="village"></select>
+              </label>
+            </div>
+            <label class="field">
+              <span class="pair small"><span class="hi">कॉल करने वाले (वैकल्पिक)</span><span class="en">Caller (optional)</span></span>
+              <input id="pi-caller" name="caller" type="text" placeholder="नाम / Name" />
+            </label>
+            <div class="pi-result" id="pi-result" aria-live="polite"></div>
+            <button class="btn" type="submit">
+              <svg class="ic" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="35" r="19" fill="none" stroke="currentColor" stroke-width="5"/><path d="M32 35V24M32 35l8 5" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+              <span class="bi"><span class="hi">घड़ी शुरू करें</span><span class="en">Start the clock</span></span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= GOVERNMENT ================= -->
+    <section class="band tint-haldi" id="sarkar">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">सरकार जो छापती है, वही पढ़ता है। ज़िला जो इस्तेमाल करता है, वही लौटाता है।</span><span class="en">It reads what the government already publishes, and hands back what the district already uses.</span></h2>
+        </div>
+        <div class="flow card" id="gov-flow"></div>
+        <div class="gov-cards">
+          <article class="gov-card card" id="gov-sachet"></article>
+          <article class="gov-card card" id="gov-cap" style="--shade: var(--kesar)"></article>
+          <article class="gov-card card" id="gov-record" style="--shade: var(--dhaan-deep)"></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= AWS ================= -->
+    <section class="band" id="aws">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi"><span class="hi">AWS पर, मुंबई रीजन में</span><span class="en">On AWS, in the Mumbai region</span></h2>
+          <p class="lead pair">
+            <span class="hi">प्राथमिकता सादे नियम तय करते हैं, AI सिर्फ़ मसौदा लिखता है। हर इंतज़ार Step Functions की घड़ी है, जो जवाब न आने पर अपने आप अगले व्यक्ति तक जाती है।</span>
+            <span class="en">Plain rules set the priority; the AI only drafts. Every wait is a Step Functions clock that moves to the next person on its own when no answer comes.</span>
+          </p>
+        </div>
+        <div class="aws-grid">
+          <div class="dock-card card" id="dock-card">
+            <div class="dock" id="dock" role="listbox" aria-label="AWS सेवाएँ / AWS services"></div>
+            <div class="dock-detail" id="dock-detail" aria-live="polite"></div>
+          </div>
+          <div class="layers card" id="layers">
+            <div class="layers-stage" id="layers-stage"></div>
+            <button class="btn small paper" type="button" id="layers-btn" aria-pressed="false">
+              <span class="bi"><span class="hi">परतें खोलें</span><span class="en">Pull the layers apart</span></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= HONEST LIMITS ================= -->
+    <section class="band tint-gandak" id="imandari">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="display h2 bi" style="--shade: var(--gandak)"><span class="hi">ईमानदारी से</span><span class="en">Honest limits</span></h2>
+        </div>
+        <ul class="limits">
+          <li class="card pair"><span class="hi">यह छात्र परियोजना है। असली लोगों को सिर्फ़ "नदी का हाल" मिलता है; चेतावनियाँ सिर्फ़ डेमो रोस्टर के फ़ोन पर जाती हैं।</span><span class="en">A student project. Real people only get "Nadi ka haal"; warnings go only to the demo roster's phones.</span></li>
+          <li class="card pair"><span class="hi">CAP ड्राफ़्ट "Exercise" के रूप में बनते हैं। SACHET या किसी सरकारी सिस्टम को कुछ नहीं भेजा जाता।</span><span class="en">CAP drafts are marked Exercise. Nothing is sent to SACHET or any government system.</span></li>
+          <li class="card pair"><span class="hi">किलोमीटर के निशान हमने हाथ से बनी रेखा पर गिने हैं, ये विभाग की चेनेज नहीं हैं।</span><span class="en">Kilometre marks are ours, computed along a hand-drawn line, not the department's chainage.</span></li>
+          <li class="card pair"><span class="hi">"नमूना" लिखे आँकड़े डेमो के लिए हैं। सरकारी रीडिंग पर हमेशा स्रोत और समय लिखा है।</span><span class="en">Numbers marked "sample" are for the demo. Official readings always show their source and time.</span></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap foot-grid">
+      <div class="foot-mark">
+        <canvas id="particle-mark" width="240" height="240" aria-hidden="true"></canvas>
+        <p class="brand-name">बाँध प्रहरी</p>
+        <p class="small pair"><span class="hi">गंडक के बाँध का पहरेदार, WhatsApp पर।</span><span class="en">A watchman for the Gandak embankment, on WhatsApp.</span></p>
+      </div>
+      <div class="foot-help">
+        <p class="display h3 bi" style="--shade: var(--kesar)"><span class="hi">ख़तरा हो तो अभी फ़ोन करें</span><span class="en">In an emergency, call now</span></p>
+        <p class="helplines">
+          <a href="tel:1070"><span class="num">1070</span> <span class="small solo"><span class="hi">राज्य आपदा नियंत्रण</span><span class="en">State disaster control</span></span></a>
+          <a href="tel:18003456145"><span class="num">1800 345 6145</span> <span class="small solo"><span class="hi">जल संसाधन विभाग</span><span class="en">Water Resources Department</span></span></a>
+        </p>
+      </div>
+      <div class="foot-credits small">
+        <p class="pair"><span class="hi">डेटा: CWC और IMD की चेतावनियाँ SACHET (NDMA) से; गेज FMISC (जल संसाधन विभाग, बिहार) से; मॉडल GloFAS, Open-Meteo से।</span><span class="en">Data: CWC and IMD alerts from SACHET (NDMA); gauges from FMISC (WRD Bihar); the model from GloFAS via Open-Meteo.</span></p>
+        <p class="pair"><span class="hi">Environmental Hacks 2026 (WeMakeDevs × AWS) के लिए बनी छात्र परियोजना। सरकारी चेतावनी सेवा नहीं।</span><span class="en">A student project for Environmental Hacks 2026 (WeMakeDevs × AWS). Not an official warning service.</span></p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
