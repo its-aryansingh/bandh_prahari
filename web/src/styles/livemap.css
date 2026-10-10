@@ -321,3 +321,8 @@ html[data-lang="both"] .lm .chip[aria-pressed="true"] .il > .en::before { color:
   .lm.full .lm-foot { max-height: 22dvh; overflow-y: auto; padding-block: 8px; gap: 8px; }
   .lm.full .lm-whatif-row, .lm.full .lm-foot .tiny { display: none; }
 }
+
+/* two windows, one demo */
+.lm-pair { min-height: 36px; font-size: 14px; white-space: nowrap; }
+.lm-linked { --tilt: -3deg; font-size: 13px; white-space: nowrap; }
+@media (max-width: 640px) { .lm-pair { display: none; } }

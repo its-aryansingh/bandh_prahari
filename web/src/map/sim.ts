@@ -59,6 +59,10 @@ export class Relief {
   myTeam: string | null = null;
   /** The request this browser raised from the family view. */
   mine: string | null = null;
+  /** Teams a person is playing in another window (two-window demo): the demo never acts for them either. */
+  humanTeams = new Set<string>();
+  /** Demo minutes before a family's own request is passed to the nearest team. Longer when a relief window is open. */
+  autoPageMin = 1.5;
   water: Water = { deep: () => false, shallow: () => false };
   private seq = 518;
   private pending = new Map<string, number>();
@@ -222,9 +226,10 @@ export class Relief {
   }
 
   /** "सुरक्षित": the family is safe. */
-  rescue(id: string): boolean {
+  rescue(id: string, fromOtherWindow = false): boolean {
     const r = this.requests.find((x) => x.id === id);
-    if (!r || r.status !== "arrived") return false;
+    // another window's team may reach the family a frame before this window's copy does
+    if (!r || r.status === "rescued" || (r.status !== "arrived" && !fromOtherWindow)) return false;
     r.status = "rescued";
     r.rescued = new Date(this.now).toISOString();
     const t = this.team(r.team);
@@ -238,11 +243,15 @@ export class Relief {
   }
 
   /** "मदद चाहिए" from the family view, at a cell. */
-  raise(cell: number, people: number, needs: HelpNeed[], elderly = 0, children = 0): HelpRequest {
+  raise(cell: number, people: number, needs: HelpNeed[], elderly = 0, children = 0, from?: { id: string }): HelpRequest {
     const [lat, lon] = cellLatLon(this.m, cell);
     const village = this.villageNear(cell);
+    if (from) {
+      const n = Number(from.id.replace(/\D/g, ""));
+      if (Number.isFinite(n)) this.seq = Math.max(this.seq, n + 1);
+    }
     const r: HelpRequest = {
-      id: `HELP-0${this.seq++}`,
+      id: from?.id ?? `HELP-0${this.seq++}`,
       village,
       lat: +lat.toFixed(4),
       lon: +lon.toFixed(4),
@@ -262,7 +271,7 @@ export class Relief {
       sample: true,
     };
     this.requests.unshift(r);
-    this.mine = r.id;
+    if (!from) this.mine = r.id;
     this.say(`${this.villageHi(village)} से नई मदद की माँग: ${people} लोग`, `New call for help from ${village}: ${people} people`);
     return r;
   }
@@ -349,7 +358,7 @@ export class Relief {
     // the other teams act on their own, a couple of demo minutes after they're asked
     for (const r of this.requests) {
       const actor = this.team(r.team);
-      const isMine = (t?: TeamState) => !!t && t.team.id === this.myTeam;
+      const isMine = (t?: TeamState) => !!t && (t.team.id === this.myTeam || this.humanTeams.has(t.team.id));
       const wait = (key: string, mins: number) => {
         const due = this.pending.get(key);
         if (due == null) {
@@ -376,7 +385,7 @@ export class Relief {
           this.say(`${actor.team.name_hi} व्यस्त: ${next.t.team.name_hi} से माँगा`, `${actor.team.name_en} is busy: ${next.t.team.name_en} is asked`);
           changed = true;
         }
-      } else if (r.status === "open" && r.id === this.mine && wait(`auto:${r.id}`, 1.5)) {
+      } else if (r.status === "open" && r.id === this.mine && wait(`auto:${r.id}`, this.autoPageMin)) {
         const next = this.nearestFree(this.cellOf(r), this.myTeam ? new Set([this.myTeam]) : new Set());
         if (next) {
           r.team = next.t.team.id;

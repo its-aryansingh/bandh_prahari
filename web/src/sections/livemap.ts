@@ -28,6 +28,12 @@ type Sel =
   | { k: "stone"; km: number };
 
 const STRETCH = "haijalpur";
+type LinkMsg =
+  | { t: "hello" }
+  | { t: "here"; now: number }
+  | { t: "raise"; now: number; id: string; cell: number; people: number; needs: HelpNeed[]; elderly: number; children: number }
+  | { t: "claim"; now: number; id: string; team: string }
+  | { t: "rescue"; now: number; id: string };
 const LEVEL_MIN = 52.5;
 const LEVEL_MAX = 58.5;
 const BREACH_KM = 14;
@@ -69,6 +75,8 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   const [grid, help, teams] = await Promise.all([api.map(STRETCH), api.help(), api.teams()]);
   const m = buildModel(grid, stretch.villages);
   const relief = new Relief(m, usingMocks, help, teams);
+  const link = usingMocks && "BroadcastChannel" in window ? new BroadcastChannel("bp-live-demo") : null;
+  const share = (msg: LinkMsg) => link?.postMessage(msg);
 
   const rewa: Reading | undefined = gauges.readings.find((r) => r.site === "Rewaghat");
   const dl = stretch.gauges.find((g) => g.site === "Rewaghat")?.dl_m ?? rewa?.dl_m ?? 54.41;
@@ -111,6 +119,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
           .join("")}
       </div>
       <p class="lm-clock" aria-live="off"><span class="lm-clock-t num"></span><small>${usingMocks ? bil("डेमो घड़ी: 1 सेकंड = 1 मिनट", "Demo clock: 1 second = 1 minute") : bil("अभी", "Now")}</small></p>
+      ${usingMocks ? `<button type="button" class="chip lm-pair" title="${esc(L("इसी पन्ने को दूसरी खिड़की में राहत दल बनकर खोलें; दोनों साथ चलेंगे", "Open this page again as the relief team; both windows play together"))}">${bil("दूसरी खिड़की: राहत दल", "Second window: relief")}</button><span class="sticker dhaan lm-linked" hidden>${bil("दो खिड़कियाँ जुड़ीं", "Two windows linked")}</span>` : ""}
       <button type="button" class="icon-btn lm-full-btn" aria-pressed="false" aria-label="${esc(L("पूरी स्क्रीन", "Full screen"))}">${FULL_ICON}</button>
     </div>
     <div class="lm-body">
@@ -1127,11 +1136,15 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     const a = b.dataset.act;
     if (a === "ask") return askHelp();
     if (a === "claim" && b.dataset.id && relief.myTeam) {
-      if (usingMocks) relief.claim(b.dataset.id, relief.myTeam);
+      if (usingMocks) {
+        if (relief.claim(b.dataset.id, relief.myTeam)) share({ t: "claim", now: relief.now, id: b.dataset.id, team: relief.myTeam });
+      }
       else postThen(api.claimHelp(b.dataset.id, relief.myTeam, roleToken()));
     }
     if (a === "rescue" && b.dataset.id) {
-      if (usingMocks) relief.rescue(b.dataset.id);
+      if (usingMocks) {
+        if (relief.rescue(b.dataset.id)) share({ t: "rescue", now: relief.now, id: b.dataset.id });
+      }
       else postThen(api.rescued(b.dataset.id, roleToken()));
     }
     if (a === "team" && b.dataset.id) {
@@ -1172,7 +1185,10 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   function askHelp() {
     const cell = S.sel?.k === "cell" ? S.sel.i : S.home;
     S.home = cell;
-    if (usingMocks) relief.raise(cell, S.people, [...S.needs], S.elderly, S.children);
+    if (usingMocks) {
+      const r = relief.raise(cell, S.people, [...S.needs], S.elderly, S.children);
+      share({ t: "raise", now: relief.now, id: r.id, cell, people: r.people, needs: r.needs, elderly: r.elderly ?? 0, children: r.children ?? 0 });
+    }
     else {
       const [lat, lon] = cellLatLon(m, cell);
       postThen(api.createHelp({ lat, lon, people: S.people, elderly: S.elderly, children: S.children, needs: [...S.needs], channel: "web" }), (r) => (relief.mine = r.id));
@@ -1207,7 +1223,8 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     renderSide();
     need();
   }
-  if (!usingMocks) setInterval(() => visible && refresh().catch(() => undefined), 15000);
+  // a few seconds is enough for two phones to feel connected, and cheap enough for the API
+  if (!usingMocks) setInterval(() => visible && document.visibilityState === "visible" && refresh().catch(() => undefined), 4000);
 
   side.addEventListener("click", (e) => act(e.target as HTMLElement));
 
@@ -1439,6 +1456,55 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
       setRole(n.dataset.role as Role);
     });
   });
+
+  // ---------------- two windows, one demo ----------------
+  // On sample data, windows of this page on one device share their actions, so a family window and a
+  // relief window play the same night together (the two-phone moment without a server). With the real
+  // API every phone reads the same server instead.
+  if (link) {
+    let synced = false;
+    const linkedBadge = host.querySelector<HTMLElement>(".lm-linked");
+    const joined = () => {
+      relief.autoPageMin = 6; // give the person in the relief window time to answer first
+      if (linkedBadge) linkedBadge.hidden = false;
+    };
+    link.onmessage = (e: MessageEvent<LinkMsg>) => {
+      const d = e.data;
+      if (d.t === "hello") {
+        share({ t: "here", now: relief.now });
+        joined();
+        return;
+      }
+      if (d.t === "here") {
+        if (!synced) relief.now = d.now;
+        synced = true;
+        joined();
+        return;
+      }
+      relief.now = Math.max(relief.now, d.now);
+      if (d.t === "raise" && !relief.requests.some((r) => r.id === d.id)) {
+        relief.raise(d.cell, d.people, d.needs, d.elderly, d.children, { id: d.id });
+        if (S.role !== "family") flashHint(L("नई मदद की माँग आई", "A new call for help came in"));
+      }
+      if (d.t === "claim") {
+        relief.humanTeams.add(d.team);
+        relief.claim(d.id, d.team);
+      }
+      if (d.t === "rescue") relief.rescue(d.id, true);
+      renderSide();
+      renderCard();
+      need();
+    };
+    share({ t: "hello" });
+  }
+  host.querySelector(".lm-pair")?.addEventListener("click", () => {
+    const u = new URL(location.href);
+    u.searchParams.set("role", "relief");
+    u.hash = "naksha";
+    window.open(u.toString(), "bp-relief", "popup,width=480,height=860");
+  });
+  const asked = new URLSearchParams(location.search).get("role");
+  if (asked === "relief" || asked === "district") queueMicrotask(() => setRole(asked));
 
   const fullBtn = $<HTMLButtonElement>(".lm-full-btn", host);
   const setFull = (on: boolean) => {

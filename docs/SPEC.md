@@ -193,7 +193,7 @@ The public page's map: the stretch as an isometric, blocky diorama in Madhubani 
 | `AwaitFamilySafe` | Waits for "सुरक्षित" | |
 | `CloseHelpRequest` | Closes HELP#, removes the geofence, tells the family and the ward member | |
 
-The demo on the page plays the same states on mock data with a clock of one second per minute; with `VITE_API_BASE` set it reads the real API every 15 seconds.
+The demo on the page plays the same states on mock data with a clock of one second per minute; with `VITE_API_BASE` set it reads the real API every 4 seconds while the map is on screen, so two phones (a family and a relief team) see each other's actions within seconds. On sample data, two windows of the page on one device share their actions through a BroadcastChannel.
 
 ## Seed data
 
