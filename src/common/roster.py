@@ -14,6 +14,7 @@ from common import db
 
 # level -> roles paged at that level (level 4 pages two)
 LEVELS: dict[int, list[str]] = {
+    0: ["patrol"],
     1: ["junior_engineer"],
     2: ["assistant_engineer"],
     3: ["executive_engineer"],
@@ -43,6 +44,7 @@ DEMO = {
     "central_flood_control_room": {"name": "Central Flood Control Room (demo)"},
     "mukhiya": {"name": "Mukhiya, Haijalpur (demo)"},
     "ward_member": {"name": "Ward 7 member, Haijalpur (demo)"},
+    "patrol": {"name": "Patrol worker (demo)"},
 }
 
 

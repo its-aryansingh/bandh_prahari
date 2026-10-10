@@ -191,4 +191,17 @@ def handler(event: dict, _ctx=None) -> dict:
     if r == "GET /incidents/{id}/execution":
         x = execution(http.path(event, "id"))
         return http.respond(200, x) if x else http.respond(404, {"error": "not_found"})
+    if r == "GET /briefing/{id}":
+        from api import briefing
+        html_doc = briefing.render(http.path(event, "id"))
+        if not html_doc:
+            return http.respond(404, {"error": "not_found"})
+        return {
+            "statusCode": 200,
+            "headers": {
+                "content-type": "text/html; charset=utf-8",
+                "cache-control": "no-store",
+            },
+            "body": html_doc,
+        }
     return http.respond(404, {"error": "no_route"})

@@ -207,3 +207,35 @@ def test_replay_seeded_run_timeline_and_execution(aws):
     assert any(s["name"] == "OpenIncident" for s in ex["states"])
     assert any(s["name"] == "PageJuniorEngineer" and s["status"] == "timed_out" for s in ex["states"])
 
+
+def test_map_grid_route(aws):
+    from api import river
+
+    res = river.handler(ev("GET /map/{stretch}", path={"stretch": "haijalpur"}))
+    assert res["statusCode"] == 200
+    grid = json.loads(res["body"])
+    assert grid["cols"] == 56 and grid["rows"] == 46
+    assert "elev_dm" in grid and "cls" in grid
+    assert grid["s2"] is not None
+    assert grid["bbox"] == [85.0, 25.905, 85.11, 25.995]
+
+    res_404 = river.handler(ev("GET /map/{stretch}", path={"stretch": "nonexistent"}))
+    assert res_404["statusCode"] == 404
+
+
+def test_briefing_route_returns_html(aws, sfn):
+    inc = start.start(14, "boil_soil", channel="screen", source="helpline", demo=True)
+    db.event(inc["id"], "handoff", "ज़िले को सौंपा: IRS फ़ॉर्म 001", "Handed to district: IRS Form 001", actor="system")
+
+    res = public.handler(ev("GET /briefing/{id}", path={"id": inc["id"]}))
+    assert res["statusCode"] == 200
+    assert "text/html" in res["headers"]["content-type"]
+    body = res["body"]
+    assert "IRS" in body
+    assert "फ़ॉर्म 001" in body
+    assert inc["id"] in body
+    assert "1070" in body and "1800 345 6145" in body
+
+    res_404 = public.handler(ev("GET /briefing/{id}", path={"id": "INC-NOPE"}))
+    assert res_404["statusCode"] == 404
+

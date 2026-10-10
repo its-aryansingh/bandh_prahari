@@ -14,6 +14,7 @@ from pathlib import Path
 
 import boto3
 from boto3.dynamodb.conditions import Key
+from botocore.exceptions import ClientError
 
 from common import clock, config, db, http
 from gov import cap
@@ -97,6 +98,19 @@ def cap_one(identifier: str) -> dict:
     return _xml(200, obj["Body"].read().decode("utf-8"))
 
 
+def map_grid(stretch_id: str) -> dict | None:
+    if config.BUCKET_NAME:
+        try:
+            obj = boto3.client("s3").get_object(Bucket=config.BUCKET_NAME, Key=f"map/{stretch_id}/latest.json")
+            return json.loads(obj["Body"].read().decode("utf-8"))
+        except ClientError:
+            pass
+    p = Path(__file__).resolve().parent.parent / "gov" / f"map.{stretch_id}.json"
+    if p.exists():
+        return json.loads(p.read_text(encoding="utf-8"))
+    return None
+
+
 def handler(event: dict, _ctx=None) -> dict:
     r = http.route(event)
     if r == "GET /stretch":
@@ -109,4 +123,8 @@ def handler(event: dict, _ctx=None) -> dict:
     if r == "GET /cap/{file}":
         f = http.path(event, "file")
         return cap_one(f[:-4] if f.endswith(".xml") else f)
+    if r == "GET /map/{stretch}":
+        st = http.path(event, "stretch")
+        g = map_grid(st)
+        return http.respond(200, g) if g else http.respond(404, {"error": "not_found"})
     return http.respond(404, {"error": "no_route"})

@@ -489,6 +489,9 @@ Resources:
         Execution:
           Type: HttpApi
           Properties: { ApiId: !Ref HttpApi, Method: GET, Path: "/incidents/{id}/execution" }
+        Briefing:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: "/briefing/{id}" }
   PublicApiLogs:
     Type: AWS::Logs::LogGroup
     Properties: { LogGroupName: /aws/lambda/bp-api-public, RetentionInDays: 180 }
@@ -740,6 +743,9 @@ Resources:
         CapOne:
           Type: HttpApi
           Properties: { ApiId: !Ref HttpApi, Method: GET, Path: "/cap/{file}" }
+        MapGrid:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: "/map/{stretch}" }
   RiverApiLogs:
     Type: AWS::Logs::LogGroup
     Properties: { LogGroupName: /aws/lambda/bp-api-river, RetentionInDays: 180 }
@@ -762,7 +768,9 @@ Resources:
                 Resource: !GetAtt Table.Arn
               - Effect: Allow
                 Action: s3:GetObject
-                Resource: !Sub "${Bucket.Arn}/cap/*"
+                Resource:
+                  - !Sub "${Bucket.Arn}/cap/*"
+                  - !Sub "${Bucket.Arn}/map/*"
 
   # ------------------------------------------------------------------ WhatsApp in (End User Messaging Social -> SNS)
   # Linking the number and pointing its event destination at this topic is done in the console

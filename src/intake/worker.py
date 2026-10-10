@@ -137,6 +137,20 @@ def tap(channel: str, to: dict, reply_id: str, roles: list[str]) -> None:
             db.table().put_item(Item={"PK": f"SUB#{village}", "SK": ids.digits(to["phone"]), "consent": clock.iso(), "note": CONSENT_EN})
             send_text(channel, to, footer({"hi": f"{village} की चेतावनियाँ आपको मिलेंगी। {CONSENT_HI}", "en": f"You will get {village}'s warnings. {CONSENT_EN}"}))
         return
+    if parts[0] == "rc" and len(parts) == 3:
+        km_str, action = parts[1], parts[2]
+        try:
+            km_num = int(km_str)
+            from rollcall import ask as rollcall_ask
+            rollcall_ask.record_reply(km_num, action, by=ids.phone_hash(to["phone"]))
+            if action == "ok":
+                send_text(channel, to, footer({"hi": f"किमी {km_num}: धन्यवाद, सब ठीक दर्ज हुआ।", "en": f"Km {km_num}: thank you, all-well recorded."}))
+            else:
+                send_text(channel, to, footer({"hi": f"किमी {km_num}: समस्या दर्ज हुई। कृपया संकेत चुनें।", "en": f"Km {km_num}: problem noted. Please pick the sign."}))
+                ask_sign(channel, to, km_num)
+        except Exception as e:
+            print({"rollcall_reply_error": repr(e)})
+        return
     help_menu(channel, to)
 
 
