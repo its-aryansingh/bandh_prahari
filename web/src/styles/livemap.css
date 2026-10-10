@@ -313,6 +313,7 @@ html[data-lang="both"] .lm .chip[aria-pressed="true"] .il > .en::before { color:
   .lm-roles button { flex-direction: column; gap: 2px; padding: 4px 2px; font-size: 14px; white-space: normal; text-align: center; justify-content: center; }
   html[data-lang="both"] .lm-roles .il > .en { display: none; }
   .lm-clock-t { font-size: 20px; }
+  .lm-night { grid-column: 1 / -1; justify-content: center; }
 }
 @media (max-width: 1099px) {
   .lm.full { grid-template-rows: auto minmax(0, 1fr) auto; }
@@ -326,3 +327,37 @@ html[data-lang="both"] .lm .chip[aria-pressed="true"] .il > .en::before { color:
 .lm-pair { min-height: 36px; font-size: 14px; white-space: nowrap; }
 .lm-linked { --tilt: -3deg; font-size: 13px; white-space: nowrap; }
 @media (max-width: 640px) { .lm-pair { display: none; } }
+
+/* ---- the night on the map: a caption on a painted board, like a film's subtitles ---- */
+.lm-night { flex: none; }
+.lm-night .ic { width: 22px; height: 22px; }
+.lm-story {
+  position: absolute; z-index: 5; left: 0; right: 0; bottom: 24px; margin-inline: auto;
+  width: min(660px, calc(100% - 48px));
+  display: grid; gap: 6px; padding: 10px 14px 10px 16px;
+  background: var(--chuna); border: 2.5px solid var(--neel); border-radius: 16px;
+  box-shadow: 5px 6px 0 var(--kesar);
+  animation: stage-in 0.45s var(--spring) both;
+}
+.lm-story[hidden] { display: none; }
+.lm-story-top { display: flex; align-items: center; gap: 12px; }
+.lm-story-t { font-size: 26px; line-height: 1; color: var(--sindoor-deep); }
+.lm-story-steps { display: flex; gap: 6px; margin: 0 0 0 auto; padding: 0; list-style: none; }
+.lm-story-steps li { width: 20px; height: 7px; border-radius: 4px; background: var(--neel-3); opacity: 0.4; transition: background 0.3s, opacity 0.3s, width 0.35s var(--spring-soft); }
+.lm-story-steps li.done { background: var(--dhaan); opacity: 1; }
+.lm-story-steps li.now { background: var(--kesar); opacity: 1; width: 34px; }
+.lm .lm-story-x { width: 38px; height: 38px; min-height: 0; box-shadow: none; }
+.lm-story-line { font-size: 18px; line-height: 1.45; font-weight: 700; }
+html[data-lang="both"] .lm-story-line > .en { font-size: 0.82em; font-weight: 600; margin-top: 0.15em; }
+.lm-story-end { display: grid; gap: 8px; padding-top: 4px; border-top: 2px dashed var(--neel-3); }
+.lm-story-end[hidden] { display: none; }
+.lm-story-end .row { display: flex; gap: 10px; flex-wrap: wrap; }
+.lm-story-note { margin: 0; color: var(--neel-2); }
+.lm[data-story] .lm-br, .lm[data-story] .lm-hint, .lm[data-story] .lm-bl { display: none !important; }
+@media (max-width: 700px) {
+  .lm-story { left: 10px; right: 10px; width: auto; bottom: 10px; padding: 8px 10px; gap: 4px; }
+  .lm-story-line { font-size: 15px; line-height: 1.4; }
+  .lm-story-t { font-size: 21px; }
+  .lm-story-steps li { width: 12px; }
+  .lm-story-steps li.now { width: 22px; }
+}

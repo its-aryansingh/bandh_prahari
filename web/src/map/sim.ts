@@ -49,7 +49,9 @@ const WALK_KMH = 3;
 export class Relief {
   now: number;
   /** Demo minutes per real second on mocks; 1/60 on the real API (real time). */
-  readonly rate: number;
+  get rate(): number {
+    return this.demo ? 1 : 1 / 60;
+  }
   requests: HelpRequest[] = [];
   teams: TeamState[] = [];
   byVillage: HelpCount[] = [];
@@ -66,16 +68,76 @@ export class Relief {
   water: Water = { deep: () => false, shallow: () => false };
   private seq = 518;
   private pending = new Map<string, number>();
+  private saved: {
+    demo: boolean;
+    now: number;
+    requests: HelpRequest[];
+    teams: TeamState[];
+    byVillage: HelpCount[];
+    log: LogLine[];
+    mine: string | null;
+    pending: Map<string, number>;
+    autoPageMin: number;
+  } | null = null;
 
   constructor(
     readonly m: Model,
-    readonly demo: boolean,
+    public demo: boolean,
     help: HelpList,
     teams: Teams,
   ) {
     this.now = Date.parse(help.as_of);
-    this.rate = demo ? 1 : 1 / 60;
     this.load(help, teams, true);
+  }
+
+  // ---------------- the night on the map ----------------
+
+  /** Is the night of 29-30 September playing? */
+  get inStory(): boolean {
+    return this.saved !== null;
+  }
+
+  /** Clears the stage for the night: sample time from `at`, no requests, every team free.
+   *  Whatever was showing (sample or real) is kept aside and comes back with endStory(). */
+  beginStory(at: number): void {
+    if (!this.saved)
+      this.saved = {
+        demo: this.demo,
+        now: this.now,
+        requests: this.requests,
+        teams: this.teams.map((t) => ({ team: { ...t.team }, pos: [t.pos[0], t.pos[1]] as Pt, drive: t.drive })),
+        byVillage: this.byVillage,
+        log: this.log,
+        mine: this.mine,
+        pending: this.pending,
+        autoPageMin: this.autoPageMin,
+      };
+    const s = this.saved;
+    this.demo = true;
+    this.now = at;
+    this.requests = [];
+    this.log = [];
+    this.mine = null;
+    this.pending = new Map();
+    this.autoPageMin = 1.5;
+    this.byVillage = s.byVillage.map((v) => ({ ...v, open: 0, on_the_way: 0, safe: 0 }));
+    this.teams = s.teams.map((t) => ({ team: { ...t.team, status: "free", help_id: null }, pos: [t.pos[0], t.pos[1]] as Pt, drive: null }));
+  }
+
+  /** Puts back what was showing before the night. */
+  endStory(): void {
+    const s = this.saved;
+    if (!s) return;
+    this.saved = null;
+    this.demo = s.demo;
+    this.now = s.demo ? s.now : Date.now();
+    this.requests = s.requests;
+    this.teams = s.teams;
+    this.byVillage = s.byVillage;
+    this.log = s.log;
+    this.mine = s.mine;
+    this.pending = s.pending;
+    this.autoPageMin = s.autoPageMin;
   }
 
   /** Takes fresh data from the API (or the mocks, once). */

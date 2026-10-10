@@ -118,6 +118,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
           .map(([id, f, hi, en], i) => `<button type="button" role="tab" data-role="${id}" aria-selected="${i === 0}" aria-controls="lm-side">${face(f)}${bil(hi, en)}</button>`)
           .join("")}
       </div>
+      <button type="button" class="btn small lm-night">${icon("play")}${bil("उस रात को नक़्शे पर चलाएँ", "Play that night on the map")}</button>
       <p class="lm-clock" aria-live="off"><span class="lm-clock-t num"></span><small>${usingMocks ? bil("डेमो घड़ी: 1 सेकंड = 1 मिनट", "Demo clock: 1 second = 1 minute") : bil("अभी", "Now")}</small></p>
       ${usingMocks ? `<button type="button" class="chip lm-pair" title="${esc(L("इसी पन्ने को दूसरी खिड़की में राहत दल बनकर खोलें; दोनों साथ चलेंगे", "Open this page again as the relief team; both windows play together"))}">${bil("दूसरी खिड़की: राहत दल", "Second window: relief")}</button><span class="sticker dhaan lm-linked" hidden>${bil("दो खिड़कियाँ जुड़ीं", "Two windows linked")}</span>` : ""}
       <button type="button" class="icon-btn lm-full-btn" aria-pressed="false" aria-label="${esc(L("पूरी स्क्रीन", "Full screen"))}">${FULL_ICON}</button>
@@ -138,6 +139,19 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
         <p class="lm-hud lm-br stamp neel">${bil("नमूना: टीमें, माँगें, शिविर · अनुमानित: बाँध की रेखा, गाँवों की जगह", "Sample: teams, requests, camps · Approximate: embankment line, village spots")}</p>
         <div class="lm-card" hidden role="dialog" aria-live="polite"></div>
         <p class="lm-hint" hidden></p>
+        <div class="lm-story" hidden>
+          <div class="lm-story-top">
+            <span class="lm-story-t num"></span>
+            <ol class="lm-story-steps" aria-hidden="true">${"<li></li>".repeat(6)}</ol>
+            <button type="button" class="icon-btn lm-story-x" aria-label="${esc(L("रोकें", "Stop"))}">${icon("close")}</button>
+          </div>
+          <p class="lm-story-line pair" aria-live="polite"></p>
+          <div class="lm-story-end" hidden>
+            <p class="lm-story-sum small pair"></p>
+            <div class="row"><button type="button" class="btn small lm-story-again">${icon("restart")}${bil("फिर से", "Again")}</button><button type="button" class="btn small paper lm-story-close">${bil("नक़्शे पर लौटें", "Back to the map")}</button></div>
+          </div>
+          <p class="lm-story-note tiny">${bil("नाटकीय रूपांतर, नमूना डेटा पर। पानी का फैलाव मोटा अनुमान है।", "A re-enactment on sample data. The spread of water is a rough sketch.")}</p>
+        </div>
       </div>
       <aside class="lm-side" id="lm-side" role="tabpanel" aria-live="polite"></aside>
     </div>
@@ -245,10 +259,12 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
         paint(false);
       }
     }
+    if (story.on || story.night > 0) storyFrame(dt);
     if (relief.tick(dt)) {
       renderSide();
       if (S.sel) renderCard();
     }
+    storyWatch();
     if (now - lastTick > 500) {
       lastTick = now;
       tickTexts();
@@ -256,7 +272,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     const ctx = iso.blit();
     drawOverlay(ctx, now);
     const pulsing = S.layers.help && S.role !== "family" && relief.requests.some((r) => r.status === "open" || r.status === "paged");
-    if (visible && (anim || relief.busy || pulsing || dragging)) raf = requestAnimationFrame(frame);
+    if (visible && (anim || relief.busy || pulsing || dragging || story.on || story.night > 0)) raf = requestAnimationFrame(frame);
   }
 
   // ---------------- overlay ----------------
@@ -388,6 +404,22 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
       if (fam && (S.role === "family" || S.sel?.k === "cell")) path(ctx, fam.cells.map(cellPt), C.dhaanDeep, now, true);
       const sr = selectedTeamRoute();
       if (sr) path(ctx, sr.cells.map(cellPt), C.neel, now);
+    }
+
+    // the night: the ground goes dark, the villages keep their lamps; labels stay readable on top
+    if (story.night > 0.01) nightShade(ctx, story.night);
+    if (story.night > 0.01 || story.sun > 0) sky(ctx, now);
+    if (story.ringKm) {
+      const [x, y] = iso.onSurface(m.pointAtKm(story.ringKm), 0);
+      const k = reducedMotion() ? 0.5 : (now / 900) % 1;
+      ctx.strokeStyle = C.haldi;
+      ctx.globalAlpha = 1 - k;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(x, y, u * (1.2 + k * 2.4), u * (0.7 + k * 1.3), 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      chipText(ctx, x + u * 3.2, y - u * 0.4, `किमी ${story.ringKm}: रिसाव`, `km ${story.ringKm}: seepage`, { bg: C.haldiTint, shade: C.kesarDeep, size: 13, must: true });
     }
 
     // the breach
@@ -890,11 +922,11 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   });
 
   let hintTimer = 0;
-  const flashHint = (text: string) => {
+  const flashHint = (text: string, ms = 1600) => {
     hint.textContent = text;
     hint.hidden = false;
     clearTimeout(hintTimer);
-    hintTimer = window.setTimeout(() => (hint.hidden = true), 1600);
+    hintTimer = window.setTimeout(() => (hint.hidden = true), ms);
   };
 
   const hitAt = (x: number, y: number) => {
@@ -1218,6 +1250,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     });
   }
   async function refresh() {
+    if (relief.inStory) return;
     const [h, t] = await Promise.all([api.help(roleToken() || undefined), api.teams()]);
     relief.load(h, t);
     renderSide();
@@ -1407,6 +1440,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   // ---------------- the clock texts, twice a second ----------------
   function tickTexts() {
     clockEl.textContent = L(clockHi(new Date(relief.now).toISOString()), clockEn(new Date(relief.now).toISOString()));
+    if (story.on) storyT.textContent = clockEl.textContent;
     $$<HTMLElement>("[data-tick]", host).forEach((el) => {
       const [kind, id] = el.dataset.tick!.split(":");
       if (kind === "status") {
@@ -1469,6 +1503,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
       if (linkedBadge) linkedBadge.hidden = false;
     };
     link.onmessage = (e: MessageEvent<LinkMsg>) => {
+      if (relief.inStory) return;
       const d = e.data;
       if (d.t === "hello") {
         share({ t: "here", now: relief.now });
@@ -1506,6 +1541,367 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   const asked = new URLSearchParams(location.search).get("role");
   if (asked === "relief" || asked === "district") queueMicrotask(() => setRole(asked));
 
+  // ---------------- the night of 29-30 September, played on the map ----------------
+  // The replay tells the night on phones; this plays it on the ground. The river climbs past danger,
+  // the patrol worker reports at our km 14 (the replay's 11:40 PM), the engineer answers, the bank
+  // slumps and gives way, the water finds the low fields, a family asks for a boat and the nearest
+  // team goes on the same answer clock, until dawn. Sample data and a rough flood sketch, labelled.
+  const IST = (hhmm: string, day = 29) => Date.parse(`2026-09-${day}T${hhmm}:00+05:30`);
+  const breachBtn = $<HTMLButtonElement>(".lm-breach", host);
+  const storyEl = $(".lm-story", host);
+  const storyLine = $(".lm-story-line", host);
+  const storyT = $(".lm-story-t", host);
+  const storyEnd = $(".lm-story-end", host);
+  const storySteps = $$<HTMLElement>(".lm-story-steps li", host);
+  const story = {
+    on: false,
+    night: 0, // 0 day to 1 night, eased towards nightTo every frame
+    nightTo: 0,
+    sun: 0, // dawn: the sun rises as the night goes
+    follow: null as (() => Pt | null) | null,
+    zoomTo: 0,
+    zooming: false,
+    timers: [] as number[],
+    req: "",
+    seen: "",
+    climbs: 0,
+    team: "",
+    ringKm: 0,
+  };
+  const storySay = (step: number, hi: string, en: string) => {
+    storyLine.innerHTML = bi(hi, en);
+    storySteps.forEach((li, k) => {
+      li.classList.toggle("done", k < step - 1);
+      li.classList.toggle("now", k === step - 1);
+    });
+    if (!reducedMotion()) storyLine.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 380, easing: "ease-out" });
+  };
+  const shake = () => {
+    if (reducedMotion()) return;
+    canvas.animate(
+      [{ transform: "none" }, { transform: "translate(-7px, 3px)" }, { transform: "translate(6px, -3px)" }, { transform: "translate(-4px, 2px)" }, { transform: "translate(2px, -1px)" }, { transform: "none" }],
+      { duration: 520, easing: "ease-out" },
+    );
+  };
+
+  function storyStart() {
+    storyStop(false);
+    delete document.documentElement.dataset.mapNight;
+    story.on = true;
+    relief.beginStory(IST("23:00"));
+    if (S.role !== "family") setRole("family");
+    S.sel = null;
+    S.breach = false;
+    breachBtn.setAttribute("aria-pressed", "false");
+    if (haijalpur) S.home = haijalpur.cell;
+    famCache.key = "";
+    setLevel(dl - 0.3, false);
+    host.dataset.story = "1";
+    storyEl.hidden = false;
+    storyEnd.hidden = true;
+    story.nightTo = 1;
+    story.sun = 0;
+    if (reducedMotion()) story.night = 1;
+    story.zoomTo = iso.size[0] < 700 ? 2.3 : 1.9;
+    const km = m.pointAtKm(BREACH_KM);
+    story.follow = () => km;
+    story.req = "";
+    story.ringKm = 0;
+    renderCard();
+    renderSide();
+    tickTexts();
+    storySay(1, "29 सितंबर, रात 11 बजे। रेवाघाट पर गंडक ख़तरे के निशान के पास है।", "29 September, 11 PM. At Rewaghat the Gandak is close to danger level.");
+    const at = (ms: number, f: () => void) => story.timers.push(window.setTimeout(f, ms));
+    at(2000, () => {
+      relief.now = IST("23:25");
+      setLevel(dl + 0.9, true);
+      storySay(1, "पानी ख़तरे के निशान से ऊपर चढ़ता है। बाँध अभी पानी रोके हुए है।", "The water climbs past danger level. The embankment still holds.");
+    });
+    at(6000, () => {
+      relief.now = IST("23:40");
+      story.ringKm = BREACH_KM;
+      storySay(2, `रात 11:40: पहरेदार किमी ${BREACH_KM} पर रिसाव की ख़बर देता है। जवाब घड़ी शुरू होती है (वही रात जो ऊपर रीप्ले में है)।`, `11:40 PM: the patrol worker reports seepage at km ${BREACH_KM}. The answer clock starts (the night the replay above tells).`);
+    });
+    at(10500, () => {
+      relief.now = IST("23:53");
+      storySay(2, "11:53: इंजीनियर जवाब देता है। गाँव को 'तैयार रहें': अनाज ऊपर, मवेशी ऊँची जगह, काग़ज़ थैले में।", "11:53 PM: the engineer answers. The village gets 'Get ready': grain up high, cattle to high ground, papers in a bag.");
+    });
+    at(15000, () => {
+      relief.now = IST("02:10", 30);
+      storySay(3, "रात 2:10: बाँध धँसने लगता है। गाँव को 'निकल चलो' जाता है।", "2:10 AM: the bank starts to slump. 'Move now' goes to the village.");
+    });
+    at(18800, () => {
+      relief.now = IST("02:30", 30);
+      story.ringKm = 0;
+      S.breach = true;
+      breachBtn.setAttribute("aria-pressed", "true");
+      famCache.key = "";
+      setLevel(Math.max(S.level, 56.4), true);
+      shake();
+      storySay(3, `रात 2:30: किमी ${BREACH_KM} पर बाँध टूटता है (यहाँ मानी गई जगह)। पानी सारण की तरफ़ के नीचे खेतों में भरता है।`, `2:30 AM: the embankment gives way at km ${BREACH_KM} (an assumed spot). Water fills the low fields on the Saran side.`);
+    });
+    at(24500, () => {
+      if (!haijalpur) return finish(null);
+      relief.now = IST("02:41", 30);
+      const cell = haijalpur.cell;
+      S.home = cell;
+      const r = relief.raise(cell, 6, ["boat"], 1, 2);
+      story.req = r.id;
+      story.seen = r.status;
+      story.climbs = 0;
+      famCache.key = "";
+      story.follow = () => cellPt(cell);
+      storySay(4, "2:41: हैजलपुर में पानी से घिरा एक परिवार नाव माँगता है: 6 लोग, एक बुज़ुर्ग, दो बच्चे।", "2:41 AM: a family in Haijalpur, cut off by water, asks for a boat: 6 people, one of them elderly, two children.");
+      renderSide();
+      need();
+    });
+    // if no team can reach them (or the tab slept), the story still ends
+    at(95000, () => {
+      if (story.on && storyEnd.hidden) finish(null);
+    });
+  }
+
+  // follows the family's request through the same clock the relief view runs
+  function storyWatch() {
+    if (!story.on || !story.req) return;
+    const r = relief.requests.find((x) => x.id === story.req);
+    if (!r) return;
+    const climbs = r.climbs ?? 0;
+    if (r.status === story.seen && climbs === story.climbs) return;
+    story.seen = r.status;
+    const t = relief.team(r.team);
+    const tHi = t?.team.name_hi ?? "टीम";
+    const tEn = t?.team.name_en ?? "The team";
+    if (climbs > story.climbs) {
+      story.climbs = climbs;
+      storySay(5, `20 मिनट पूरे और टीम नहीं पहुँची: घड़ी ने अगली टीम, ${tHi}, से माँगा और ज़िले को बताया।`, `20 minutes up and the team hasn't arrived: the clock asks the next team, ${tEn}, and tells the district.`);
+      return;
+    }
+    if (r.status === "paged") storySay(4, `सबसे पास की ख़ाली टीम, ${tHi}, को ख़बर जाती है।`, `The nearest free team, ${tEn}, is asked.`);
+    else if (r.status === "claimed") {
+      story.team = r.team ?? "";
+      story.follow = () => relief.team(story.team)?.pos ?? null;
+      const eta = t ? relief.eta(t) : null;
+      storySay(5, `${tHi}: "मैं जा रहा हूँ"। 20 मिनट की जवाब घड़ी शुरू।${eta != null ? ` रास्ता लगभग ${mins(eta)} मिनट।` : ""}`, `${tEn}: "On my way." The 20-minute answer clock starts.${eta != null ? ` About ${mins(eta)} minutes by its route.` : ""}`);
+    } else if (r.status === "arrived") {
+      const took = mins(relief.minutesSince(r.raised));
+      storySay(5, `${tHi} माँग के ${took} मिनट बाद परिवार तक पहुँची।`, `${tEn} reached the family ${took} minutes after they asked.`);
+    } else if (r.status === "rescued") finish(r);
+  }
+
+  // dawn, and what the record shows
+  function finish(r: HelpRequest | null) {
+    story.nightTo = 0;
+    story.sun = 0.001;
+    story.follow = null;
+    story.zoomTo = iso.size[0] < 700 ? 1.8 : 1.3;
+    const camp = r ? m.villages.find((v) => v.key === r.village)?.camp : null;
+    if (r)
+      storySay(
+        6,
+        `सुबह से पहले ${r.people} लोग सुरक्षित${camp ? `, ${camp.name_hi} में` : ""}। हर क़दम का एक मालिक, एक समय-सीमा और एक रिकॉर्ड।`,
+        `${r.people} people safe before dawn${camp ? `, at ${camp.name_en}` : ""}. Every step had an owner, a deadline and a record.`,
+      );
+    else storySay(6, "सुबह। हर क़दम का एक मालिक, एक समय-सीमा और एक रिकॉर्ड।", "Morning. Every step had an owner, a deadline and a record.");
+    const t = (iso?: string | null) => (iso ? [clockHi(iso), clockEn(iso)] : ["-", "-"]);
+    if (r) {
+      const [a, b, c, d] = [t(r.raised), t(r.claimed), t(r.arrived), t(r.rescued)];
+      $(".lm-story-sum", host).innerHTML = bi(
+        `माँगी ${a[0]} · टीम चली ${b[0]} · पहुँची ${c[0]} · सुरक्षित ${d[0]}। उस रात असल में कोई घड़ी नहीं थी; विभाग की समीक्षा ने ऐसी बातें एक हफ़्ते बाद पाईं।`,
+        `Asked ${a[1]} · team on its way ${b[1]} · there ${c[1]} · safe ${d[1]}. That night there was no clock; the department's review found such things a week later.`,
+      );
+    } else $(".lm-story-sum", host).innerHTML = "";
+    storyEnd.hidden = false;
+  }
+
+  function storyStop(restore = true) {
+    story.timers.forEach(clearTimeout);
+    story.timers = [];
+    if (!story.on) return;
+    story.on = false;
+    story.follow = null;
+    story.zoomTo = 0;
+    story.ringKm = 0;
+    story.req = "";
+    story.nightTo = 0;
+    story.sun = 0;
+    if (!restore) return;
+    story.night = 0;
+    delete host.dataset.story;
+    storyEl.hidden = true;
+    relief.endStory();
+    S.breach = false;
+    breachBtn.setAttribute("aria-pressed", "false");
+    if (haijalpur) S.home = haijalpur.cell;
+    famCache.key = "";
+    setLevel(today, true);
+    renderSide();
+    renderCard();
+    tickTexts();
+    need();
+  }
+
+  // every frame while the night plays: the dark comes and goes, the camera follows what matters
+  function storyFrame(dt: number) {
+    const k = reducedMotion() ? 1 : dt;
+    if (story.night < story.nightTo) story.night = Math.min(story.nightTo, story.night + k / 1600);
+    else if (story.night > story.nightTo) story.night = Math.max(story.nightTo, story.night - k / 2600);
+    if (story.sun > 0 && story.sun < 1) story.sun = Math.min(1, story.sun + k / 2600);
+    if (dragging) return;
+    const p = story.follow?.();
+    if (p) {
+      const [w, h] = iso.size;
+      const [sx, sy] = iso.onSurface(p, 0);
+      const a = reducedMotion() ? 1 : 1 - Math.exp(-dt / 450);
+      iso.panX += (w / 2 - sx) * a;
+      iso.panY += (h / 2 - sy) * a;
+      iso.clampPan();
+    }
+    if (story.zoomTo) {
+      const [w, h] = iso.size;
+      const ratio = story.zoomTo / iso.zoom;
+      if (Math.abs(ratio - 1) > 0.01) {
+        iso.zoomAt(reducedMotion() ? ratio : Math.pow(ratio, Math.min(1, dt / 380)), w / 2, h / 2, 0.8, 6);
+        story.zooming = true;
+      } else if (story.zooming) {
+        story.zooming = false;
+        story.zoomTo = 0;
+        sharpenSoon();
+      }
+    }
+  }
+
+  // night: multiply the ground towards indigo, then lamps in the villages
+  function nightShade(ctx: CanvasRenderingContext2D, k: number) {
+    const [w, h] = iso.size;
+    const mix = (a: number, b: number) => Math.round(a + (b - a) * k);
+    ctx.save();
+    ctx.globalCompositeOperation = "multiply";
+    ctx.fillStyle = `rgb(${mix(255, 104)}, ${mix(255, 110)}, ${mix(255, 176)})`;
+    ctx.fillRect(0, 0, w, h);
+    ctx.globalCompositeOperation = "screen";
+    const u = iso.unit;
+    for (const v of m.villages) {
+      const [x, y] = iso.cellPoint(v.cell, 0);
+      const r = u * 3.4;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, `rgba(247, 181, 0, ${0.62 * k})`);
+      g.addColorStop(1, "rgba(247, 181, 0, 0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+    ctx.restore();
+  }
+
+  // the sky inside the frame, painted as in Madhubani: a moon with stars, then a sun with a face
+  function sky(ctx: CanvasRenderingContext2D, now: number) {
+    const [w, h] = iso.size;
+    // top right, beside the zoom buttons, where the diorama's corner leaves sky
+    const x = w - (w < 700 ? 112 : 142);
+    const y = Math.min(64, h * 0.12);
+    const still = reducedMotion();
+    if (story.night > 0.02) {
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, story.night * 1.3);
+      for (const [sx, sy, r, ph] of [
+        [-120, 4, 5, 0],
+        [-70, 34, 3.5, 1.7],
+        [70, -6, 4.5, 3.1],
+        [130, 30, 3.5, 4.4],
+        [-170, 40, 3, 2.2],
+        [180, 2, 3, 5.2],
+      ]) {
+        const tw = still ? 1 : 0.75 + 0.25 * Math.sin(now / 520 + ph);
+        star(ctx, x + sx, y + sy, r * tw);
+      }
+      ctx.translate(x, y);
+      ctx.beginPath();
+      ctx.arc(0, 0, 21, 0.35 * Math.PI, 1.65 * Math.PI, false);
+      ctx.bezierCurveTo(-1, -15, -2, 15, 21 * Math.cos(0.35 * Math.PI), 21 * Math.sin(0.35 * Math.PI));
+      ctx.closePath();
+      ctx.fillStyle = C.haldiTint;
+      ctx.strokeStyle = C.neel;
+      ctx.lineWidth = 2.4;
+      ctx.fill();
+      ctx.stroke();
+      // the moon's eye and smile, as the painters draw it
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(-14, -6);
+      ctx.quadraticCurveTo(-10, -9, -6, -6);
+      ctx.moveTo(-14, 6);
+      ctx.quadraticCurveTo(-10, 10, -6, 7);
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (story.sun > 0) {
+      const k = eio(story.sun);
+      ctx.save();
+      ctx.globalAlpha = k;
+      ctx.translate(x, y + (1 - k) * 46);
+      const spin = still ? 0 : now / 6000;
+      for (let i = 0; i < 12; i++) {
+        const a = spin + (i * Math.PI) / 6;
+        ctx.save();
+        ctx.rotate(a);
+        ctx.beginPath();
+        ctx.moveTo(-6, -24);
+        ctx.lineTo(0, -38);
+        ctx.lineTo(6, -24);
+        ctx.closePath();
+        ctx.fillStyle = i % 2 ? C.sindoor : C.kesar;
+        ctx.strokeStyle = C.neel;
+        ctx.lineWidth = 1.8;
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.beginPath();
+      ctx.arc(0, 0, 23, 0, Math.PI * 2);
+      ctx.fillStyle = C.haldi;
+      ctx.strokeStyle = C.neel;
+      ctx.lineWidth = 2.6;
+      ctx.fill();
+      ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-11, -4);
+      ctx.quadraticCurveTo(-7, -9, -3, -4);
+      ctx.moveTo(3, -4);
+      ctx.quadraticCurveTo(7, -9, 11, -4);
+      ctx.moveTo(-8, 7);
+      ctx.quadraticCurveTo(0, 13, 8, 7);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function star(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI) / 4;
+      const rr = i % 2 ? r * 0.38 : r * 1.6;
+      ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+    ctx.closePath();
+    ctx.fillStyle = C.haldi;
+    ctx.fill();
+  }
+
+  canvas.addEventListener("pointerdown", () => {
+    // the person takes the camera; the next moment of the story takes it back
+    if (story.on) {
+      story.follow = null;
+      story.zoomTo = 0;
+    }
+  });
+  $(".lm-night", host).addEventListener("click", storyStart);
+  $(".lm-story-x", host).addEventListener("click", () => storyStop());
+  $(".lm-story-close", host).addEventListener("click", () => storyStop());
+  $(".lm-story-again", host).addEventListener("click", storyStart);
+  document.addEventListener("bp:map-night", storyStart);
+  if (document.documentElement.dataset.mapNight) queueMicrotask(storyStart);
+
   const fullBtn = $<HTMLButtonElement>(".lm-full-btn", host);
   const setFull = (on: boolean) => {
     S.full = on;
@@ -1524,7 +1920,8 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   };
   fullBtn.addEventListener("click", () => setFull(!S.full));
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && S.full) setFull(false);
+    if (e.key === "Escape" && story.on) storyStop();
+    else if (e.key === "Escape" && S.full) setFull(false);
   });
 
   document.addEventListener("bp:lang", () => {

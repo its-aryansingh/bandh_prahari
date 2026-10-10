@@ -474,7 +474,7 @@ function buildTheatre(tl: Timeline, ex: Execution) {
                 <div><b>22/25</b>${bil("वार्ड 7 के घर शिविर में", "homes of ward 7 at the camp")}</div>
               </div>
               <p class="small pair">${bi("इस साल की विभागीय समीक्षा ने ऐसी बातें एक हफ़्ते बाद पाईं। बाँध प्रहरी उन्हें उसी रात दिखाता है।", "This year's department review found such things a week later. Baandh Prahari shows them that night.")}</p>
-              <div class="row"><button type="button" class="btn small th-again">${icon("restart")}${bil("फिर से चलाएँ", "Play again")}</button><button type="button" class="btn small paper th-close2">${bil("बंद करें", "Close")}</button></div>
+              <div class="row"><button type="button" class="btn small th-tomap">${icon("map")}${bil("यही रात नक़्शे पर", "This night on the map")}</button><button type="button" class="btn small paper th-again">${icon("restart")}${bil("फिर से चलाएँ", "Play again")}</button><button type="button" class="btn small paper th-close2">${bil("बंद करें", "Close")}</button></div>
             </div>
           </div>
         </div>
@@ -916,6 +916,14 @@ function buildTheatre(tl: Timeline, ex: Execution) {
   });
   el.querySelector(".th-close")!.addEventListener("click", close);
   el.querySelector(".th-close2")!.addEventListener("click", close);
+  // the same night, played on the live map: water through the breach, a family asks, a team goes
+  el.querySelector(".th-tomap")!.addEventListener("click", () => {
+    close();
+    document.getElementById("naksha")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // the map loads as it nears the screen; it plays the night on load if it wasn't ready yet
+    document.documentElement.dataset.mapNight = "1";
+    document.dispatchEvent(new CustomEvent("bp:map-night"));
+  });
   el.querySelector(".th-again")!.addEventListener("click", () => {
     seek(0);
     play();

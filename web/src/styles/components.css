@@ -32,6 +32,7 @@
 .btn.small { min-height: 44px; font-size: 16px; padding: 6px 14px; gap: 8px; box-shadow: 3px 4px 0 var(--shade); }
 .btn.small .ic { width: 20px; height: 20px; }
 .btn[disabled] { opacity: 0.5; pointer-events: none; }
+html[data-lang="both"] .btn:not(.paper) .il > .en { color: inherit; opacity: 0.82; }
 html[data-lang="both"] .btn .bi > .en { font-size: 0.7em; margin-top: 2px; color: inherit; opacity: 0.8; font-weight: 600; }
 
 /* "हो गया" (done): turns green with a stamp. */
