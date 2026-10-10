@@ -366,6 +366,24 @@
             </button>
           </div>
         </div>
+        <div class="judge card" id="judge">
+          <h3 class="display h3 bi" style="--shade: var(--kesar)"><span class="hi">असली घड़ी चलाकर देखें</span><span class="en">Run the real clock</span></h3>
+          <p class="pair">
+            <span class="hi">एक टैप से मुंबई में Step Functions का असली रन शुरू होता है। फ़ोन यहीं बने हैं, घड़ी एक मिनट की है। जवाब दें, या चुप रहें और देखें बात ऊपर कैसे जाती है। किसी असली फ़ोन पर कुछ नहीं जाता।</span>
+            <span class="en">One tap starts a real Step Functions run in Mumbai. The phones are drawn here and the clock is one minute. Answer, or stay silent and watch it climb. Nothing goes to a real phone.</span>
+          </p>
+          <div class="judge-bar">
+            <label class="field"><span class="bi"><span class="hi">संकेत</span><span class="en">Sign</span></span><select id="judge-sign"></select></label>
+            <button class="btn" type="button" id="judge-start"><span class="bi"><span class="hi">रन शुरू करें</span><span class="en">Start a run</span></span></button>
+            <p class="judge-clock pair" id="judge-clock" aria-live="polite"></p>
+          </div>
+          <p class="small judge-status pair" id="judge-status" aria-live="polite"></p>
+          <div class="judge-phones" id="judge-phones"></div>
+          <div class="judge-cols">
+            <div><h4 class="bi"><span class="hi">Step Functions का इतिहास</span><span class="en">Step Functions history</span></h4><ol class="judge-states" id="judge-states"></ol></div>
+            <div><h4 class="bi"><span class="hi">टाइमलाइन (DynamoDB)</span><span class="en">Timeline (DynamoDB)</span></h4><ol class="judge-log" id="judge-log"></ol></div>
+          </div>
+        </div>
       </div>
     </section>
 

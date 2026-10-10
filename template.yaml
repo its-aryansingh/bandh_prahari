@@ -1,0 +1,539 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Baandh Prahari (docs/SPEC.md). Jawab Ghadi, the answer clock: every warning sign on the
+  Gandak embankment near Haijalpur gets an owner, a deadline and a next person. ap-south-1 only.
+  A student project: every CAP alert is status Exercise and nothing is ever sent to SACHET.
+
+# IAM notes (AGENTS.md: least privilege per function, no "*").
+# Every function has its own role below; none uses a managed policy. Two things cannot be
+# scoped to a resource ARN, and are the only "Resource: '*'" in this file:
+#   - states:SendTaskSuccess / SendTaskFailure (the answer button). The IAM Service
+#     Authorization Reference lists no resource type for them.
+#     https://docs.aws.amazon.com/service-authorization/latest/reference/list_awsstepfunctions.html
+#   - the bucket policy's Deny of plain-HTTP requests (a Deny for every principal).
+# Log streams, S3 prefixes and execution ARNs end in "*" because their names are made at run time.
+
+Parameters:
+  Channel:
+    Type: String
+    Default: screen
+    AllowedValues: [screen, whatsapp, telegram]
+    Description: Where real runs send their messages. "screen" only draws them on the page.
+  Outbound:
+    Type: String
+    Default: "off"
+    AllowedValues: ["on", "off"]
+    Description: One switch for every message to a real phone. Keep "off" until the roster phones have sent "join".
+  DemoDailyCap:
+    Type: Number
+    Default: 300
+    MinValue: 1
+    Description: Most judge-path runs per day.
+  AllowedOrigin:
+    Type: String
+    Default: "*"
+    Description: The site's origin for CORS (the Amplify URL once you have it).
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [arm64]
+    CodeUri: src/
+    MemorySize: 256
+    Timeout: 15
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref Table
+        CHANNEL: !Ref Channel
+        OUTBOUND: !Ref Outbound
+
+Resources:
+  # ------------------------------------------------------------------ data
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: bp
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: PK, AttributeType: S }
+        - { AttributeName: SK, AttributeType: S }
+        - { AttributeName: gsi1pk, AttributeType: S }
+        - { AttributeName: gsi1sk, AttributeType: S }
+      KeySchema:
+        - { AttributeName: PK, KeyType: HASH }
+        - { AttributeName: SK, KeyType: RANGE }
+      GlobalSecondaryIndexes:
+        # The control room: open incidents by priority, oldest first.
+        - IndexName: gsi1
+          KeySchema:
+            - { AttributeName: gsi1pk, KeyType: HASH }
+            - { AttributeName: gsi1sk, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+      TimeToLiveSpecification: { AttributeName: ttl, Enabled: true }
+      PointInTimeRecoverySpecification: { PointInTimeRecoveryEnabled: true }
+      SSESpecification: { SSEEnabled: true, SSEType: KMS }
+
+  # Media, timelines and CAP drafts. Object Lock in governance mode keeps every version for a day,
+  # so nobody can quietly change who knew what, and when. Retained when the stack is deleted
+  # (docs/DEPLOY.md, "Teardown", empties it once the day has passed).
+  Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      ObjectLockEnabled: true
+      ObjectLockConfiguration:
+        ObjectLockEnabled: Enabled
+        Rule:
+          DefaultRetention: { Mode: GOVERNANCE, Days: 1 }
+      VersioningConfiguration: { Status: Enabled }
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: { SSEAlgorithm: "aws:kms" }
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ ObjectOwnership: BucketOwnerEnforced }]
+      LifecycleConfiguration:
+        Rules:
+          - Id: old-versions
+            Status: Enabled
+            NoncurrentVersionExpiration: { NoncurrentDays: 30 }
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: HttpsOnly
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource: [!GetAtt Bucket.Arn, !Sub "${Bucket.Arn}/*"]
+            Condition: { Bool: { "aws:SecureTransport": "false" } }
+
+  # ------------------------------------------------------------------ the incident run
+  IncidentRun:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: bp-incident
+      Type: STANDARD
+      DefinitionUri: statemachine/incident.asl.json
+      DefinitionSubstitutions:
+        OpenFunctionArn: !GetAtt OpenFunction.Arn
+        WarnFunctionArn: !GetAtt WarnFunction.Arn
+        PageFunctionArn: !GetAtt PageFunction.Arn
+        DispatchFunctionArn: !GetAtt DispatchFunction.Arn
+        NotifyFunctionArn: !GetAtt NotifyFunction.Arn
+        HandoffFunctionArn: !GetAtt HandoffFunction.Arn
+        CloseFunctionArn: !GetAtt CloseFunction.Arn
+      Role: !GetAtt IncidentRunRole.Arn
+
+  IncidentRunRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: states.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition: { StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId } }
+      Policies:
+        - PolicyName: invoke-steps
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource:
+                  - !GetAtt OpenFunction.Arn
+                  - !GetAtt WarnFunction.Arn
+                  - !GetAtt PageFunction.Arn
+                  - !GetAtt DispatchFunction.Arn
+                  - !GetAtt NotifyFunction.Arn
+                  - !GetAtt HandoffFunction.Arn
+                  - !GetAtt CloseFunction.Arn
+
+  # One function per step of the run. Each has its own role and its own 180-day log group.
+  OpenFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-open
+      Description: OpenIncident
+      Handler: incident.open.handler
+      Role: !GetAtt OpenRole.Arn
+      LoggingConfig: { LogGroup: !Ref OpenLogs, LogFormat: JSON }
+  OpenLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-open, RetentionInDays: 180 }
+  OpenRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: open
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt OpenLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem]
+                Resource: !GetAtt Table.Arn
+
+  WarnFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-warn
+      Description: WarnVillagesGetReady, WarnVillagesMoveNow, AllClear
+      Handler: incident.warn.handler
+      Role: !GetAtt WarnRole.Arn
+      LoggingConfig: { LogGroup: !Ref WarnLogs, LogFormat: JSON }
+  WarnLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-warn, RetentionInDays: 180 }
+  WarnRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: warn
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt WarnLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
+                Resource: !GetAtt Table.Arn
+
+  PageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-page
+      Description: Every wait in the run (page a level, await on site, hold); stores the token under a short wait ID
+      Handler: incident.page.handler
+      Role: !GetAtt PageRole.Arn
+      LoggingConfig: { LogGroup: !Ref PageLogs, LogFormat: JSON }
+  PageLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-page, RetentionInDays: 180 }
+  PageRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: page
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt PageLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
+                Resource: !GetAtt Table.Arn
+
+  DispatchFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-dispatch
+      Description: DispatchRepairTeam
+      Handler: incident.dispatch.handler
+      Role: !GetAtt DispatchRole.Arn
+      LoggingConfig: { LogGroup: !Ref DispatchLogs, LogFormat: JSON }
+  DispatchLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-dispatch, RetentionInDays: 180 }
+  DispatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: dispatch
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt DispatchLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
+                Resource: !GetAtt Table.Arn
+
+  NotifyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-notify
+      Description: Not on site / missed check-in, to the next level and the district
+      Handler: incident.notify.handler
+      Role: !GetAtt NotifyRole.Arn
+      LoggingConfig: { LogGroup: !Ref NotifyLogs, LogFormat: JSON }
+  NotifyLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-notify, RetentionInDays: 180 }
+  NotifyRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: notify
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt NotifyLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:Query, dynamodb:PutItem]
+                Resource: !GetAtt Table.Arn
+
+  HandoffFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-handoff
+      Description: HandToDistrict
+      Handler: incident.handoff.handler
+      Role: !GetAtt HandoffRole.Arn
+      LoggingConfig: { LogGroup: !Ref HandoffLogs, LogFormat: JSON }
+  HandoffLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-handoff, RetentionInDays: 180 }
+  HandoffRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: handoff
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt HandoffLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
+                Resource: !GetAtt Table.Arn
+
+  CloseFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-close
+      Description: WriteIncidentReport; copies the timeline to the Object Lock bucket
+      Handler: incident.close.handler
+      Role: !GetAtt CloseRole.Arn
+      LoggingConfig: { LogGroup: !Ref CloseLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref Bucket
+  CloseLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-close, RetentionInDays: 180 }
+  CloseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: close
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt CloseLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem]
+                Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "${Bucket.Arn}/timelines/*"
+
+  # ------------------------------------------------------------------ the HTTP API
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins: [!Ref AllowedOrigin]
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: [content-type, authorization]
+        MaxAge: 600
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 40
+        ThrottlingRateLimit: 20
+      RouteSettings:
+        # The judge path: one new run every few seconds at most, across everyone.
+        "POST /demo/runs":
+          ThrottlingBurstLimit: 2
+          ThrottlingRateLimit: 0.2
+        "POST /demo/answer":
+          ThrottlingBurstLimit: 5
+          ThrottlingRateLimit: 2
+
+  PublicApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-api-public
+      Description: GET /incidents, the timeline and the live execution history
+      Handler: api.public.handler
+      Role: !GetAtt PublicApiRole.Arn
+      LoggingConfig: { LogGroup: !Ref PublicApiLogs, LogFormat: JSON }
+      Events:
+        Incidents:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: /incidents }
+        Timeline:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: "/incidents/{id}/timeline" }
+        Execution:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: "/incidents/{id}/execution" }
+  PublicApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-api-public, RetentionInDays: 180 }
+  PublicApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: api-public
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt PublicApiLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query]
+                Resource: [!GetAtt Table.Arn, !Sub "${Table.Arn}/index/gsi1"]
+              - Effect: Allow
+                Action: [states:GetExecutionHistory, states:DescribeExecution]
+                Resource: !Sub "arn:${AWS::Partition}:states:${AWS::Region}:${AWS::AccountId}:execution:bp-incident:*"
+
+  DemoApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-api-demo
+      Description: The judge path. A real run on the phones drawn on the page; never a real phone
+      Handler: api.demo.handler
+      Role: !GetAtt DemoApiRole.Arn
+      LoggingConfig: { LogGroup: !Ref DemoApiLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !Ref IncidentRun
+          DEMO_DAILY_CAP: !Ref DemoDailyCap
+      Events:
+        Start:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: POST, Path: /demo/runs }
+        Current:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: /demo/runs/current }
+        Answer:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: POST, Path: /demo/answer }
+  DemoApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-api-demo, RetentionInDays: 180 }
+  DemoApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: api-demo
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt DemoApiLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem]
+                Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref IncidentRun
+              - Sid: AnswerButtonNoResourceLevelPermissions
+                Effect: Allow
+                Action: [states:SendTaskSuccess, states:SendTaskFailure]
+                Resource: "*"
+
+  ControlApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-api-control
+      Description: POST /incidents, the control-room form for helpline calls (token in SSM)
+      Handler: api.control.handler
+      Role: !GetAtt ControlApiRole.Arn
+      LoggingConfig: { LogGroup: !Ref ControlApiLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          STATE_MACHINE_ARN: !Ref IncidentRun
+      Events:
+        NewIncident:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: POST, Path: /incidents }
+  ControlApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-api-control, RetentionInDays: 180 }
+  ControlApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: api-control
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt ControlApiLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
+                Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref IncidentRun
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/tokens/control"
+
+Outputs:
+  ApiUrl:
+    Description: Put this in the site's VITE_API_BASE
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}"
+  TableName:
+    Value: !Ref Table
+  BucketName:
+    Value: !Ref Bucket
+  IncidentRunArn:
+    Value: !Ref IncidentRun

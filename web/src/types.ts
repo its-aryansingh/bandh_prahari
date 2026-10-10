@@ -180,6 +180,15 @@ export interface Execution {
   states: ExecutionState[];
 }
 
+/** POST /demo/runs: the judge path's run (409 = someone else's run, which the page shows). */
+export interface DemoStart {
+  incident: string;
+  priority?: Priority;
+  km?: number;
+  sign?: Sign;
+  error?: string;
+}
+
 export interface NewIncident {
   km: number;
   sign: Sign;

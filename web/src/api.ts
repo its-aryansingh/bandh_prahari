@@ -2,6 +2,7 @@
 // the mock JSON in web/mock/, which has the same shapes, and says so on screen.
 
 import type {
+  DemoStart,
   Execution,
   Gauges,
   HelpList,
@@ -11,6 +12,7 @@ import type {
   MapGrid,
   NewHelp,
   NewIncident,
+  Sign,
   Stretch,
   TeamPosition,
   Teams,
@@ -45,6 +47,17 @@ async function post<T>(path: string, body: unknown, token?: string): Promise<T> 
   });
   if (!res.ok) throw new Error(`POST ${path} answered ${res.status}`);
   return (await res.json()) as T;
+}
+
+/** The judge path answers 409 (busy, or a late tap) and 429 (daily cap) with a body the page reads. */
+async function postDemo<T>(path: string, body: unknown): Promise<T & { status: number }> {
+  const res = await fetch(BASE + path, {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = (await res.json().catch(() => ({}))) as T;
+  return { ...data, status: res.status };
 }
 
 export const api = {
@@ -83,6 +96,11 @@ export const api = {
     }
     return post<Incident>("/incidents", body);
   },
+
+  // The judge path: a real Step Functions run on the phones drawn on the page (never a real phone).
+  demoStart: (sign: Sign) => postDemo<DemoStart>("/demo/runs", { sign }),
+  demoCurrent: () => get<{ incident: string }>("/demo/runs/current", { incident: "" }),
+  demoAnswer: (wait: string, action: string, role?: string) => postDemo<{ ok: boolean; reason?: string }>("/demo/answer", { wait, action, role }),
 
   // The help actions. On mocks the live map's demo clock plays them out in this tab only.
   createHelp: (body: NewHelp) => post<HelpRequest>("/help", body),

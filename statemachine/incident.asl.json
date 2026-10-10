@@ -1,0 +1,804 @@
+{
+  "Comment": "Jawab Ghadi, the answer clock: every warning sign gets an owner, a deadline and a next person. docs/SPEC.md, 'The incident run'.",
+  "StartAt": "OpenIncident",
+  "States": {
+    "OpenIncident": {
+      "Type": "Task",
+      "Resource": "${OpenFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "execution.$": "$$.Execution.Id"
+      },
+      "ResultPath": "$.incident",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        },
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "IsItP1",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "IsItP1"
+        }
+      ]
+    },
+    "IsItP1": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.incident.priority",
+          "StringEquals": "P1",
+          "Next": "WarnVillagesGetReady"
+        }
+      ],
+      "Default": "PageJuniorEngineer"
+    },
+    "WarnVillagesGetReady": {
+      "Type": "Task",
+      "Resource": "${WarnFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "level": "taiyaar"
+      },
+      "ResultPath": "$.warned",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "PageJuniorEngineer",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "PageJuniorEngineer"
+        }
+      ]
+    },
+    "PageJuniorEngineer": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${PageFunctionArn}",
+        "Payload": {
+          "kind": "page",
+          "taskToken.$": "$$.Task.Token",
+          "incident.$": "$.incident",
+          "timeout.$": "$.clocks.page",
+          "level": 1,
+          "previous.$": "$.previous"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.page",
+      "ResultPath": "$.answer",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "PageAssistantEngineer"
+        }
+      ],
+      "Next": "DispatchRepairTeam"
+    },
+    "PageAssistantEngineer": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${PageFunctionArn}",
+        "Payload": {
+          "kind": "page",
+          "taskToken.$": "$$.Task.Token",
+          "incident.$": "$.incident",
+          "timeout.$": "$.clocks.page",
+          "level": 2,
+          "previous.$": "$.previous"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.page",
+      "ResultPath": "$.answer",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "WarnedAlready"
+        }
+      ],
+      "Next": "DispatchRepairTeam"
+    },
+    "PageExecutiveEngineer": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${PageFunctionArn}",
+        "Payload": {
+          "kind": "page",
+          "taskToken.$": "$$.Task.Token",
+          "incident.$": "$.incident",
+          "timeout.$": "$.clocks.page",
+          "level": 3,
+          "previous.$": "$.previous"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.page",
+      "ResultPath": "$.answer",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "PageForceAndDistrict"
+        }
+      ],
+      "Next": "DispatchRepairTeam"
+    },
+    "PageForceAndDistrict": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${PageFunctionArn}",
+        "Payload": {
+          "kind": "page",
+          "taskToken.$": "$$.Task.Token",
+          "incident.$": "$.incident",
+          "timeout.$": "$.clocks.page",
+          "level": 4,
+          "previous.$": "$.previous"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.page",
+      "ResultPath": "$.answer",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "AlertCentralFloodControlRoom"
+        }
+      ],
+      "Next": "DispatchRepairTeam"
+    },
+    "AlertCentralFloodControlRoom": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${PageFunctionArn}",
+        "Payload": {
+          "kind": "page",
+          "taskToken.$": "$$.Task.Token",
+          "incident.$": "$.incident",
+          "timeout.$": "$.clocks.central",
+          "level": 5,
+          "previous.$": "$.previous"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.central",
+      "ResultPath": "$.answer",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "CountCentralPages"
+        }
+      ],
+      "Next": "DispatchRepairTeam"
+    },
+    "WarnedAlready": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "And": [
+            {
+              "Variable": "$.warned",
+              "IsPresent": true
+            },
+            {
+              "Variable": "$.warned.level",
+              "StringEquals": "taiyaar"
+            }
+          ],
+          "Next": "PageExecutiveEngineer"
+        }
+      ],
+      "Default": "WarnVillagesOnClimb"
+    },
+    "WarnVillagesOnClimb": {
+      "Type": "Task",
+      "Resource": "${WarnFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "level": "taiyaar"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "PageExecutiveEngineer",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "PageExecutiveEngineer"
+        }
+      ]
+    },
+    "CountCentralPages": {
+      "Type": "Pass",
+      "Parameters": {
+        "central.$": "States.MathAdd($.counts.central, 1)",
+        "onsite.$": "$.counts.onsite",
+        "missed.$": "$.counts.missed",
+        "rounds.$": "$.counts.rounds"
+      },
+      "ResultPath": "$.counts",
+      "Next": "PageCentralAgain"
+    },
+    "PageCentralAgain": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.counts.central",
+          "NumericLessThanPath": "$.limits.central",
+          "Next": "AlertCentralFloodControlRoom"
+        }
+      ],
+      "Default": "MarkUnanswered"
+    },
+    "MarkUnanswered": {
+      "Type": "Pass",
+      "Result": {
+        "reason": "unanswered",
+        "outcome": "unanswered"
+      },
+      "ResultPath": "$.end",
+      "Next": "HandToDistrict"
+    },
+    "DispatchRepairTeam": {
+      "Type": "Task",
+      "Resource": "${DispatchFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "answer.$": "$.answer"
+      },
+      "ResultPath": "$.dispatch",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "AwaitEngineerOnSite",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "AwaitEngineerOnSite"
+        }
+      ]
+    },
+    "AwaitEngineerOnSite": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${PageFunctionArn}",
+        "Payload": {
+          "kind": "onsite",
+          "taskToken.$": "$$.Task.Token",
+          "incident.$": "$.incident",
+          "timeout.$": "$.clocks.onsite",
+          "answer.$": "$.answer"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.onsite",
+      "ResultPath": "$.onsite",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "TellNotOnSite"
+        }
+      ],
+      "Next": "HoldTheStretch"
+    },
+    "TellNotOnSite": {
+      "Type": "Task",
+      "Resource": "${NotifyFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "what": "not_on_site",
+        "answer.$": "$.answer"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "CountOnSiteMisses",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "CountOnSiteMisses"
+        }
+      ]
+    },
+    "CountOnSiteMisses": {
+      "Type": "Pass",
+      "Parameters": {
+        "central.$": "$.counts.central",
+        "onsite.$": "States.MathAdd($.counts.onsite, 1)",
+        "missed.$": "$.counts.missed",
+        "rounds.$": "$.counts.rounds"
+      },
+      "ResultPath": "$.counts",
+      "Next": "WaitOnSiteAgain"
+    },
+    "WaitOnSiteAgain": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.counts.onsite",
+          "NumericLessThanPath": "$.limits.onsite",
+          "Next": "AwaitEngineerOnSite"
+        }
+      ],
+      "Default": "MarkNobodyOnSite"
+    },
+    "MarkNobodyOnSite": {
+      "Type": "Pass",
+      "Result": {
+        "reason": "unanswered",
+        "outcome": "district"
+      },
+      "ResultPath": "$.end",
+      "Next": "HandToDistrict"
+    },
+    "HoldTheStretch": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${PageFunctionArn}",
+        "Payload": {
+          "kind": "hold",
+          "taskToken.$": "$$.Task.Token",
+          "incident.$": "$.incident",
+          "timeout.$": "$.clocks.hold",
+          "answer.$": "$.answer"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.hold",
+      "ResultPath": "$.hold",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "TellMissedCheckIn"
+        }
+      ],
+      "Next": "SecuredOrBreached"
+    },
+    "SecuredOrBreached": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.hold.action",
+          "StringEquals": "secured",
+          "Next": "AllClear"
+        },
+        {
+          "Variable": "$.hold.action",
+          "StringEquals": "breached",
+          "Next": "WarnVillagesMoveNow"
+        }
+      ],
+      "Default": "CountHoldRounds"
+    },
+    "CountHoldRounds": {
+      "Type": "Pass",
+      "Parameters": {
+        "central.$": "$.counts.central",
+        "onsite.$": "$.counts.onsite",
+        "missed": 0,
+        "rounds.$": "States.MathAdd($.counts.rounds, 1)"
+      },
+      "ResultPath": "$.counts",
+      "Next": "HoldAgain"
+    },
+    "HoldAgain": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.counts.rounds",
+          "NumericLessThanPath": "$.limits.rounds",
+          "Next": "HoldTheStretch"
+        }
+      ],
+      "Default": "MarkLongHold"
+    },
+    "MarkLongHold": {
+      "Type": "Pass",
+      "Result": {
+        "reason": "long_hold",
+        "outcome": "district"
+      },
+      "ResultPath": "$.end",
+      "Next": "HandToDistrict"
+    },
+    "TellMissedCheckIn": {
+      "Type": "Task",
+      "Resource": "${NotifyFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "what": "missed_checkin",
+        "answer.$": "$.answer"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "CountMissedCheckIns",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "CountMissedCheckIns"
+        }
+      ]
+    },
+    "CountMissedCheckIns": {
+      "Type": "Pass",
+      "Parameters": {
+        "central.$": "$.counts.central",
+        "onsite.$": "$.counts.onsite",
+        "missed.$": "States.MathAdd($.counts.missed, 1)",
+        "rounds.$": "States.MathAdd($.counts.rounds, 1)"
+      },
+      "ResultPath": "$.counts",
+      "Next": "MissedTooMany"
+    },
+    "MissedTooMany": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.counts.missed",
+          "NumericLessThanPath": "$.limits.missed",
+          "Next": "HoldAgain"
+        }
+      ],
+      "Default": "MarkNoCheckIn"
+    },
+    "MarkNoCheckIn": {
+      "Type": "Pass",
+      "Result": {
+        "reason": "no_checkin",
+        "outcome": "district"
+      },
+      "ResultPath": "$.end",
+      "Next": "HandToDistrict"
+    },
+    "WarnVillagesMoveNow": {
+      "Type": "Task",
+      "Resource": "${WarnFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "level": "nikal_chalo"
+      },
+      "ResultPath": "$.warned",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "MarkBreached",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "MarkBreached"
+        }
+      ]
+    },
+    "MarkBreached": {
+      "Type": "Pass",
+      "Result": {
+        "reason": "breached",
+        "outcome": "breached"
+      },
+      "ResultPath": "$.end",
+      "Next": "HandToDistrict"
+    },
+    "AllClear": {
+      "Type": "Task",
+      "Resource": "${WarnFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "level": "khatra_tala"
+      },
+      "ResultPath": "$.warned",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "MarkSecured",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "MarkSecured"
+        }
+      ]
+    },
+    "MarkSecured": {
+      "Type": "Pass",
+      "Result": {
+        "reason": "secured",
+        "outcome": "secured"
+      },
+      "ResultPath": "$.end",
+      "Next": "WriteIncidentReport"
+    },
+    "HandToDistrict": {
+      "Type": "Task",
+      "Resource": "${HandoffFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "reason.$": "$.end.reason"
+      },
+      "ResultPath": "$.handoff",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "WriteIncidentReport",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "WriteIncidentReport"
+        }
+      ]
+    },
+    "WriteIncidentReport": {
+      "Type": "Task",
+      "Resource": "${CloseFunctionArn}",
+      "Parameters": {
+        "incident.$": "$.incident",
+        "outcome.$": "$.end.outcome"
+      },
+      "ResultPath": "$.report",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        },
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 3,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Done"
+    },
+    "Done": {
+      "Type": "Succeed"
+    }
+  }
+}

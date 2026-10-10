@@ -431,3 +431,25 @@ html[data-lang="both"] .site-foot .pair > .en, html[data-lang="both"] .site-foot
   .layers-stage.open .layer { top: calc(4px + var(--i) * 104px); }
   .layers-stage .layer { top: calc(150px + var(--i) * 13px); }
 }
+
+/* The judge path: a real run on drawn phones */
+.judge { margin-top: 28px; padding: 18px 16px; display: grid; gap: 14px; }
+.judge-bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.judge-bar .field { min-width: 0; flex: 1 1 220px; }
+.judge-clock { font-family: var(--font-display); font-size: 1.4rem; color: var(--sindoor-deep); margin: 0; }
+.judge-phones { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+.jphone { padding: 12px; display: grid; gap: 8px; align-content: start; background: var(--dhaan-tint); border-radius: 22px; }
+.jwho { font-weight: 700; margin: 0; }
+.jmsg { background: var(--white); border: var(--ink); border-radius: 12px; padding: 8px 10px; display: grid; gap: 8px; }
+.jmsg p { margin: 0; }
+.jbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+.jquiet { opacity: 0.7; margin: 0; }
+.judge-cols { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .judge-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+.judge-states, .judge-log { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.jstate { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.jstate code { overflow-wrap: anywhere; }
+.jstate.timed_out .chip { background: var(--sindoor-tint); }
+.jstate.succeeded .chip { background: var(--dhaan-tint); }
+.jstate.running .chip { background: var(--haldi-tint); }
+.judge-log time { font-weight: 700; margin-right: 6px; }

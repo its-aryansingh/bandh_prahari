@@ -1,0 +1,294 @@
+{
+ "stretch": {
+  "id": "gandak-rb-haijalpur",
+  "name_hi": "गंडक का दायाँ तटबंध, हैजलपुर के पास",
+  "name_en": "Gandak right-bank embankment near Haijalpur",
+  "river": "Gandak",
+  "block": "Maker",
+  "district": "Saran",
+  "length_km": 20,
+  "km_note_hi": "किलोमीटर के निशान हमने हाथ से बनी रेखा पर गिने हैं, ये विभाग की चेनेज नहीं हैं।",
+  "km_note_en": "Kilometre marks are computed by Baandh Prahari along a hand-drawn line, not the department's chainage."
+ },
+ "segments": [
+  {
+   "km": 1,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 2,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 3,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 4,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 5,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 6,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 7,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 8,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 9,
+   "villages": [
+    "Parmanand Chhapra"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": true
+  },
+  {
+   "km": 10,
+   "villages": [
+    "Parmanand Chhapra"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 11,
+   "villages": [
+    "Parmanand Chhapra"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 12,
+   "villages": [
+    "Haijalpur",
+    "Parmanand Chhapra"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 13,
+   "villages": [
+    "Haijalpur"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 14,
+   "villages": [
+    "Haijalpur"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": true,
+   "vulnerable": true
+  },
+  {
+   "km": 15,
+   "villages": [
+    "Haijalpur"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": true,
+   "vulnerable": true
+  },
+  {
+   "km": 16,
+   "villages": [
+    "Haijalpur",
+    "Naukraha"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 17,
+   "villages": [
+    "Naukraha"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": true
+  },
+  {
+   "km": 18,
+   "villages": [
+    "Naukraha"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 19,
+   "villages": [
+    "Naukraha"
+   ],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  },
+  {
+   "km": 20,
+   "villages": [],
+   "gauge": "Rewaghat",
+   "breach_last_5y": false,
+   "vulnerable": false
+  }
+ ],
+ "villages": [
+  {
+   "name": "Haijalpur",
+   "name_hi": "हैजलपुर",
+   "lgd_code": null,
+   "panchayat": null,
+   "block": "Maker",
+   "district": "Saran",
+   "behind_km": [
+    12,
+    16
+   ],
+   "gauge": "Rewaghat",
+   "relief_camp_hi": "पंचायत भवन (नमूना)",
+   "relief_camp_en": "Panchayat bhawan (sample)",
+   "wards": [
+    {
+     "ward": 7,
+     "households": 25
+    }
+   ],
+   "on_stretch": true,
+   "lat": 25.9529,
+   "lon": 85.054,
+   "approx": true
+  },
+  {
+   "name": "Parmanand Chhapra",
+   "name_hi": "परमानंद छपरा",
+   "lgd_code": null,
+   "panchayat": null,
+   "block": "Maker",
+   "district": "Saran",
+   "behind_km": [
+    9,
+    12
+   ],
+   "gauge": "Rewaghat",
+   "relief_camp_hi": "मध्य विद्यालय (नमूना)",
+   "relief_camp_en": "Middle school (sample)",
+   "wards": [
+    {
+     "ward": 3,
+     "households": 31
+    }
+   ],
+   "on_stretch": true,
+   "lat": 25.9745,
+   "lon": 85.0403,
+   "approx": true
+  },
+  {
+   "name": "Naukraha",
+   "name_hi": "नौकरहा",
+   "lgd_code": null,
+   "panchayat": null,
+   "block": "Maker",
+   "district": "Saran",
+   "behind_km": [
+    16,
+    19
+   ],
+   "gauge": "Rewaghat",
+   "relief_camp_hi": "ऊँचा खेल मैदान (नमूना)",
+   "relief_camp_en": "High playground (sample)",
+   "wards": [
+    {
+     "ward": 5,
+     "households": 19
+    }
+   ],
+   "on_stretch": true,
+   "lat": 25.9138,
+   "lon": 85.0658,
+   "approx": true
+  },
+  {
+   "name": "Dumariaghat",
+   "name_hi": "डुमरियाघाट",
+   "lgd_code": null,
+   "panchayat": null,
+   "block": null,
+   "district": "Gopalganj",
+   "behind_km": null,
+   "gauge": "Dumariaghat",
+   "relief_camp_hi": null,
+   "relief_camp_en": null,
+   "wards": [],
+   "on_stretch": false,
+   "lat": null,
+   "lon": null,
+   "approx": true
+  }
+ ],
+ "gauges": [
+  {
+   "site": "Rewaghat",
+   "site_hi": "रेवाघाट",
+   "river": "Gandak",
+   "district": "Saran",
+   "dl_m": 54.41,
+   "source": "FMISC"
+  },
+  {
+   "site": "Dumariaghat",
+   "site_hi": "डुमरियाघाट",
+   "river": "Gandak",
+   "district": "Gopalganj",
+   "dl_m": 62.22,
+   "hfl_m": 64.36,
+   "source": "CWC"
+  }
+ ],
+ "sample": true,
+ "_todo": "Fill lgd_code and panchayat from lgdirectory.gov.in; confirm Hindi names against LGD local-language names; sample flags on relief camps, wards and breach history. Village lat/lon are our estimates from built-up cells in ESA WorldCover (approx: true); replace with OpenStreetMap points from data/villages.csv."
+}

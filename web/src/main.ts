@@ -18,6 +18,7 @@ import { initWho } from "./sections/who";
 import { initControl } from "./sections/control";
 import { initGov } from "./sections/gov";
 import { initAws } from "./sections/aws";
+import { initJudge } from "./sections/judge";
 import { initFooter } from "./sections/footer";
 import { initLive } from "./sections/live";
 
@@ -54,6 +55,8 @@ async function main() {
     $(".live-strip .wrap").append(h(`<span class="mock-note solo" role="note">${bi("नमूना डेटा: API नहीं जुड़ा", "Sample data: API not connected")}</span>`));
   }
 
+  // The judge path needs none of the data below, so it works even if a feed is down.
+  initJudge();
   const [stretch, gauges, incidents] = await Promise.all([api.stretch(), api.gauges(), api.openIncidents()]);
 
   initLive(gauges);
