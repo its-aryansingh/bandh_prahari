@@ -18,6 +18,9 @@ ACTIONS = {
     "page": {"onway", "notmine"},
     "onsite": {"onsite"},
     "hold": {"holding", "secured", "breached"},
+    "help_ask": {"claim"},
+    "help_onsite": {"arrived", "rescued"},
+    "help_safe": {"rescued"},
 }
 
 _sfn = None

@@ -31,3 +31,7 @@ WORKER_FUNCTION = env("WORKER_FUNCTION", "")
 DELIVERY_FUNCTION_ARN = env("DELIVERY_FUNCTION_ARN", "")
 SCHEDULER_ROLE_ARN = env("SCHEDULER_ROLE_ARN", "")
 DELIVERY_CHECK_S = int(env("DELIVERY_CHECK_S", "120"))
+
+# The help run: its state machine, and real or demo clocks (demo: 1 / 2 / 10 minutes).
+HELP_MACHINE_ARN = env("HELP_MACHINE_ARN", "")
+HELP_CLOCKS = env("HELP_CLOCKS", "demo")

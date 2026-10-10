@@ -81,6 +81,9 @@ BUTTONS = {
     "breached": ("टूट गया", "Breached"),
     "holding": ("डटे हैं", "Holding"),
     "ready": ("हो गया", "Done"),
+    "claim": ("मैं जा रहा हूँ", "I'm going"),
+    "arrived": ("पहुँच गए", "We're here"),
+    "rescued": ("सुरक्षित", "Safe"),
 }
 
 

@@ -52,7 +52,14 @@ def plain(v: Any) -> Any:
 
 
 def inc_pk(incident_id: str) -> str:
-    return f"INC#{incident_id}"
+    """INC#<id> for an incident; HELP#<id> for a family's call for help, which has the same META/EV# shape."""
+    return f"HELP#{incident_id}" if incident_id.startswith("HELP-") else f"INC#{incident_id}"
+
+
+def _status_key(record_id: str, status: str) -> str:
+    """gsi1: STATUS#open|closed for incidents (the control room), HELPSTATUS#open|closed for help."""
+    closed = str(status).startswith("closed") or status == "rescued"
+    return f"{'HELPSTATUS' if record_id.startswith('HELP-') else 'STATUS'}#{'closed' if closed else 'open'}"
 
 
 def get_incident(incident_id: str) -> dict | None:
@@ -66,7 +73,7 @@ def put_incident(inc: dict) -> None:
         "SK": "META",
         **inc,
         # The control room's index: open incidents by priority, oldest first.
-        "gsi1pk": f"STATUS#{'open' if not str(inc.get('status', 'open')).startswith('closed') else 'closed'}",
+        "gsi1pk": _status_key(inc["id"], inc.get("status", "open")),
         "gsi1sk": f"{inc.get('priority', 'P3')}#{inc.get('opened', clock.iso())}",
     }
     table().put_item(Item=clean(item))
@@ -76,7 +83,7 @@ def update_incident(incident_id: str, **fields: Any) -> None:
     if not fields:
         return
     if "status" in fields:
-        fields["gsi1pk"] = f"STATUS#{'closed' if str(fields['status']).startswith('closed') else 'open'}"
+        fields["gsi1pk"] = _status_key(incident_id, fields["status"])
     names = {f"#{k}": k for k in fields}
     values = {f":{k}": v for k, v in clean(fields).items()}
     expr = "SET " + ", ".join(f"#{k} = :{k}" for k in fields)
@@ -111,10 +118,10 @@ def timeline(incident_id: str) -> list[dict]:
     return [{k: v for k, v in plain(i).items() if k not in ("PK", "SK")} for i in items]
 
 
-def open_incidents(limit: int = 50) -> list[dict]:
+def open_incidents(limit: int = 50, key: str = "STATUS#open") -> list[dict]:
     res = table().query(
         IndexName="gsi1",
-        KeyConditionExpression=Key("gsi1pk").eq("STATUS#open"),
+        KeyConditionExpression=Key("gsi1pk").eq(key),
         Limit=limit,
     )
     return [plain(i) for i in res.get("Items", [])]
