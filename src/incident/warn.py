@@ -11,6 +11,7 @@ from boto3.dynamodb.conditions import Key
 
 from channels import send_buttons, send_text
 from common import db, ids, roster, words
+from gov import cap
 
 LOUDSPEAKER = {"hi": "गाँव के लाउडस्पीकर पर चलाएँ।", "en": "Play it on the village loudspeaker."}
 
@@ -65,4 +66,12 @@ def handler(event: dict, _ctx=None) -> dict:
         cap_response=L["cap"],
     )
     db.update_incident(inc["id"], **{f"warned_{level}": True})
+    # The CAP 1.2 draft (status Exercise), published only on our own feed. A failed draft never
+    # stops a warning.
+    try:
+        row = cap.save(inc, level, camp_hi, camp_en)
+        if row:
+            db.event(inc["id"], "cap_draft", f"CAP ड्राफ़्ट (Exercise): {row['identifier']}", f"CAP draft (Exercise): {row['identifier']}", actor="system", cap=row["identifier"], level=level)
+    except Exception as e:  # noqa: BLE001
+        print({"cap_draft_failed": repr(e), "incident": inc["id"], "level": level})
     return {"level": level, "recipients": sent}

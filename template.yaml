@@ -200,6 +200,9 @@ Resources:
       Handler: incident.warn.handler
       Role: !GetAtt WarnRole.Arn
       LoggingConfig: { LogGroup: !Ref WarnLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref Bucket
   WarnLogs:
     Type: AWS::Logs::LogGroup
     Properties: { LogGroupName: /aws/lambda/bp-warn, RetentionInDays: 180 }
@@ -220,6 +223,9 @@ Resources:
               - Effect: Allow
                 Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem]
                 Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "${Bucket.Arn}/cap/*"
 
   PageFunction:
     Type: AWS::Serverless::Function
@@ -526,6 +532,165 @@ Resources:
               - Effect: Allow
                 Action: ssm:GetParameter
                 Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/tokens/control"
+
+  # ------------------------------------------------------------------ the government's own data
+  # Read gently on a schedule; a failed fetch keeps the last good reading.
+  SachetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-sachet
+      Description: SACHET's Bihar feed in, every 15 minutes; CWC alerts for our gauges, deduplicated
+      Handler: gov.sachet.handler
+      Timeout: 60
+      Role: !GetAtt SachetRole.Arn
+      LoggingConfig: { LogGroup: !Ref SachetLogs, LogFormat: JSON }
+      Events:
+        Every15Minutes:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(15 minutes)
+            RetryPolicy: { MaximumRetryAttempts: 0 }
+  SachetLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-sachet, RetentionInDays: 180 }
+  SachetRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: sachet
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt SachetLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem]
+                Resource: !GetAtt Table.Arn
+
+  FmiscFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-fmisc
+      Description: The department's Gandak gauges (FMISC layers 1 and 0), every three hours
+      Handler: gov.fmisc.handler
+      Timeout: 60
+      Role: !GetAtt FmiscRole.Arn
+      LoggingConfig: { LogGroup: !Ref FmiscLogs, LogFormat: JSON }
+      Events:
+        Every3Hours:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: rate(3 hours)
+            RetryPolicy: { MaximumRetryAttempts: 0 }
+  FmiscLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-fmisc, RetentionInDays: 180 }
+  FmiscRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: fmisc
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt FmiscLogs.Arn
+              - Effect: Allow
+                Action: dynamodb:PutItem
+                Resource: !GetAtt Table.Arn
+
+  GlofasFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-glofas
+      Description: GloFAS modelled discharge (Open-Meteo Flood API), every morning; a model, never an official reading
+      Handler: river.poll.handler
+      Timeout: 60
+      Role: !GetAtt GlofasRole.Arn
+      LoggingConfig: { LogGroup: !Ref GlofasLogs, LogFormat: JSON }
+      Events:
+        EveryMorning:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(10 6 * * ? *)
+            ScheduleExpressionTimezone: Asia/Kolkata
+            RetryPolicy: { MaximumRetryAttempts: 1 }
+  GlofasLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-glofas, RetentionInDays: 180 }
+  GlofasRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: glofas
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt GlofasLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:PutItem, dynamodb:BatchWriteItem]
+                Resource: !GetAtt Table.Arn
+
+  RiverApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-api-river
+      Description: GET /stretch, /gauges, /cap/rss.xml and /cap/{id}.xml (our Exercise drafts)
+      Handler: api.river.handler
+      Role: !GetAtt RiverApiRole.Arn
+      LoggingConfig: { LogGroup: !Ref RiverApiLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          BUCKET_NAME: !Ref Bucket
+      Events:
+        Stretch:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: /stretch }
+        Gauges:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: /gauges }
+        CapFeed:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: /cap/rss.xml }
+        CapOne:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: "/cap/{file}" }
+  RiverApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-api-river, RetentionInDays: 180 }
+  RiverApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: api-river
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt RiverApiLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query]
+                Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${Bucket.Arn}/cap/*"
 
 Outputs:
   ApiUrl:
