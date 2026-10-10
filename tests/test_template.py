@@ -19,12 +19,15 @@ TEMPLATE, _ = decode(str(ROOT / "template.yaml"))
 RES = TEMPLATE["Resources"]
 ASL_TEXT = (ROOT / "statemachine" / "incident.asl.json").read_text(encoding="utf-8")
 ASL = json.loads(ASL_TEXT)
+HELP_ASL_TEXT = (ROOT / "statemachine" / "help.asl.json").read_text(encoding="utf-8")
+HELP_ASL = json.loads(HELP_ASL_TEXT)
 WAIT = "arn:aws:states:::lambda:invoke.waitForTaskToken"
 
 # The only statements allowed Resource "*" (see the IAM notes at the top of template.yaml).
 STAR_OK = {
     ("DemoApiRole", "AnswerButtonNoResourceLevelPermissions"),
     ("WorkerRole", "AnswerButtonNoResourceLevelPermissions"),
+    ("HelpApiRole", "AnswerButtonNoResourceLevelPermissions"),
     ("IntakeRole", "UndeliveredNoResourceLevelPermissions"),
     ("DeliveryRole", "UndeliveredNoResourceLevelPermissions"),
 }
@@ -62,11 +65,16 @@ def test_incident_run_is_standard_never_express():
     sm = RES["IncidentRun"]["Properties"]
     assert sm["Type"] == "STANDARD"
     assert sm["DefinitionUri"] == "statemachine/incident.asl.json"
+    help_sm = RES["HelpRun"]["Properties"]
+    assert help_sm["Type"] == "STANDARD"
+    assert help_sm["DefinitionUri"] == "statemachine/help.asl.json"
 
 
 def test_every_substitution_in_the_asl_is_defined():
     used = set(re.findall(r"\$\{(\w+)\}", ASL_TEXT))
     assert used == set(RES["IncidentRun"]["Properties"]["DefinitionSubstitutions"])
+    help_used = set(re.findall(r"\$\{(\w+)\}", HELP_ASL_TEXT))
+    assert help_used == set(RES["HelpRun"]["Properties"]["DefinitionSubstitutions"])
 
 
 def test_every_function_has_its_own_role_and_a_180_day_log_group():
@@ -99,7 +107,7 @@ def test_no_star_in_iam_except_the_documented_ones():
 
 def test_only_the_judge_route_and_the_worker_can_answer():
     can_answer = {n for n, r in of_type("AWS::IAM::Role").items() for st in _statements(r) if "states:SendTaskSuccess" in st["Action"]}
-    assert can_answer == {"DemoApiRole", "WorkerRole"}
+    assert can_answer == {"DemoApiRole", "WorkerRole", "HelpApiRole"}
 
 
 def test_judge_routes_are_throttled():
@@ -128,6 +136,31 @@ def test_asl_passes_cfn_lint_step_functions_schema():
     # the ${...} substitutions are filled at deploy time; stand in a Lambda ARN
     filled = json.loads(re.sub(r"\$\{(\w+)\}", "arn:aws:lambda:ap-south-1:123456789012:function:bp-x", ASL_TEXT))
     jsonschema.Draft7Validator(schema).validate(filled)
+    filled_help = json.loads(re.sub(r"\$\{(\w+)\}", "arn:aws:lambda:ap-south-1:123456789012:function:bp-x", HELP_ASL_TEXT))
+    jsonschema.Draft7Validator(schema).validate(filled_help)
+
+
+def test_help_asl_reachability_and_waits():
+    states = HELP_ASL["States"]
+    seen, todo = set(), [HELP_ASL["StartAt"]]
+    while todo:
+        n = todo.pop()
+        if n in seen:
+            continue
+        seen.add(n)
+        s = states[n]
+        nxt = [s.get("Next"), s.get("Default")] + [c["Next"] for c in s.get("Choices", [])] + [c["Next"] for c in s.get("Catch", [])]
+        for x in filter(None, nxt):
+            assert x in states, (n, x)
+            todo.append(x)
+    assert seen == set(states)
+
+    waits = {n: s for n, s in states.items() if s.get("Resource") == WAIT}
+    assert set(waits) == {"AskNearestTeam", "AwaitTeamOnSite", "AwaitFamilySafe"}
+    for n, s in waits.items():
+        assert "TimeoutSeconds" not in s and s["TimeoutSecondsPath"].startswith("$.clocks."), n
+        assert s["Parameters"]["Payload"]["taskToken.$"] == "$$.Task.Token", n
+        assert s["Catch"][0]["ErrorEquals"] == ["States.ALL"], n
 
 
 def test_every_next_exists_and_every_state_is_reachable():

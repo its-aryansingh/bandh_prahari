@@ -993,6 +993,210 @@ Resources:
                 Action: ssm:GetParameter
                 Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/hook-secret"
 
+  # ------------------------------------------------------------------ Amazon Location Service (teams and help geofences)
+  LocationTracker:
+    Type: AWS::Location::Tracker
+    Properties:
+      TrackerName: bp-teams
+      Description: Tracker for relief teams
+
+  LocationGeofenceCollection:
+    Type: AWS::Location::GeofenceCollection
+    Properties:
+      CollectionName: bp-help
+      Description: Geofence collection for help requests
+
+  LocationTrackerConsumer:
+    Type: AWS::Location::TrackerConsumer
+    Properties:
+      TrackerName: bp-teams
+      ConsumerArn: !GetAtt LocationGeofenceCollection.Arn
+
+  # ------------------------------------------------------------------ the help run
+  HelpRun:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: bp-help
+      Type: STANDARD
+      DefinitionUri: statemachine/help.asl.json
+      DefinitionSubstitutions:
+        HelpFunctionArn: !GetAtt HelpFunction.Arn
+      Role: !GetAtt HelpRunRole.Arn
+
+  HelpRunRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: states.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition: { StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId } }
+      Policies:
+        - PolicyName: invoke-help-steps
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: !GetAtt HelpFunction.Arn
+
+  HelpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-help-step
+      Description: Steps of the help run (open, ask, onsite, safe, district, next, close)
+      Handler: help.run.handler
+      Role: !GetAtt HelpRole.Arn
+      LoggingConfig: { LogGroup: !Ref HelpLogs, LogFormat: JSON }
+  HelpLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-help-step, RetentionInDays: 180 }
+  HelpRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: help-step
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt HelpLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:Query]
+                Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: [geo:PutGeofence, geo:BatchDeleteGeofence]
+                Resource: !Sub "arn:${AWS::Partition}:geo:${AWS::Region}:${AWS::AccountId}:geofence-collection/bp-help"
+              - Effect: Allow
+                Action: geo:ListDevicePositions
+                Resource: !Sub "arn:${AWS::Partition}:geo:${AWS::Region}:${AWS::AccountId}:tracker/bp-teams"
+              - Effect: Allow
+                Action: social-messaging:SendWhatsAppMessage
+                Resource: !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:phone-number-id/${WhatsAppPhoneNumberHex}"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/teams/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/roster/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/token"
+
+  # ------------------------------------------------------------------ help & teams API
+  HelpApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-api-help
+      Description: GET /help, POST /help, POST /help/{id}/claim, POST /help/{id}/rescued
+      Handler: api.help.handler
+      Role: !GetAtt HelpApiRole.Arn
+      LoggingConfig: { LogGroup: !Ref HelpApiLogs, LogFormat: JSON }
+      Environment:
+        Variables:
+          HELP_MACHINE_ARN: !Ref HelpRun
+      Events:
+        GetHelp:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: /help }
+        PostHelp:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: POST, Path: /help }
+        ClaimHelp:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: POST, Path: "/help/{id}/claim" }
+        RescuedHelp:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: POST, Path: "/help/{id}/rescued" }
+  HelpApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-api-help, RetentionInDays: 180 }
+  HelpApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: api-help
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt HelpApiLogs.Arn
+              - Effect: Allow
+                Action: [dynamodb:GetItem, dynamodb:Query, dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:DeleteItem]
+                Resource: [!GetAtt Table.Arn, !Sub "${Table.Arn}/index/gsi1"]
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: !Ref HelpRun
+              - Sid: AnswerButtonNoResourceLevelPermissions
+                Effect: Allow
+                Action: [states:SendTaskSuccess, states:SendTaskFailure]
+                Resource: "*"
+              - Effect: Allow
+                Action: [geo:PutGeofence, geo:BatchDeleteGeofence]
+                Resource: !Sub "arn:${AWS::Partition}:geo:${AWS::Region}:${AWS::AccountId}:geofence-collection/bp-help"
+              - Effect: Allow
+                Action: geo:ListDevicePositions
+                Resource: !Sub "arn:${AWS::Partition}:geo:${AWS::Region}:${AWS::AccountId}:tracker/bp-teams"
+              - Effect: Allow
+                Action: social-messaging:SendWhatsAppMessage
+                Resource: !Sub "arn:${AWS::Partition}:social-messaging:${AWS::Region}:${AWS::AccountId}:phone-number-id/${WhatsAppPhoneNumberHex}"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource:
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/tokens/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/teams/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/roster/*"
+                  - !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/telegram/token"
+
+  TeamsApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bp-api-teams
+      Description: GET /teams, POST /teams/{id}/position
+      Handler: teams.position.handler
+      Role: !GetAtt TeamsApiRole.Arn
+      LoggingConfig: { LogGroup: !Ref TeamsApiLogs, LogFormat: JSON }
+      Events:
+        GetTeams:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: /teams }
+        PostPosition:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: POST, Path: "/teams/{id}/position" }
+  TeamsApiLogs:
+    Type: AWS::Logs::LogGroup
+    Properties: { LogGroupName: /aws/lambda/bp-api-teams, RetentionInDays: 180 }
+  TeamsApiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{ Effect: Allow, Principal: { Service: lambda.amazonaws.com }, Action: sts:AssumeRole }]
+      Policies:
+        - PolicyName: api-teams
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt TeamsApiLogs.Arn
+              - Effect: Allow
+                Action: dynamodb:GetItem
+                Resource: !GetAtt Table.Arn
+              - Effect: Allow
+                Action: [geo:ListDevicePositions, geo:BatchUpdateDevicePosition]
+                Resource: !Sub "arn:${AWS::Partition}:geo:${AWS::Region}:${AWS::AccountId}:tracker/bp-teams"
+              - Effect: Allow
+                Action: ssm:GetParameter
+                Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/tokens/*"
+
 Outputs:
   ApiUrl:
     Description: Put this in the site's VITE_API_BASE
@@ -1003,6 +1207,8 @@ Outputs:
     Value: !Ref Bucket
   IncidentRunArn:
     Value: !Ref IncidentRun
+  HelpRunArn:
+    Value: !Ref HelpRun
   InboundTopicArn:
     Description: Set this as the WhatsApp business account's event destination
     Value: !Ref InboundTopic

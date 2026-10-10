@@ -146,11 +146,12 @@ def choose(state, data):
 class Run:
     """run = Run(functions, responder, sfn); final = run.start(input)."""
 
-    def __init__(self, functions: dict, responder, sfn: FakeStepFunctions, name: str = "test"):
+    def __init__(self, functions: dict, responder, sfn: FakeStepFunctions, name: str = "test", asl: dict | None = None):
         self.functions = functions  # "PageFunctionArn" -> handler
         self.responder = responder  # (state_name, payload, handler_result, run) -> None
         self.sfn = sfn
         self.name = name
+        self.asl = asl or ASL
         self.entered: list[str] = []
         self.waits: list[dict] = []
         self.tokens = 0
@@ -191,9 +192,9 @@ class Run:
 
     def start(self, data: dict, max_steps: int = 500) -> dict:
         ctx = {"Execution": {"Id": f"arn:aws:states:ap-south-1:123456789012:execution:bp-incident:{self.name}"}}
-        name = ASL["StartAt"]
+        name = self.asl["StartAt"]
         for _ in range(max_steps):
-            state = ASL["States"][name]
+            state = self.asl["States"][name]
             self.entered.append(name)
             t = state["Type"]
             if t == "Succeed":
