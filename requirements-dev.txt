@@ -1,0 +1,6 @@
+# Tools for tests and lint (not deployed). The Lambdas use only the runtime's boto3 so far.
+pytest>=8
+moto[dynamodb,s3]>=5
+cfn-lint>=1.30
+aws-sam-cli>=1.130
+boto3

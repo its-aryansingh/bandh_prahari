@@ -1,0 +1,41 @@
+{
+ "_note": "Sample relief teams for the demo (no member names). base = where each team starts if the tracker has no position yet.",
+ "teams": [
+  {
+   "id": "T-BOAT-1",
+   "kind": "boat",
+   "name_hi": "आपदा मित्र नाव",
+   "name_en": "Aapda Mitra boat",
+   "crew": 3,
+   "speed_kmh": 8,
+   "base": [
+    25.9529,
+    85.0599
+   ]
+  },
+  {
+   "id": "T-TRAC-1",
+   "kind": "tractor",
+   "name_hi": "बाँध एम्बुलेंस",
+   "name_en": "Embankment ambulance",
+   "crew": 10,
+   "speed_kmh": 10,
+   "base": [
+    25.9647,
+    85.0638
+   ]
+  },
+  {
+   "id": "T-SDRF-1",
+   "kind": "sdrf",
+   "name_hi": "SDRF मोटरबोट",
+   "name_en": "SDRF motorboat",
+   "crew": 6,
+   "speed_kmh": 9,
+   "base": [
+    25.9392,
+    85.0756
+   ]
+  }
+ ]
+}

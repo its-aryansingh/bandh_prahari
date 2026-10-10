@@ -1,0 +1,313 @@
+{
+  "Comment": "The help run: the nearest free team is asked; a claim starts a 20-minute clock; a late team brings in the next. docs/SPEC.md, 'The help run'.",
+  "StartAt": "OpenHelpRequest",
+  "States": {
+    "OpenHelpRequest": {
+      "Type": "Task",
+      "Resource": "${HelpFunctionArn}",
+      "Parameters": {
+        "step": "open",
+        "help.$": "$.help"
+      },
+      "ResultPath": "$.opened",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "AskNearestTeam",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "AskNearestTeam"
+        }
+      ]
+    },
+    "AskNearestTeam": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${HelpFunctionArn}",
+        "Payload": {
+          "step": "ask",
+          "taskToken.$": "$$.Task.Token",
+          "help.$": "$.help",
+          "timeout.$": "$.clocks.ask"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.ask",
+      "ResultPath": "$.claim",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "AlertDistrictControlRoom"
+        }
+      ],
+      "Next": "AwaitTeamOnSite"
+    },
+    "AlertDistrictControlRoom": {
+      "Type": "Task",
+      "Resource": "${HelpFunctionArn}",
+      "Parameters": {
+        "step": "district",
+        "help.$": "$.help",
+        "previous.$": "$.previous"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "CountAsks",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "CountAsks"
+        }
+      ]
+    },
+    "CountAsks": {
+      "Type": "Pass",
+      "Parameters": {
+        "asks.$": "States.MathAdd($.counts.asks, 1)",
+        "next.$": "$.counts.next"
+      },
+      "ResultPath": "$.counts",
+      "Next": "AskAgain"
+    },
+    "AskAgain": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.counts.asks",
+          "NumericLessThanPath": "$.limits.asks",
+          "Next": "AskNearestTeam"
+        }
+      ],
+      "Default": "MarkWithDistrict"
+    },
+    "AwaitTeamOnSite": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${HelpFunctionArn}",
+        "Payload": {
+          "step": "onsite",
+          "taskToken.$": "$$.Task.Token",
+          "help.$": "$.help",
+          "timeout.$": "$.clocks.onsite",
+          "claim.$": "$.claim"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.onsite",
+      "ResultPath": "$.arrival",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "AskNextTeam"
+        }
+      ],
+      "Next": "RescuedAlready"
+    },
+    "AskNextTeam": {
+      "Type": "Task",
+      "Resource": "${HelpFunctionArn}",
+      "Parameters": {
+        "step": "next",
+        "help.$": "$.help"
+      },
+      "ResultPath": null,
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "CountNext",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "CountNext"
+        }
+      ]
+    },
+    "CountNext": {
+      "Type": "Pass",
+      "Parameters": {
+        "next.$": "States.MathAdd($.counts.next, 1)",
+        "asks.$": "$.counts.asks"
+      },
+      "ResultPath": "$.counts",
+      "Next": "NextAgain"
+    },
+    "NextAgain": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.counts.next",
+          "NumericLessThanPath": "$.limits.next",
+          "Next": "AwaitTeamOnSite"
+        }
+      ],
+      "Default": "MarkWithDistrict"
+    },
+    "RescuedAlready": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.arrival.action",
+          "StringEquals": "rescued",
+          "Next": "MarkRescued"
+        }
+      ],
+      "Default": "AwaitFamilySafe"
+    },
+    "AwaitFamilySafe": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${HelpFunctionArn}",
+        "Payload": {
+          "step": "safe",
+          "taskToken.$": "$$.Task.Token",
+          "help.$": "$.help",
+          "timeout.$": "$.clocks.safe",
+          "arrival.$": "$.arrival"
+        }
+      },
+      "TimeoutSecondsPath": "$.clocks.safe",
+      "ResultPath": "$.safe",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.previous",
+          "Next": "MarkWithDistrict"
+        }
+      ],
+      "Next": "MarkRescued"
+    },
+    "MarkRescued": {
+      "Type": "Pass",
+      "Result": {
+        "outcome": "rescued"
+      },
+      "ResultPath": "$.end",
+      "Next": "CloseHelpRequest"
+    },
+    "MarkWithDistrict": {
+      "Type": "Pass",
+      "Result": {
+        "outcome": "district"
+      },
+      "ResultPath": "$.end",
+      "Next": "CloseHelpRequest"
+    },
+    "CloseHelpRequest": {
+      "Type": "Task",
+      "Resource": "${HelpFunctionArn}",
+      "Parameters": {
+        "step": "close",
+        "help.$": "$.help",
+        "outcome.$": "$.end.outcome"
+      },
+      "ResultPath": "$.closed",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2
+        }
+      ],
+      "Next": "Done"
+    },
+    "Done": {
+      "Type": "Succeed"
+    }
+  }
+}
