@@ -101,3 +101,11 @@ Rules:
 - Section fade-ups and hover tilts on every card are the generic default; removed. Motion is kept for the hero moment, the replay and responses to taps.
 - The brief asks for cards; the SaaS card kit (same radius, same grey shadow) is the generic version. Cards here differ by what they are.
 - Generic sans pairs were rejected for Yatra One (painted railway signage) and Baloo 2.
+
+## The live map (सजीव नक़्शा)
+
+- **A painting in a frame.** The canvas draws a hatched double border; inside it the stretch is a blocky isometric diorama: kachni (line) hatching on the fields, wave lines on water, Madhubani fish in the river, mango, taad and bamboo trees, khapda-roof huts on built-up cells, white kilometre stones with a kesar cap, the painted staff gauge. Relief is exaggerated so 11 m of height reads.
+- **Colours keep their meaning.** Water is gandak: the river full strength, the what-if flood lighter with waves, the water a satellite saw pale with crossed lines. Help pins use the level colours for state only: sindoor waiting, kesar on the way, haldi arrived, dhaan safe. Everything else is a tint.
+- **Motion explains a change.** The water rising through the blocks, teams driving their routes, the ring on a pin that is still waiting, the 90° turn. With reduced motion the water jumps to its level and the rings stop.
+- **Honest labels on the stage.** Sample (teams, requests, camps), approximate (the bank line, the villages' places), and the satellite pass's date with a note that satellites come back every few days.
+- **Privacy is visible.** The public (family) view shows counts per village, never pins.
