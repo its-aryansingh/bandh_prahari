@@ -28,6 +28,11 @@ export interface Village {
   relief_camp_en: string | null;
   wards: { ward: number; households: number }[];
   on_stretch: boolean;
+  /** Approximate centre of the settlement, for the live map. Null until filled from OpenStreetMap. */
+  lat?: number | null;
+  lon?: number | null;
+  /** True while lat/lon is our estimate from built-up cells, not a surveyed point. */
+  approx?: boolean;
 }
 
 export interface Segment {
@@ -181,4 +186,120 @@ export interface NewIncident {
   village: string;
   caller?: string;
   note?: string;
+}
+
+// ---------- The live map (GET /map/{stretch}), help requests and relief teams ----------
+
+/** A satellite pass reduced to the map grid: percent of each cell seen as water (and cloud, for optical). */
+export interface SatPass {
+  id: string;
+  date: string;
+  cloud_cover?: number;
+  water: number[];
+  cloud?: number[];
+}
+
+/** The stretch as a grid of about 200 m cells, built from AWS Open Data (tools/build_map.py, then the daily Lambda). */
+export interface MapGrid {
+  stretch?: string;
+  /** West, south, east, north in degrees. */
+  bbox: [number, number, number, number];
+  cols: number;
+  rows: number;
+  cell_m: number;
+  /** Copernicus DEM GLO-30, decimetres, row-major from the north-west corner. */
+  elev_dm: number[];
+  /** ESA WorldCover class of the cell (10 trees, 30 grass, 40 crop, 50 built, 60 bare, 80 water, 90 wetland). */
+  cls: number[];
+  /** Percent of the cell's 10 m pixels that are built-up. */
+  built: number[];
+  /** Sentinel-2 L2A optical pass: water from NDWI, cloud from the SCL band. */
+  s2: SatPass | null;
+  /** Sentinel-1 GRD radar pass: sees through cloud. Null until the daily Lambda runs with the account's credentials. */
+  s1?: SatPass | null;
+  sources: Record<string, string>;
+  built_at: string;
+}
+
+export type HelpStatus = "open" | "paged" | "claimed" | "arrived" | "rescued";
+export type HelpNeed = "boat" | "medical" | "food" | "animals";
+
+/** A family's call for help. No names and no phone numbers, ever: counts and a pin. */
+export interface HelpRequest {
+  id: string;
+  village: string;
+  /** Present only for relief and district callers; the public view gets counts per village. */
+  lat?: number;
+  lon?: number;
+  people: number;
+  elderly?: number;
+  children?: number;
+  needs: HelpNeed[];
+  channel: "whatsapp" | "helpline" | "web";
+  status: HelpStatus;
+  team?: string | null;
+  raised: string;
+  claimed?: string | null;
+  /** When the team must arrive by (claim time + 20 minutes); passing it climbs to the next team. */
+  deadline?: string | null;
+  arrived?: string | null;
+  rescued?: string | null;
+  climbs?: number;
+  sample: boolean;
+}
+
+export interface HelpCount {
+  village: string;
+  open: number;
+  on_the_way: number;
+  safe: number;
+}
+
+export interface HelpList {
+  as_of: string;
+  sample: boolean;
+  /** Always present: what the public view shows. */
+  by_village: HelpCount[];
+  /** Exact requests, only for a relief or district token. */
+  requests?: HelpRequest[];
+}
+
+export interface NewHelp {
+  lat: number;
+  lon: number;
+  people: number;
+  elderly?: number;
+  children?: number;
+  needs?: HelpNeed[];
+  channel: "whatsapp" | "helpline" | "web";
+}
+
+export type TeamKind = "boat" | "tractor" | "sdrf";
+
+export interface Team {
+  id: string;
+  kind: TeamKind;
+  name_hi: string;
+  name_en: string;
+  crew: number;
+  lat: number;
+  lon: number;
+  /** Time of the last position from the Amazon Location tracker. */
+  at: string;
+  status: "free" | "on_the_way" | "on_site";
+  help_id?: string | null;
+  sample: boolean;
+}
+
+export interface Teams {
+  as_of: string;
+  sample: boolean;
+  teams: Team[];
+}
+
+export interface TeamPosition {
+  lat: number;
+  lon: number;
+  accuracy_m?: number;
+  at: string;
 }

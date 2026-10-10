@@ -197,7 +197,10 @@
      "households": 25
     }
    ],
-   "on_stretch": true
+   "on_stretch": true,
+   "lat": 25.9529,
+   "lon": 85.054,
+   "approx": true
   },
   {
    "name": "Parmanand Chhapra",
@@ -219,7 +222,10 @@
      "households": 31
     }
    ],
-   "on_stretch": true
+   "on_stretch": true,
+   "lat": 25.9745,
+   "lon": 85.0403,
+   "approx": true
   },
   {
    "name": "Naukraha",
@@ -241,7 +247,10 @@
      "households": 19
     }
    ],
-   "on_stretch": true
+   "on_stretch": true,
+   "lat": 25.9138,
+   "lon": 85.0658,
+   "approx": true
   },
   {
    "name": "Dumariaghat",
@@ -255,7 +264,10 @@
    "relief_camp_hi": null,
    "relief_camp_en": null,
    "wards": [],
-   "on_stretch": false
+   "on_stretch": false,
+   "lat": null,
+   "lon": null,
+   "approx": true
   }
  ],
  "gauges": [
@@ -278,5 +290,5 @@
   }
  ],
  "sample": true,
- "_todo": "Fill lgd_code and panchayat from lgdirectory.gov.in; confirm Hindi names against LGD local-language names; sample flags on relief camps, wards and breach history."
+ "_todo": "Fill lgd_code and panchayat from lgdirectory.gov.in; confirm Hindi names against LGD local-language names; sample flags on relief camps, wards and breach history. Village lat/lon are our estimates from built-up cells in ESA WorldCover (approx: true); replace with OpenStreetMap points from data/villages.csv."
 }
