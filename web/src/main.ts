@@ -50,10 +50,8 @@ async function main() {
   initLang();
   $("#brand-mark").innerHTML = logoMark();
   if (usingMocks) {
-    document.body.append(
-      h(`<p class="stamp neel mock-stamp" role="note">${bi("नमूना डेटा: API नहीं जुड़ा", "Sample data: API not connected")}</p>`),
-    );
-    document.querySelector(".mock-stamp")?.classList.add("solo");
+    // said once, in the strip at the top, so it never covers the page
+    $(".live-strip .wrap").append(h(`<span class="mock-note solo" role="note">${bi("नमूना डेटा: API नहीं जुड़ा", "Sample data: API not connected")}</span>`));
   }
 
   const [stretch, gauges, incidents] = await Promise.all([api.stretch(), api.gauges(), api.openIncidents()]);

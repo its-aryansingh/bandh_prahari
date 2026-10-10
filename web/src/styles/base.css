@@ -43,7 +43,10 @@ html[data-lang="both"] .bi > .en {
   margin-top: 0.3em;
   text-shadow: none;
 }
-html[data-lang="both"] .display.bi > .en { font-size: max(17px, 0.4em); font-weight: 700; margin-top: 0.45em; }
+/* under a painted heading the English stays a small caption: plain, unshaded, never competing */
+html[data-lang="both"] .display.bi > .en { font-size: max(15px, min(0.34em, 20px)); font-weight: 600; margin-top: 0.5em; line-height: 1.35; }
+/* inline English beside a Hindi label is always the reading font, unshaded */
+html[data-lang="both"] .il > .en { font-family: var(--font-ui); font-weight: 600; text-shadow: none; letter-spacing: 0; }
 html[data-lang="both"] .bi.en-quiet > .en { font-size: 0.86em; font-weight: 500; }
 html[data-lang="both"] .pair > .en {
   display: block;
@@ -55,6 +58,11 @@ html[data-lang="en"] .bi > .en { display: block; }
 /* SVG labels that should show English when both languages are on (diagrams judges must read) */
 html[data-lang="both"] svg .en.en-both { display: inline; }
 html[data-lang="both"] svg .hi.hi-only { display: none; }
+/* English sub-labels drawn under Hindi in diagrams: only when both languages show */
+svg .both-only { display: none; }
+html[data-lang="both"] svg .both-only { display: inline; }
+html[data-lang="both"] .lnode .l-main { transform: translateY(-4px); }
+html[data-lang="both"] .gnode .g-rows { transform: translateY(-7px); }
 
 /* ---------- layout ---------- */
 .wrap { width: min(var(--page), 100% - 2 * var(--gutter)); margin-inline: auto; }
@@ -73,6 +81,7 @@ html[data-lang="both"] svg .hi.hi-only { display: none; }
   letter-spacing: 0;
   /* the sign painter's drop shade */
   text-shadow: 0.045em 0.05em 0 var(--shade, var(--kesar));
+  text-wrap: balance;
 }
 .h1 { font-size: clamp(38px, 5.2vw, 66px); }
 .h2 { font-size: clamp(32px, 4.6vw, 52px); }

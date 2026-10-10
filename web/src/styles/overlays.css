@@ -133,19 +133,35 @@ html[data-lang="both"] .th-now .msg .en { display: block; font-size: 14px; color
 }
 
 .th-tabs { display: none; }
+.mini-phone .phone-top .il > .en, .mini-phone .phone-top .il > .en::before { color: var(--dhaan-tint); }
 @media (max-width: 1099px) {
   .th-body { grid-template-columns: minmax(0, 1fr); }
+  /* one column in the order a phone needs: the stage, what's happening, the phones, then the machinery */
+  .th-body { grid-auto-rows: max-content; align-content: start; }
+  .th-center, .th-side { display: contents; }
+  .th-stage { order: 1; }
+  .th-now { order: 2; }
+  .th-tabs { order: 3; }
+  .th-panel { order: 4; }
+  .th-ladder { order: 5; overflow-x: auto; }
+  .th-ladder > svg { min-width: 700px; }
+  .sfn-wrap { order: 6; }
   .th-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
   .th-tabs button { flex: none; min-height: 40px; padding: 4px 14px; border-radius: 999px; border: 2px solid var(--chuna); background: transparent; color: var(--chuna); font: 700 15px/1.1 var(--font-ui); }
   .th-tabs button[aria-selected="true"] { background: var(--chuna); color: var(--neel); }
   .th-panel { display: none; }
   .th-panel.show { display: grid; }
-  .th-side { order: 2; }
   .mini-phone .thread { max-height: 52vh; }
   .th-log { min-height: 300px; max-height: 52vh; }
 }
 
-.th-bottom { padding: 8px clamp(12px, 2vw, 22px) 12px; border-top: 2px solid rgba(255, 253, 248, 0.2); display: grid; grid-template-columns: auto auto 1fr auto; gap: 10px; align-items: center; }
+.th-bottom { padding: 8px clamp(12px, 2vw, 22px) 12px; border-top: 2px solid rgba(255, 253, 248, 0.2); display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+@media (max-width: 700px) {
+  .th-bottom { grid-template-columns: auto auto minmax(0, 1fr); padding-bottom: 8px; }
+  .th-bottom > .tiny { grid-column: 1 / -1; max-width: none !important; text-align: center; order: 4; }
+  .th-top { gap: 8px; }
+  .th-top .icon-btn { width: 40px; height: 40px; }
+}
 .th-play { width: 52px; height: 52px; border-radius: 50%; border: 2.5px solid var(--neel); background: var(--kesar); color: var(--neel); display: grid; place-items: center; box-shadow: 3px 3px 0 var(--chuna); }
 .th-play .ic { width: 24px; height: 24px; }
 .scrub { position: relative; height: 44px; }
@@ -204,3 +220,4 @@ html[data-lang="both"] .th-now .msg .en { display: block; font-size: 14px; color
 .zoom .dots span { display: grid; place-items: center; aspect-ratio: 1.4; border: 2px solid var(--neel); border-radius: 10px; background: var(--white); font-weight: 700; font-size: 14px; }
 .zoom .dots span.on { background: var(--dhaan); color: var(--white); }
 .zoom .icon-btn { position: absolute; right: 12px; top: 12px; color: var(--neel); border-color: var(--neel); }
+html[data-lang="both"] .th-tabs .il > .en, html[data-lang="both"] .th-tabs .il > .en::before { color: inherit; opacity: 0.8; }
