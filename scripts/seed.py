@@ -70,6 +70,33 @@ def items(region: str, with_allowlist: bool = True) -> list[dict]:
             allow.setdefault(phone_hash(phone), set()).add(role)
         # ALLOW#<sha256>: the numbers that may ever get a page or a warning, and the roles they play
         out.extend({"PK": f"ALLOW#{h}", "SK": "META", "why": "demo roster", "roles": sorted(r)} for h, r in allow.items())
+    out.extend(replay_items())
+    return out
+
+
+def replay_items() -> list[dict]:
+    """Finished run INC-0930-14 for the night the page replays (docs/SPEC.md)."""
+    replay_file = ROOT / "data" / "replay.json"
+    if not replay_file.exists():
+        return []
+    rep = json.loads(replay_file.read_text(encoding="utf-8"))
+    inc = rep.get("incident", {})
+    inc_id = inc.get("id", "INC-0930-14")
+    out = [
+        {
+            "PK": f"INC#{inc_id}",
+            "SK": "META",
+            **inc,
+            "execution": rep.get("execution"),
+            "gsi1pk": "STATUS#closed",
+            "gsi1sk": f"{inc.get('priority', 'P1')}#{inc.get('opened', '2026-09-29T23:40:12+05:30')}",
+        }
+    ]
+    for idx, ev in enumerate(rep.get("events", [])):
+        at = ev.get("at", "")
+        kind = ev.get("kind", "")
+        sk = f"EV#{at}#{idx:04d}#{kind}"
+        out.append({"PK": f"INC#{inc_id}", "SK": sk, **ev})
     return out
 
 

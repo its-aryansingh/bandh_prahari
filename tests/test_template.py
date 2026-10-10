@@ -17,7 +17,7 @@ from cfnlint.decode import decode
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE, _ = decode(str(ROOT / "template.yaml"))
 RES = TEMPLATE["Resources"]
-ASL_TEXT = (ROOT / "statemachine" / "incident.asl.json").read_text()
+ASL_TEXT = (ROOT / "statemachine" / "incident.asl.json").read_text(encoding="utf-8")
 ASL = json.loads(ASL_TEXT)
 WAIT = "arn:aws:states:::lambda:invoke.waitForTaskToken"
 
@@ -165,7 +165,7 @@ def test_get_ready_does_not_wait_for_anyone():
 
 
 def test_state_names_match_the_spec():
-    spec = (ROOT / "docs" / "SPEC.md").read_text()
+    spec = (ROOT / "docs" / "SPEC.md").read_text(encoding="utf-8")
     for name in re.findall(r"^\| `(\w+)` \|", spec[spec.index("## The incident run") : spec.index("## The agent")], re.M):
         assert name in ASL["States"], name
 

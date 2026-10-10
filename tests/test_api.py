@@ -171,3 +171,30 @@ def test_execution_view_hides_the_account_id(sfn, monkeypatch):
     monkeypatch.setattr(public, "_sfn", X())
     x = json.loads(public.handler(ev("GET /incidents/{id}/execution", path={"id": inc["id"]}))["body"])
     assert "123456789012" not in x["executionArn"]
+
+
+def test_replay_seeded_run_timeline_and_execution(aws):
+    from pathlib import Path
+    import sys
+    scripts_dir = str(Path(__file__).resolve().parent.parent / "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+    import seed
+
+    for item in seed.replay_items():
+        db.table().put_item(Item=db.clean(item))
+
+    res_tl = public.handler(ev("GET /incidents/{id}/timeline", path={"id": "INC-0930-14"}))
+    assert res_tl["statusCode"] == 200
+    tl = json.loads(res_tl["body"])
+    assert tl["incident"]["id"] == "INC-0930-14"
+    assert tl["incident"]["reenactment"] is True
+    assert len(tl["events"]) > 20
+
+    res_ex = public.handler(ev("GET /incidents/{id}/execution", path={"id": "INC-0930-14"}))
+    assert res_ex["statusCode"] == 200
+    ex = json.loads(res_ex["body"])
+    assert ex["sample"] is True
+    assert any(s["name"] == "OpenIncident" for s in ex["states"])
+    assert any(s["name"] == "PageJuniorEngineer" and s["status"] == "timed_out" for s in ex["states"])
+

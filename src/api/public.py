@@ -10,6 +10,8 @@ import json
 import re
 import time
 
+from pathlib import Path
+
 import boto3
 from botocore.exceptions import ClientError
 
@@ -112,6 +114,12 @@ def execution(incident_id: str) -> dict | None:
     inc = db.get_incident(incident_id)
     if not inc or not inc.get("execution_arn"):
         return None
+    if inc.get("sample") or inc.get("execution_arn") == "sample" or incident_id == "INC-0930-14":
+        if inc.get("execution"):
+            return inc["execution"]
+        p = Path(__file__).parent / "replay_execution.json"
+        if p.exists():
+            return json.loads(p.read_text(encoding="utf-8"))
     hit = _cache.get(incident_id)
     if hit and time.time() - hit[0] < CACHE_S:
         return hit[1]
@@ -155,10 +163,10 @@ def timeline(incident_id: str) -> dict | None:
             "priority": inc.get("priority"),
             "status": inc.get("status"),
             "villages": inc.get("villages", []),
-            "reenactment": False,
+            "reenactment": bool(inc.get("reenactment", False)),
             "demo": bool(inc.get("demo")),
-            "note_hi": "डेमो: स्क्रीन पर बने फ़ोन, कोई असली फ़ोन नहीं।" if inc.get("demo") else "",
-            "note_en": "Demo: the phones drawn on screen, no real phone." if inc.get("demo") else "",
+            "note_hi": inc.get("note_hi") or ("डेमो: स्क्रीन पर बने फ़ोन, कोई असली फ़ोन नहीं।" if inc.get("demo") else ""),
+            "note_en": inc.get("note_en") or ("Demo: the phones drawn on screen, no real phone." if inc.get("demo") else ""),
         },
         "events": events if inc.get("demo") else [_redact(e) for e in events],
     }

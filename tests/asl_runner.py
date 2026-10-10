@@ -20,7 +20,7 @@ from pathlib import Path
 
 from botocore.exceptions import ClientError
 
-ASL = json.loads((Path(__file__).resolve().parent.parent / "statemachine" / "incident.asl.json").read_text())
+ASL = json.loads((Path(__file__).resolve().parent.parent / "statemachine" / "incident.asl.json").read_text(encoding="utf-8"))
 WAIT_RESOURCE = "arn:aws:states:::lambda:invoke.waitForTaskToken"
 MATH_ADD = re.compile(r"^States\.MathAdd\((\$[\w.]*),\s*(-?\d+)\)$")
 
