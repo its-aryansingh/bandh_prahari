@@ -1,0 +1,288 @@
+{
+  "events": [
+    {
+      "timestamp": "2026-10-10T06:00:00.123000+00:00",
+      "type": "ExecutionStarted",
+      "id": 1,
+      "previousEventId": 0,
+      "executionStartedEventDetails": {
+        "input": "{\"incident\":{\"id\":\"INC-1010-0600-14-abc\",\"km\":14,\"sign\":\"boil_soil\",\"priority\":\"P1\"}}",
+        "inputDetails": { "truncated": false },
+        "roleArn": "arn:aws:iam::123456789012:role/bp-incident-role"
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:00.200000+00:00",
+      "type": "TaskStateEntered",
+      "id": 2,
+      "previousEventId": 1,
+      "stateEnteredEventDetails": {
+        "name": "OpenIncident",
+        "input": "{\"incident\":{\"id\":\"INC-1010-0600-14-abc\",\"km\":14}}",
+        "inputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:00.250000+00:00",
+      "type": "LambdaFunctionScheduled",
+      "id": 3,
+      "previousEventId": 2,
+      "lambdaFunctionScheduledEventDetails": {
+        "resource": "arn:aws:lambda:ap-south-1:123456789012:function:bp-incident-open"
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:00.300000+00:00",
+      "type": "LambdaFunctionStarted",
+      "id": 4,
+      "previousEventId": 3
+    },
+    {
+      "timestamp": "2026-10-10T06:00:01.100000+00:00",
+      "type": "LambdaFunctionSucceeded",
+      "id": 5,
+      "previousEventId": 4,
+      "lambdaFunctionSucceededEventDetails": {
+        "output": "{\"status\":\"open\"}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:01.150000+00:00",
+      "type": "TaskStateExited",
+      "id": 6,
+      "previousEventId": 5,
+      "stateExitedEventDetails": {
+        "name": "OpenIncident",
+        "output": "{\"status\":\"open\"}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:01.200000+00:00",
+      "type": "ChoiceStateEntered",
+      "id": 7,
+      "previousEventId": 6,
+      "stateEnteredEventDetails": {
+        "name": "IsItP1",
+        "input": "{\"status\":\"open\"}",
+        "inputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:01.220000+00:00",
+      "type": "ChoiceStateExited",
+      "id": 8,
+      "previousEventId": 7,
+      "stateExitedEventDetails": {
+        "name": "IsItP1",
+        "output": "{\"status\":\"open\"}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:01.300000+00:00",
+      "type": "TaskStateEntered",
+      "id": 9,
+      "previousEventId": 8,
+      "stateEnteredEventDetails": {
+        "name": "WarnVillagesGetReady",
+        "input": "{\"status\":\"open\"}",
+        "inputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:01.350000+00:00",
+      "type": "LambdaFunctionScheduled",
+      "id": 10,
+      "previousEventId": 9,
+      "lambdaFunctionScheduledEventDetails": {
+        "resource": "arn:aws:lambda:ap-south-1:123456789012:function:bp-incident-warn"
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:01.400000+00:00",
+      "type": "LambdaFunctionStarted",
+      "id": 11,
+      "previousEventId": 10
+    },
+    {
+      "timestamp": "2026-10-10T06:00:02.000000+00:00",
+      "type": "LambdaFunctionSucceeded",
+      "id": 12,
+      "previousEventId": 11,
+      "lambdaFunctionSucceededEventDetails": {
+        "output": "{\"warned\":true}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:02.050000+00:00",
+      "type": "TaskStateExited",
+      "id": 13,
+      "previousEventId": 12,
+      "stateExitedEventDetails": {
+        "name": "WarnVillagesGetReady",
+        "output": "{\"warned\":true}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:02.100000+00:00",
+      "type": "TaskStateEntered",
+      "id": 14,
+      "previousEventId": 13,
+      "stateEnteredEventDetails": {
+        "name": "PageJuniorEngineer",
+        "input": "{\"incident\":{\"id\":\"INC-1010-0600-14-abc\"},\"clocks\":{\"page\":60}}",
+        "inputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:02.150000+00:00",
+      "type": "TaskScheduled",
+      "id": 15,
+      "previousEventId": 14,
+      "taskScheduledEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke.waitForTaskToken",
+        "region": "ap-south-1",
+        "parameters": "{\"FunctionName\":\"bp-incident-page\",\"Payload\":{\"taskToken\":\"AAAAKgAAAAIAAAAAAAAAAY1234567890SECRET_TASK_TOKEN==\",\"incident\":{\"id\":\"INC-1010-0600-14-abc\"}}}"
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:00:02.200000+00:00",
+      "type": "TaskStarted",
+      "id": 16,
+      "previousEventId": 15,
+      "taskStartedEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke.waitForTaskToken"
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:02.300000+00:00",
+      "type": "TaskTimedOut",
+      "id": 17,
+      "previousEventId": 16,
+      "taskTimedOutEventDetails": {
+        "error": "States.Timeout",
+        "cause": null
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:02.350000+00:00",
+      "type": "TaskStateExited",
+      "id": 18,
+      "previousEventId": 17,
+      "stateExitedEventDetails": {
+        "name": "PageJuniorEngineer",
+        "output": "{\"error\":\"States.Timeout\"}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:02.400000+00:00",
+      "type": "TaskStateEntered",
+      "id": 19,
+      "previousEventId": 18,
+      "stateEnteredEventDetails": {
+        "name": "PageAssistantEngineer",
+        "input": "{\"incident\":{\"id\":\"INC-1010-0600-14-abc\"},\"clocks\":{\"page\":60}}",
+        "inputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:02.450000+00:00",
+      "type": "TaskScheduled",
+      "id": 20,
+      "previousEventId": 19,
+      "taskScheduledEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke.waitForTaskToken",
+        "region": "ap-south-1",
+        "parameters": "{\"FunctionName\":\"bp-incident-page\",\"Payload\":{\"taskToken\":\"AAAAKgAAAAIAAAAAAAAAAZ9876543210SECRET_TASK_TOKEN==\",\"incident\":{\"id\":\"INC-1010-0600-14-abc\"}}}"
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:02.500000+00:00",
+      "type": "TaskStarted",
+      "id": 21,
+      "previousEventId": 20,
+      "taskStartedEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke.waitForTaskToken"
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:25.100000+00:00",
+      "type": "TaskSucceeded",
+      "id": 22,
+      "previousEventId": 21,
+      "taskSucceededEventDetails": {
+        "resourceType": "lambda",
+        "resource": "invoke.waitForTaskToken",
+        "output": "{\"ok\":true,\"action\":\"onway\",\"actor\":\"assistant_engineer\"}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:25.150000+00:00",
+      "type": "TaskStateExited",
+      "id": 23,
+      "previousEventId": 22,
+      "stateExitedEventDetails": {
+        "name": "PageAssistantEngineer",
+        "output": "{\"ok\":true,\"action\":\"onway\"}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:25.200000+00:00",
+      "type": "TaskStateEntered",
+      "id": 24,
+      "previousEventId": 23,
+      "stateEnteredEventDetails": {
+        "name": "DispatchRepairTeam",
+        "input": "{\"action\":\"onway\"}",
+        "inputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:25.300000+00:00",
+      "type": "LambdaFunctionScheduled",
+      "id": 25,
+      "previousEventId": 24,
+      "lambdaFunctionScheduledEventDetails": {
+        "resource": "arn:aws:lambda:ap-south-1:123456789012:function:bp-incident-dispatch"
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:25.350000+00:00",
+      "type": "LambdaFunctionStarted",
+      "id": 26,
+      "previousEventId": 25
+    },
+    {
+      "timestamp": "2026-10-10T06:01:26.100000+00:00",
+      "type": "LambdaFunctionSucceeded",
+      "id": 27,
+      "previousEventId": 26,
+      "lambdaFunctionSucceededEventDetails": {
+        "output": "{\"dispatched\":true}",
+        "outputDetails": { "truncated": false }
+      }
+    },
+    {
+      "timestamp": "2026-10-10T06:01:26.150000+00:00",
+      "type": "TaskStateExited",
+      "id": 28,
+      "previousEventId": 27,
+      "stateExitedEventDetails": {
+        "name": "DispatchRepairTeam",
+        "output": "{\"dispatched\":true}",
+        "outputDetails": { "truncated": false }
+      }
+    }
+  ]
+}

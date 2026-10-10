@@ -112,6 +112,14 @@ def test_outbound_is_off_until_the_human_turns_it_on():
     assert TEMPLATE["Parameters"]["Outbound"]["Default"] == "off"
 
 
+def test_cors_configuration_allows_amplify_and_localhost():
+    cors = RES["HttpApi"]["Properties"]["CorsConfiguration"]
+    origins = [str(o) for o in cors["AllowOrigins"]]
+    assert any("localhost:5173" in o for o in origins)
+    assert any("amplifyapp.com" in o for o in origins)
+    assert set(cors["AllowMethods"]) >= {"GET", "POST", "OPTIONS"}
+
+
 # ---------------- the ASL itself ----------------
 
 

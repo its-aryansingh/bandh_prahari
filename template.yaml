@@ -451,7 +451,11 @@ Resources:
     Type: AWS::Serverless::HttpApi
     Properties:
       CorsConfiguration:
-        AllowOrigins: [!Ref AllowedOrigin]
+        AllowOrigins:
+          - !Ref AllowedOrigin
+          - "http://localhost:5173"
+          - "http://127.0.0.1:5173"
+          - "https://*.amplifyapp.com"
         AllowMethods: [GET, POST, OPTIONS]
         AllowHeaders: [content-type, authorization]
         MaxAge: 600

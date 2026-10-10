@@ -125,9 +125,18 @@ def test_real_history_fixture_if_captured():
     f = Path(__file__).parent / "fixtures" / "sfn_history.json"
     if not f.exists():
         pytest.skip("capture a real GetExecutionHistory response first (docs/DEPLOY.md)")
-    states = public.history_to_states(json.loads(f.read_text())["events"])
+    states = public.history_to_states(json.loads(f.read_text(encoding="utf-8"))["events"])
     assert states and states[0]["name"] == "OpenIncident"
+    assert states[0]["status"] == "succeeded"
     assert "taskToken" not in json.dumps(states)
+    names = [s["name"] for s in states]
+    assert names == ["OpenIncident", "WarnVillagesGetReady", "PageJuniorEngineer", "PageAssistantEngineer", "DispatchRepairTeam"]
+    je = next(s for s in states if s["name"] == "PageJuniorEngineer")
+    assert je["status"] == "timed_out"
+    ae = next(s for s in states if s["name"] == "PageAssistantEngineer")
+    assert ae["status"] == "succeeded"
+    assert ae["detail"] == "SendTaskSuccess: onway"
+    assert all(s["entered"] and s["exited"] for s in states)
 
 
 def test_the_judge_route_cannot_answer_a_real_run_even_on_the_screen_channel(sfn):
