@@ -143,6 +143,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
           <div class="lm-story-top">
             <span class="lm-story-t num"></span>
             <ol class="lm-story-steps" aria-hidden="true">${"<li></li>".repeat(6)}</ol>
+            ${"speechSynthesis" in window ? `<button type="button" class="icon-btn lm-story-sound" aria-pressed="false" aria-label="${esc(L("आवाज़ में सुनें", "Read it aloud"))}">${icon("mute")}</button>` : ""}
             <button type="button" class="icon-btn lm-story-x" aria-label="${esc(L("रोकें", "Stop"))}">${icon("close")}</button>
           </div>
           <p class="lm-story-line pair" aria-live="polite"></p>
@@ -1568,7 +1569,20 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     team: "",
     ringKm: 0,
   };
+  let storyVoice = false;
+  const speak = (hi: string, en: string) => {
+    if (!storyVoice || !window.speechSynthesis) return;
+    const english = lang() === "en";
+    const u = new SpeechSynthesisUtterance(english ? en : hi);
+    u.lang = english ? "en-IN" : "hi-IN";
+    const v = speechSynthesis.getVoices().find((x) => x.lang.toLowerCase().startsWith(english ? "en" : "hi"));
+    if (v) u.voice = v;
+    u.rate = 1.05;
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  };
   const storySay = (step: number, hi: string, en: string) => {
+    speak(hi, en);
     storyLine.innerHTML = bi(hi, en);
     storySteps.forEach((li, k) => {
       li.classList.toggle("done", k < step - 1);
@@ -1718,6 +1732,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     story.timers.forEach(clearTimeout);
     story.timers = [];
     if (!story.on) return;
+    window.speechSynthesis?.cancel();
     story.on = false;
     story.follow = null;
     story.zoomTo = 0;
@@ -1897,6 +1912,14 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   });
   $(".lm-night", host).addEventListener("click", storyStart);
   $(".lm-story-x", host).addEventListener("click", () => storyStop());
+  host.querySelector(".lm-story-sound")?.addEventListener("click", (e) => {
+    storyVoice = !storyVoice;
+    const b = e.currentTarget as HTMLButtonElement;
+    b.setAttribute("aria-pressed", String(storyVoice));
+    b.innerHTML = icon(storyVoice ? "sound" : "mute");
+    if (storyVoice) speak(storyLine.querySelector(".hi")?.textContent ?? "", storyLine.querySelector(".en")?.textContent ?? "");
+    else window.speechSynthesis?.cancel();
+  });
   $(".lm-story-close", host).addEventListener("click", () => storyStop());
   $(".lm-story-again", host).addEventListener("click", storyStart);
   document.addEventListener("bp:map-night", storyStart);
@@ -2002,29 +2025,136 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.closePath();
 }
 
-/** The painting's frame: two ink lines with a hatched band between, as in Madhubani borders. */
+/** The painting's frame, as in a Madhubani border: two ink lines, and between them fish and lotus
+ *  buds in turn (both stand for plenty and good fortune in Mithila painting), a flower at each corner.
+ *  Drawn once per canvas size into its own bitmap, then copied every frame. */
+const borderCache = { key: "", c: null as HTMLCanvasElement | null };
+const BAND = 18;
 function frameBorder(ctx: CanvasRenderingContext2D, w: number, h: number) {
-  const b = 12;
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(0, 0, w, h);
-  ctx.rect(b, b, w - 2 * b, h - 2 * b);
-  ctx.fillStyle = C.haldiTint;
-  ctx.fill("evenodd");
-  ctx.clip("evenodd");
-  ctx.strokeStyle = C.kesar;
-  ctx.lineWidth = 2.2;
-  ctx.beginPath();
-  for (let s = -h; s < w + h; s += 9) {
-    ctx.moveTo(s, 0);
-    ctx.lineTo(s + h, h);
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const key = `${w}x${h}@${dpr}`;
+  if (borderCache.key !== key || !borderCache.c) {
+    const c = borderCache.c ?? document.createElement("canvas");
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    const g = c.getContext("2d")!;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    paintBorder(g, w, h);
+    borderCache.c = c;
+    borderCache.key = key;
   }
-  ctx.stroke();
-  ctx.restore();
-  ctx.strokeStyle = C.neel;
-  ctx.lineWidth = 2.5;
-  ctx.strokeRect(1.25, 1.25, w - 2.5, h - 2.5);
-  ctx.strokeRect(b - 1.25, b - 1.25, w - 2 * b + 2.5, h - 2 * b + 2.5);
+  ctx.drawImage(borderCache.c, 0, 0, w, h);
+}
+
+function paintBorder(g: CanvasRenderingContext2D, w: number, h: number) {
+  const b = BAND;
+  g.clearRect(0, 0, w, h);
+  g.beginPath();
+  g.rect(0, 0, w, h);
+  g.rect(b, b, w - 2 * b, h - 2 * b);
+  g.fillStyle = C.haldiTint;
+  g.fill("evenodd");
+  g.lineJoin = "round";
+  g.lineCap = "round";
+  // motifs along each edge, spaced to fit it evenly
+  const edge = (len: number, place: (t: number, k: number) => void) => {
+    const n = Math.max(2, Math.round((len - 2 * b) / 30));
+    const step = (len - 2 * b) / n;
+    for (let k = 0; k < n; k++) place(b + step * (k + 0.5), k);
+  };
+  const motif = (x: number, y: number, rot: number, k: number) => {
+    g.save();
+    g.translate(x, y);
+    g.rotate(rot);
+    if (k % 2 === 0) fish(g, k % 4 === 0 ? C.kesar : C.gandak);
+    else bud(g, k % 4 === 1 ? C.sindoor : C.dhaan);
+    g.restore();
+  };
+  edge(w, (x, k) => motif(x, b / 2, 0, k)); // top
+  edge(w, (x, k) => motif(w - x, h - b / 2, Math.PI, k)); // bottom
+  edge(h, (y, k) => motif(w - b / 2, y, Math.PI / 2, k)); // right
+  edge(h, (y, k) => motif(b / 2, h - y, -Math.PI / 2, k)); // left
+  for (const [x, y] of [
+    [b / 2, b / 2],
+    [w - b / 2, b / 2],
+    [w - b / 2, h - b / 2],
+    [b / 2, h - b / 2],
+  ])
+    flower(g, x, y);
+  g.strokeStyle = C.neel;
+  g.lineWidth = 2.5;
+  g.strokeRect(1.25, 1.25, w - 2.5, h - 2.5);
+  g.strokeRect(b - 1.25, b - 1.25, w - 2 * b + 2.5, h - 2 * b + 2.5);
+}
+
+// a fish swimming right, about 22 x 10 px: body, tail, eye and two scale lines
+function fish(g: CanvasRenderingContext2D, fill: string) {
+  g.beginPath();
+  g.moveTo(-6, 0);
+  g.quadraticCurveTo(1, -6.5, 9, 0);
+  g.quadraticCurveTo(1, 6.5, -6, 0);
+  g.closePath();
+  g.moveTo(-6, 0);
+  g.lineTo(-11, -4);
+  g.lineTo(-11, 4);
+  g.closePath();
+  g.fillStyle = fill;
+  g.fill();
+  g.strokeStyle = C.neel;
+  g.lineWidth = 1.4;
+  g.stroke();
+  g.beginPath();
+  g.moveTo(-1, -3.2);
+  g.quadraticCurveTo(1, 0, -1, 3.2);
+  g.moveTo(2, -3.6);
+  g.quadraticCurveTo(4, 0, 2, 3.6);
+  g.stroke();
+  g.beginPath();
+  g.arc(6, -0.8, 1, 0, Math.PI * 2);
+  g.fillStyle = C.neel;
+  g.fill();
+}
+
+// a lotus bud on its stalk, pointing outward
+function bud(g: CanvasRenderingContext2D, fill: string) {
+  g.beginPath();
+  g.moveTo(0, 6);
+  g.quadraticCurveTo(-6.5, 0, 0, -7);
+  g.quadraticCurveTo(6.5, 0, 0, 6);
+  g.closePath();
+  g.fillStyle = fill;
+  g.fill();
+  g.strokeStyle = C.neel;
+  g.lineWidth = 1.4;
+  g.stroke();
+  g.beginPath();
+  g.moveTo(0, 5);
+  g.lineTo(0, -4);
+  g.moveTo(-5, 6.5);
+  g.quadraticCurveTo(0, 3.5, 5, 6.5);
+  g.stroke();
+}
+
+// the corner flower: eight petals around a red centre
+function flower(g: CanvasRenderingContext2D, x: number, y: number) {
+  g.save();
+  g.translate(x, y);
+  for (let i = 0; i < 8; i++) {
+    g.rotate(Math.PI / 4);
+    g.beginPath();
+    g.ellipse(0, -4.6, 2.2, 3.8, 0, 0, Math.PI * 2);
+    g.fillStyle = i % 2 ? C.haldi : C.kesar;
+    g.fill();
+    g.strokeStyle = C.neel;
+    g.lineWidth = 1.1;
+    g.stroke();
+  }
+  g.beginPath();
+  g.arc(0, 0, 2.6, 0, Math.PI * 2);
+  g.fillStyle = C.sindoor;
+  g.fill();
+  g.stroke();
+  g.restore();
 }
 
 const clockHiEn = (iso: string) => `${clockHi(iso)} (${clockEn(iso)})`;
