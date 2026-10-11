@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<title>Baandh Prahari: pitch deck</title>
+<link rel="stylesheet" href="pilot.css">
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  body { font-size: 19px; line-height: 1.45; }
+  .s { width: 1280px; height: 720px; padding: 34px 56px 30px; position: relative; overflow: hidden; break-after: page; display: flex; flex-direction: column; background: var(--chuna); }
+  .s::before, .s::after { content: ""; position: absolute; left: 0; right: 0; height: 18px; background: url("band.svg") repeat-x left center / auto 18px; border-block: 2px solid var(--neel); }
+  .s::before { top: 0; } .s::after { bottom: 0; }
+  .s h2 { font: 400 46px/1.12 var(--display); margin: 14px 0 0; text-shadow: 0.04em 0.05em 0 var(--kesar); }
+  .s h2 .en-sub { font-size: 22px; margin-top: 6px; }
+  .body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+  .n { position: absolute; right: 56px; bottom: 26px; font: 700 14px var(--ui); color: var(--neel-3); }
+  .big { font: 400 74px/1.05 var(--display); text-shadow: 0.04em 0.05em 0 var(--kesar); }
+  .s .card { padding: 14px 18px; border-radius: 16px; box-shadow: 5px 6px 0 var(--neel); }
+  .s .card.kesar { box-shadow: 5px 6px 0 var(--kesar-deep); } .s .card.dhaan { box-shadow: 5px 6px 0 var(--dhaan-deep); } .s .card.gandak { box-shadow: 5px 6px 0 var(--gandak-deep); }
+  .s .card h3 { font: 700 23px/1.25 var(--ui); margin: 0 0 6px; }
+  .s .card p, .s .card li { font-size: 20px; line-height: 1.42; }
+  .s .card h3 { font-size: 25px; }
+  .split { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 34px; align-items: center; flex: 1; }
+  .split img { width: 100%; border: 2.5px solid var(--neel); border-radius: 16px; box-shadow: 6px 7px 0 var(--kesar); }
+  .s .grid3, .s .grid2 { gap: 20px; }
+  .en { display: block; color: var(--neel-2); font-size: 0.82em; font-weight: 600; }
+  .row { display: flex; gap: 14px; align-items: stretch; }
+  .row > div { flex: 1; }
+  .step { border: 2.5px solid var(--neel); border-radius: 14px; background: var(--white); padding: 14px 16px; font-size: 20px; line-height: 1.35; box-shadow: 4px 5px 0 var(--neel); }
+  .step b { display: block; font-size: 25px; margin-bottom: 4px; }
+  .arrow { flex: 0 0 auto !important; align-self: center; font: 700 30px var(--ui); color: var(--kesar-deep); }
+  .lv { border-radius: 14px; padding: 14px 16px; border: 2.5px solid var(--neel); font-size: 19px; line-height: 1.35; }
+  .lv b { display: block; font-size: 23px; }
+  table { font-size: 19px; } th, td { padding: 9px 11px; }
+  .kpi { font: 400 52px/1 var(--display); color: var(--kesar-deep); }
+  .note { font-size: 15.5px; color: var(--neel-2); }
+</style>
+</head>
+<body>
+
+<section class="s">
+  <div class="split"><div class="body">
+    <p class="stamp" style="align-self:flex-start;font-size:15px">छात्र परियोजना · Student project · not adopted by any department</p>
+    <div class="big" style="font-size:84px">बाँध प्रहरी<span class="en-sub" style="font-size:28px">Baandh Prahari: Jawab Ghadi, the answer clock</span></div>
+    <p style="font-size:28px;line-height:1.35"><strong>तटबंध पर हर ख़तरे का एक ज़िम्मेदार, एक समय-सीमा, और एक अगला व्यक्ति।</strong><span class="en">Every warning on Bihar's flood embankments gets an owner, a deadline and a next person.</span></p>
+    <p class="note">A pilot proposal for the Water Resources Department, the Disaster Management Department and BSDMA · October 2026</p>
+  </div><img src="img/scene.png" alt=""></div>
+  <span class="n">1</span>
+</section>
+
+<section class="s">
+  <h2>29–30 सितंबर की रात<span class="en-sub">The night of 29–30 September 2026</span></h2>
+  <div class="body">
+    <div class="grid3">
+      <div class="card"><h3>तटबंध टूटे</h3><p>हैजलपुर (मकेर, सारण) और शीतलपुर (बैकुंठपुर, गोपालगंज) में गंडक के तटबंध टूटे।<span class="en">Gandak breaches at Haijalpur, Saran and Sheetalpur, Gopalganj.</span></p></div>
+      <div class="card kesar"><h3>संकेत पहले मिले</h3><p>अधिकारियों ने "कई जगह रिसाव और पाइपिंग" की बात कही।<span class="en">Officials cited "seepage and piping at several locations" before the breaches.</span></p></div>
+      <div class="card"><h3>जवाब नहीं पहुँचा</h3><p>4 अक्टूबर: सात अभियंता निलंबित; कुछ "टूटान स्थल छोड़ गए"।<span class="en">4 October: seven engineers suspended; some "left the breach sites".</span></p></div>
+    </div>
+    <p style="font-size:24px"><strong>तटबंध टूटने से पहले चेतावनी देता है। चेतावनी के पास जाने की कोई जगह नहीं है।</strong><span class="en">The bank warned before it broke. The warning had nowhere to go.</span></p>
+    <p class="note">Sources: Rozana Spokesman (PTI) 30 Sep; Daily Excelsior and Aaj Tak, 4–5 Oct 2026. The department counted 408 breaches from 1987 to 2018 (Dialogue Earth).</p>
+  </div>
+  <span class="n">2</span>
+</section>
+
+<section class="s">
+  <h2>हिस्से सब हैं, कड़ी नहीं<span class="en-sub">The state has the parts. It lacks the wire between them</span></h2>
+  <div class="body">
+    <div class="grid2">
+      <div class="card dhaan"><h3>पहले से है · Already in place</h3><ul>
+        <li>3,808 किमी तटबंध पर हर किलोमीटर एक पहरेदार · one patrol worker per km</li>
+        <li>तटबंध एम्बुलेंस, 72 घंटे का पूर्वानुमान, हेल्पलाइन 1800 345 6145</li>
+        <li>14 बाढ़ संघर्षात्मक बल (27 मई 2026 का संकल्प) · 14 flood-fighting forces</li>
+        <li>25 सितंबर: रिसाव की ख़बर तुरंत देने का आदेश · order to report at once</li></ul></div>
+      <div class="card kesar"><h3>नहीं है · Missing</h3><ul>
+        <li>ख़बर किसने देखी, किसे बताई: कोई रिकॉर्ड नहीं · no record of who saw what</li>
+        <li>जवाब की कोई समय-सीमा नहीं · no deadline to answer</li>
+        <li>जवाब न आए तो अगला कौन: तय नहीं · no next person</li>
+        <li>गाँव तक ख़बर लाउडस्पीकर के भरोसे · villages told by loudspeaker</li></ul></div>
+    </div>
+  </div>
+  <span class="n">3</span>
+</section>
+
+<section class="s">
+  <h2>जवाब घड़ी कैसे चलती है<span class="en-sub">How the answer clock works</span></h2>
+  <div class="body">
+    <div class="row">
+      <div class="step"><b>ख़बर</b>पहरेदार का वॉइस नोट और फ़ोटो, व्हाट्सऐप पर<span class="en">Report on WhatsApp</span></div><div class="arrow">→</div>
+      <div class="step"><b>नियम</b>संकेत और नदी से P1, P2, P3 तय<span class="en">Rules set the priority</span></div><div class="arrow">→</div>
+      <div class="step"><b>चेतावनी</b>एक मिनट में गाँव को "तैयार रहें"<span class="en">Village told in a minute</span></div><div class="arrow">→</div>
+      <div class="step"><b>सूचना</b>कनीय अभियंता: किमी, फ़ोटो, रुझान, टीम<span class="en">Engineer paged</span></div><div class="arrow">→</div>
+      <div class="step" style="background:var(--kesar-tint)"><b>10 मिनट</b>जवाब नहीं: सहायक, फिर कार्यपालक अभियंता और ज़िला<span class="en">No answer: it climbs</span></div>
+    </div>
+    <p style="font-size:22px">हर क़दम उसी समय दर्ज होता है, और कोई उसे बाद में बदल नहीं सकता।<span class="en">Every step is recorded as it happens, and nobody can change it later. AWS Step Functions in Mumbai runs the clock.</span></p>
+  </div>
+  <span class="n">4</span>
+</section>
+
+<section class="s">
+  <h2>परिवार के लिए, पहले दिन से<span class="en-sub">Useful to families from day one, with no one's permission</span></h2>
+  <div class="body">
+    <div class="card gandak"><h3>"नदी का हाल" · How's the river?</h3><p>गाँव का नाम भेजें, आज की सरकारी गेज रीडिंग हिंदी में पाएँ, स्रोत और समय के साथ।<span class="en">Send a village name; get today's official gauge reading in Hindi, with source and time.</span></p></div>
+    <div class="grid2" style="grid-template-columns:repeat(4,1fr)">
+      <div class="lv" style="background:var(--haldi-tint)"><b>सावधान</b>काग़ज़ थैले में, तीन दिन का सूखा राशन<span class="en">Watch: papers in a bag</span></div>
+      <div class="lv" style="background:var(--kesar-tint)"><b>तैयार</b>अनाज मचान पर, मवेशी ऊँची जगह<span class="en">Get ready: grain up, cattle out</span></div>
+      <div class="lv" style="background:var(--sindoor-tint)"><b>निकल चलो</b>सिर्फ़ अभियंता की पुष्टि पर, शिविर की ओर<span class="en">Move: only when confirmed</span></div>
+      <div class="lv" style="background:var(--dhaan-tint)"><b>ख़तरा टला</b>घर लौटें, दीवार और कुआँ जाँचें<span class="en">All clear</span></div>
+    </div>
+    <p class="note">2025 Kosi survey: 671 of 1,081 families stayed even after hearing the water was rising, fearing for animals and belongings (Down To Earth). So each warning asks for cheap steps that protect exactly those.</p>
+  </div>
+  <span class="n">5</span>
+</section>
+
+<section class="s">
+  <h2>राहत दलों और ज़िले के लिए सजीव नक़्शा<span class="en-sub">A live map for relief teams and the district</span></h2>
+  <div class="split" style="grid-template-columns:0.9fr 1.1fr">
+    <div class="body" style="gap:14px">
+      <div class="card"><h3>परिवार · Family</h3><p>एक बटन से मदद: कितने लोग, बुज़ुर्ग, बच्चे, नाव या दवा।<span class="en">One button to ask for help.</span></p></div>
+      <div class="card kesar"><h3>राहत दल · Relief team</h3><p>सबसे पास की माँग पहले। "मैं जा रहा हूँ" से 20 मिनट की घड़ी; देर हो तो अगली टीम।<span class="en">Nearest first; a 20-minute clock; late means the next team.</span></p></div>
+      <div class="card dhaan"><h3>ज़िला · District</h3><p>डूबा इलाक़ा, ख़तरे में घर, खुली माँगें, टीमें, गाँवों की तैयारी।<span class="en">Flooded area, homes at risk, requests, teams, readiness.</span></p></div>
+    </div>
+    <div><img src="img/map-night.png" alt=""><p class="note" style="margin-top:12px">Built from open satellite data on AWS (Copernicus DEM, ESA WorldCover, Sentinel-2). The public sees counts per village; exact locations go only to relief teams and the district. Here: the 29–30 September night, re-enacted on sample data.</p></div>
+  </div>
+  <span class="n">6</span>
+</section>
+
+<section class="s">
+  <h2>विभाग की व्यवस्थाओं से जुड़ता है<span class="en-sub">It plugs into the state's own systems; it replaces none</span></h2>
+  <div class="body">
+    <table>
+      <tr><th>व्यवस्था · System</th><th>पढ़ता है · Reads</th><th>लौटाता है · Hands back</th></tr>
+      <tr><td>FMISC गेज सेवा (WRD)</td><td>जल स्तर, ख़तरे का निशान, रुझान · levels every 3 h</td><td>किलोमीटर-वार घटनाएँ · incidents by km</td></tr>
+      <tr><td>SACHET (NDMA), CWC</td><td>नदी चेतावनियाँ, हर 15 मिनट · CAP alerts</td><td>CAP 1.2 मसौदा, "Exercise" · drafts the district sends</td></tr>
+      <tr><td>बाढ़ संघर्षात्मक बल</td><td>क्षेत्र का रोस्टर · the zone's roster</td><td>घड़ी की कड़ी में एक क़दम · a step in the climb</td></tr>
+      <tr><td>IRS, ज़िला नियंत्रण कक्ष</td><td>हेल्पलाइन कॉल · helpline calls</td><td>IRS फ़ॉर्म 001 ब्रीफ़िंग · the incident briefing</td></tr>
+      <tr><td>आपदा संपूर्ति (DMD)</td><td>-</td><td>टूटान के पीछे के गाँव-वार्ड, LGD कोड के साथ · relief lists (format to confirm)</td></tr>
+    </table>
+  </div>
+  <span class="n">7</span>
+</section>
+
+<section class="s">
+  <h2>विभाग के अपने AWS खाते में<span class="en-sub">Government-grade, in the department's own AWS account</span></h2>
+  <div class="body">
+    <div class="grid3">
+      <div class="card gandak"><h3>भारत में डेटा</h3><p>AWS मुंबई, MeitY से सूचीबद्ध क्षेत्र; 180 दिन के लॉग (CERT-In)।<span class="en">Data in India; logs kept 180 days.</span></p></div>
+      <div class="card"><h3>निजता</h3><p>DPDP अधिनियम 2023: मदद में नाम नहीं, नंबर हैश में, आम लोगों को सिर्फ़ गिनती।<span class="en">No names, hashed numbers, public counts only.</span></p></div>
+      <div class="card kesar"><h3>नियम तय करते हैं</h3><p>AI सिर्फ़ मसौदा लिखता है; प्राथमिकता कोई घटा नहीं सकता।<span class="en">AI only drafts; nobody can lower a priority.</span></p></div>
+    </div>
+    <div class="row" style="align-items:center">
+      <div><span class="kpi">≈ $155</span><span class="en" style="font-size:19px">a district's whole monsoon on AWS's published prices (estimate; most of it WhatsApp messages)</span></div>
+      <div><span class="kpi">₹512 करोड़</span><span class="en" style="font-size:19px">what the 2024 Gandak flood cost (Patna Press)</span></div>
+    </div>
+  </div>
+  <span class="n">8</span>
+</section>
+
+<section class="s">
+  <h2>पायलट: सारण, 2027 का मानसून<span class="en-sub">The pilot: Saran, monsoon 2027</span></h2>
+  <div class="body">
+    <div class="grid2">
+      <div class="card haldi"><h3>समय-रेखा · Timeline</h3><ul>
+        <li><b>दिसंबर–फ़रवरी:</b> MoU, डेटा, विभाग के नाम पर व्हाट्सऐप नंबर</li>
+        <li><b>मार्च–मई:</b> रोस्टर, चेनेज, प्रशिक्षण, दो अभ्यास</li>
+        <li><b>15 जून–31 अक्टूबर:</b> लाइव मौसम, हर हफ़्ते रिपोर्ट</li>
+        <li><b>नवंबर:</b> मौसम की रिपोर्ट, आगे का फ़ैसला</li></ul></div>
+      <div class="card dhaan"><h3>हर हफ़्ते मापेंगे · Measured weekly</h3><ul>
+        <li>पहले जवाब तक के मिनट · minutes to first answer</li>
+        <li>10 मिनट में जवाब पाने वाले P1 · P1s answered in 10 min</li>
+        <li>पानी से पहले तैयार घर · households ready before the water</li>
+        <li>सुरक्षित बंद हुई मदद की माँगें · help requests closed safe</li></ul></div>
+    </div>
+  </div>
+  <span class="n">9</span>
+</section>
+
+<section class="s">
+  <h2>अनुरोध<span class="en-sub">The ask</span></h2>
+  <div class="body">
+    <div class="grid2">
+      <div class="card kesar"><h3>हमें चाहिए · We need</h3><ul>
+        <li>विभाग और ज़िले में एक-एक नोडल अधिकारी · a nodal officer each</li>
+        <li>एक प्रमंडल का रोस्टर और चेनेज सूची · one division's roster and chainage</li>
+        <li>विभाग के नाम पर व्हाट्सऐप नंबर · a WhatsApp number in the department's name</li>
+        <li>पहरेदारों के लिए 30 मिनट · 30 minutes with patrol workers</li></ul></div>
+      <div class="card"><h3>आज की स्थिति · Where it stands</h3><ul>
+        <li>जवाब घड़ी, SACHET, FMISC, CAP मसौदा, व्हाट्सऐप: बना और जाँचा · built and tested</li>
+        <li>खुला स्रोत (Apache-2.0) · open source</li>
+        <li>किसी विभाग ने अभी नहीं अपनाया · not adopted by any department yet</li></ul></div>
+    </div>
+    <p style="font-size:24px"><strong>बाँध प्रहरी: हर चेतावनी का जवाब।</strong><span class="en">Every warning gets an answer. · github.com/its-aryansingh/bandh_prahari · Contact: [name, phone, email]</span></p>
+  </div>
+  <span class="n">10</span>
+</section>
+
+</body>
+</html>

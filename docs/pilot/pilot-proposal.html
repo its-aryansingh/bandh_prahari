@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Baandh Prahari: pilot proposal</title>
+<link rel="stylesheet" href="pilot.css">
+</head>
+<body>
+<div class="band"></div>
+<div class="mast">
+  <h1>Baandh Prahari: a one-district pilot<span class="en-sub">बाँध प्रहरी · integration map, pilot plan, costs, data protection and roadmap</span></h1>
+  <div class="tag">For the Water Resources Department (WRD), the Disaster Management Department (DMD) and BSDMA · October 2026 · <span class="stamp">Draft for discussion</span></div>
+</div>
+<p class="lede">This note goes with the two-page concept note. It sets out what Baandh Prahari reads from and hands back to the state's existing systems, what a pilot in one district for one monsoon would need and measure, what it would cost, how it protects people's data, and how it could grow. Anything we could not confirm from a primary source is marked <span class="tbc">to confirm</span>, to be settled with the department.</p>
+
+<h2>1. How it works, in one incident</h2>
+<div class="flow">
+  <div><b>Report</b>A patrol worker sends a voice note and photo on WhatsApp, or the helpline logs a call.</div><i>→</i>
+  <div><b>Rules</b>Published rules set P1, P2 or P3 from the sign and the river. No model decides.</div><i>→</i>
+  <div><b>Warn</b>For a P1, the mukhiya, ward members and subscribed families get "get ready" at once.</div><i>→</i>
+  <div><b>Page</b>The junior engineer on duty gets the kilometre, photo, trend and nearest team.</div><i>→</i>
+  <div><b>Climb</b>No answer in 10 minutes (or no delivery in 2): AE, then EE and district, then the zone's force.</div><i>→</i>
+  <div><b>Record</b>Every step written as it happens, locked, and handed to the district.</div>
+</div>
+<p class="small">Relief runs on the same clock: a family's call for help goes to the nearest free relief team; a team that says "on my way" has 20 minutes before the next team is asked and the district is told.</p>
+
+<h2>2. Integration map: it adds to existing systems, it replaces none</h2>
+<table>
+  <tr><th style="width:19%">Existing system</th><th style="width:27%">What Baandh Prahari reads</th><th style="width:27%">What it hands back</th><th>Permission or MoU needed</th></tr>
+  <tr><td><strong>FMISC gauge map service</strong> (WRD, Patna)</td><td>Water level, danger level and trend at department and CWC gauges, every three hours<sup>1</sup></td><td>Incident timelines and kilometre-level status for the department's own dashboards, if wanted</td><td>Use of the map service as an agreed feed (today it is public but not an official API)</td></tr>
+  <tr><td><strong>FMISC daily flood bulletin</strong></td><td>Gauge table (PDF), as a cross-check</td><td>None</td><td>None (public)</td></tr>
+  <tr><td><strong>Embankment Asset Management System</strong> (Kosi, Bagmati reports; Kosi portal keams)<sup>2</sup></td><td>Embankment lines and chainage, to replace our own kilometre marks with the department's</td><td>Incidents tagged by official chainage, building a history of weak spots</td><td>Data sharing for the Gandak (Saran) stretches. <span class="tbc">To confirm</span> whether an EAMS covers the Gandak, and the name "BEAMS" used in one blueprint</td></tr>
+  <tr><td><strong>RTDAS / telemetry</strong></td><td>Live sensor levels where they exist</td><td>None</td><td><span class="tbc">To confirm</span> that such a feed exists and who runs it</td></tr>
+  <tr><td><strong>CWC alerts via NDMA SACHET</strong></td><td>CAP 1.2 river alerts, every 15 minutes<sup>3</sup>; an alert above danger level starts the night roll-call</td><td>None</td><td>None (public feed)</td></tr>
+  <tr><td><strong>SACHET and the Cell Broadcast System</strong> (NDMA, DoT, C-DOT)</td><td>None</td><td>CAP 1.2 drafts in Hindi and English for villages behind a stretch, marked Exercise</td><td>Sending stays with the district's authorised officer, through SACHET</td></tr>
+  <tr><td><strong>Flood-fighting forces</strong> (WRD resolution, 27 May 2026)<sup>4</sup></td><td>The roster: 14 forces, one per zone</td><td>The zone's force is a step in the climb, between the EE and the Central Flood Control Room</td><td>The zone's roster with WhatsApp numbers</td></tr>
+  <tr><td><strong>WRD helpline 1800 345 6145, district control rooms</strong></td><td>Helpline calls, logged in a control-room form</td><td>The same clock and record for calls as for WhatsApp</td><td>Control-room staff accounts</td></tr>
+  <tr><td><strong>Incident Response System</strong> (NDMA)</td><td>None</td><td>An IRS Form 001 incident briefing at hand-off to the district</td><td>The district's preferred format <span class="tbc">to confirm</span></td></tr>
+  <tr><td><strong>Local Government Directory</strong> (MoPR)</td><td>LGD codes for every village and panchayat</td><td>LGD codes on every alert, timeline and relief list</td><td>None (public)</td></tr>
+  <tr><td><strong>Aapda Sampoorti</strong> (DMD)</td><td>None</td><td>Villages and wards behind a breach, with LGD codes and dates, so relief verification starts sooner. This year ₹7,000 went to each of 8,27,472 families by DBT<sup>5</sup></td><td>The intake format, and who receives the list, <span class="tbc">to confirm</span> with DMD</td></tr>
+  <tr><td><strong>Aapda Mitra volunteers, SDRF, embankment ambulances</strong></td><td>Team positions, only from team phones on duty</td><td>Help requests nearest first, with a 20-minute clock</td><td>Team rosters. Volunteer numbers in Bihar <span class="tbc">to confirm</span> (a 2025 report: 22,000 youth to be trained)<sup>6</sup></td></tr>
+  <tr><td><strong>JEEViKA</strong> village organisations</td><td>More reporters for danger signs</td><td>Relays for village warnings</td><td>Agreement with JEEViKA, a later phase</td></tr>
+  <tr><td><strong>Sandes (NIC), government SMS</strong></td><td>None</td><td>Pages to officials who must use a government channel; SMS to basic phones</td><td>A registered government sender (DLT); later phase</td></tr>
+</table>
+
+<h2 class="pb">3. The pilot: Saran, monsoon 2027</h2>
+<p>Saran is where the Haijalpur breach happened this season, and where the prototype's map, gauge (Rewaghat) and villages already are. One division, one monsoon, with nothing installed in the field.</p>
+<div class="grid2">
+  <div class="card">
+    <h3>Who does what</h3>
+    <ul class="small">
+      <li><strong>WRD nodal officer:</strong> the roster, the stretches by chainage, the escalation chain, weekly review.</li>
+      <li><strong>District (DM office, control room):</strong> receives climbs, approves any public alert, uses the briefing.</li>
+      <li><strong>DMD / BSDMA:</strong> relief teams on the map; the relief-list format.</li>
+      <li><strong>Patrol workers and engineers:</strong> save one number; a 30-minute briefing.</li>
+      <li><strong>Our team:</strong> deploys into the department's AWS account, runs drills, reports weekly, hands over the code and the account.</li>
+    </ul>
+  </div>
+  <div class="card haldi">
+    <h3>Timeline</h3>
+    <table>
+      <tr><td><strong>Dec–Feb</strong></td><td>MoU and data access; WhatsApp number in the department's name; AWS account</td></tr>
+      <tr><td><strong>Mar–May</strong></td><td>Load roster and chainage; train patrol workers; two dry-run drills with the district</td></tr>
+      <tr><td><strong>15 Jun–31 Oct</strong></td><td>Live season, with weekly measures to the nodal officer (the forces are posted until 31 October)<sup>4</sup></td></tr>
+      <tr><td><strong>November</strong></td><td>Season report; decision on more districts</td></tr>
+    </table>
+  </div>
+</div>
+
+<h3>What we would measure, every week</h3>
+<table>
+  <tr><th>Measure</th><th>Why it matters</th></tr>
+  <tr><td>Minutes from a report to the first engineer's answer (median and worst)</td><td>The gap the September review found</td></tr>
+  <tr><td>Share of P1 warnings answered within 10 minutes, and how many climbed</td><td>Whether the clock is respected</td></tr>
+  <tr><td>Roll-call coverage on high-water nights (stretches that answered "theek hai")</td><td>Whether every kilometre is watched</td></tr>
+  <tr><td>Households marked "ready" before the water reached them</td><td>The outcome families care about</td></tr>
+  <tr><td>Help requests closed safe, and minutes from request to a team on site</td><td>Whether relief reaches people in time</td></tr>
+  <tr><td>Unique people and villages using "Nadi ka haal"</td><td>Whether the number is already in phones on the night it matters</td></tr>
+</table>
+
+<h2>4. What it costs</h2>
+<p>An estimate for one district's monsoon from AWS's published prices, assuming 150 km of embankment, 150 patrol workers, 20 high-water nights with five roll-calls each, 500 reports and 150 incidents.</p>
+<table>
+  <tr><th>Item</th><th>Per season</th></tr>
+  <tr><td>WhatsApp messages through AWS End User Messaging Social (AWS's fee: up to $0.005 per message out, $0.001 in)</td><td>~ $115</td></tr>
+  <tr><td>Amazon Transcribe, Amazon Bedrock and Amazon Polly</td><td>~ $5</td></tr>
+  <tr><td>Step Functions, Lambda, DynamoDB, S3, Location Service, EventBridge Scheduler</td><td>~ $10</td></tr>
+  <tr><td>CloudWatch and Amplify Hosting</td><td>~ $25</td></tr>
+  <tr><td><strong>Total</strong></td><td><strong>~ $155</strong>, plus Meta's fee on template messages</td></tr>
+</table>
+<p class="small">Most of the cost is roll-calls. The services are pay-per-use, so the cost from November to May is close to nothing. People's time (briefings, drills) is the larger cost and is the department's to plan. For scale, the 2024 Gandak flood damaged 118 km of embankments and cost ₹512 crore.<sup>7</sup></p>
+
+<h2 class="pb">5. Data protection and security</h2>
+<div class="grid2">
+  <div class="card gandak">
+    <h3>Personal data (DPDP Act 2023)</h3>
+    <ul class="small">
+      <li>The Act allows processing to assist any individual during a disaster (section 7(h)).<sup>8</sup> We still tell every reporter what their number is used for.</li>
+      <li>Help requests carry no names; the family's number is stored only as a hash for de-duplication.</li>
+      <li>Subscriptions to village warnings are kept with a consent note, for that season only.</li>
+      <li>The public map shows counts per village; exact locations only to relief teams and the district, with a role login (a pilot adds MFA).</li>
+      <li>Team positions only from team phones on duty. Nobody else is tracked.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Security and ownership</h3>
+    <ul class="small">
+      <li>Runs in AWS Mumbai (ap-south-1), a MeitY-empanelled region; data stays in India.<sup>9</sup></li>
+      <li>Logs kept 180 days, as CERT-In's 2022 directions ask.<sup>10</sup></li>
+      <li>Encryption with AWS KMS; a write-once record (S3 Object Lock); one least-privilege role per function.</li>
+      <li>Open source (Apache-2.0), deployed by one template into the department's own AWS account. The state owns the code, the account and the data.</li>
+      <li>No public alert is ever sent by the system: drafts are marked Exercise until the authorised officer sends them.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>6. Risks, and what we would do</h2>
+<table>
+  <tr><th>Risk</th><th>What we would do</th></tr>
+  <tr><td>It is read as blaming engineers</td><td>The same record proves a fast answer; the page hands the engineer the photo, trend and nearest team at once. No individual is named in public reports.</td></tr>
+  <tr><td>Phones are off or out of coverage</td><td>A page with no delivery receipt moves on in two minutes; a later phase adds government SMS and calls.</td></tr>
+  <tr><td>False alarms erode trust</td><td>"Get ready" asks only for cheap steps; "move" needs an engineer's confirmation or two reports from the same spot; the mukhiya can cancel a false alarm, and every cancel is logged.</td></tr>
+  <tr><td>A government feed is down</td><td>The last good reading is kept, and the screen says how old it is; GloFAS is the fallback for the river curve.</td></tr>
+  <tr><td>Voice notes in Bhojpuri or Maithili are misread</td><td>The worker's tap on the sign list sets the report; the voice note travels with it untouched.</td></tr>
+</table>
+
+<h2>7. Roadmap: from today's build to the whole state</h2>
+<table>
+  <tr><th style="width:21%">Phase</th><th>What it adds</th><th style="width:15%">State</th></tr>
+  <tr><td><strong>0. Hackathon slice</strong> (Oct 2026)</td><td>The answer clock, SACHET and FMISC in, CAP drafts out, WhatsApp, "Nadi ka haal", the public page, the live map of one stretch from AWS Open Data</td><td class="ok">Built</td></tr>
+  <tr><td><strong>1. One-district pilot</strong> (2027)</td><td>The department's roster and chainage; WhatsApp in the department's name; relief teams on the map; IRS briefing; Hindi voice notes; geofenced check-ins</td><td>Proposed</td></tr>
+  <tr><td><strong>2. The Gandak and Kosi</strong></td><td>Embankment geometry and crest levels from the department's surveys and EAMS, replacing our drawn lines; Sentinel-1 radar water extent (sees through cloud) after every breach; government SMS for basic phones; Hyderabad standby region</td><td class="nb">Not built</td></tr>
+  <tr><td><strong>3. Statewide</strong></td><td>All divisions and forces; Aapda Sampoorti hand-off in its own format; JEEViKA reporters; routing on the road network around flooded areas; offline relief-camp ledgers. The reference blueprints in <em>docs/reference</em> describe these in detail.</td><td class="nb">Not built</td></tr>
+</table>
+<p class="small"><strong>A note on the reference blueprints.</strong> They were drafted with an AI tool and are treated as leads, not facts. Before any of their components is proposed, each number and system name will be checked with the department, and each AWS service checked for availability to new customers in ap-south-1. For example, AWS has closed Amazon Timestream for LiveAnalytics to new customers,<sup>11</sup> so a time-series store would use another service. One blueprint places the Haijalpur breach near km 46.5 of the Saran embankment; our map uses its own kilometre marks (km 14), and the official chainage is <span class="tbc">to confirm</span>. Forecasting would build on CWC's and the department's official forecasts rather than a new model.</p>
+
+<div class="foot">
+  <ol class="sources">
+    <li>FMISC gauge map service: gis.fmiscwrdbihar.gov.in/arcgis/rest/services/FmiscHydro/FMISC_Dynmic/MapServer (tested 9 October 2026).</li>
+    <li>Embankment Asset Management System final reports (Kosi, Bagmati) on fmiscwrdbihar.gov.in; Kosi EAMS portal: keams.fmiscwrdbihar.gov.in.</li>
+    <li>SACHET Bihar feed: sachet.ndma.gov.in/cap_public_website/rss/rss_bihar.xml.</li>
+    <li>WRD resolution on flood-fighting forces, 27 May 2026 (state.bihar.gov.in).</li>
+    <li>UNI, 15 September 2026: ₹7,000 each to 8,27,472 families by DBT.</li>
+    <li>Patna Press, May 2025: 22,000 youth to be trained as disaster volunteers.</li>
+    <li>Patna Press, May 2025: the 2024 Gandak flood, 118 km of embankments damaged, ₹512 crore.</li>
+    <li>Digital Personal Data Protection Act 2023, section 7 (MeitY).</li>
+    <li>AWS compliance: MeitY empanelment of the Mumbai and Hyderabad regions.</li>
+    <li>CERT-In directions under section 70B, 28 April 2022.</li>
+    <li>AWS documentation: "Amazon Timestream for LiveAnalytics availability change".</li>
+  </ol>
+  Baandh Prahari is a student project with no government affiliation; no department has agreed to a pilot. Costs are estimates from published prices. Contact: [name, phone, email].
+</div>
+</body>
+</html>

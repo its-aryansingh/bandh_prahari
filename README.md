@@ -61,10 +61,10 @@ The same clock runs relief: a family's "मदद" (help) goes to the nearest fr
 | CAP 1.2 alert drafts out, always status Exercise, checked against the OASIS schema | Built, tested |
 | WhatsApp through AWS End User Messaging Social, with delivery receipts; Telegram switchable | Built, tested |
 | The public page: replay, live map, four warning levels, control room, government and AWS views, Hindi first | Built |
-| Help requests and relief teams on the server (Amazon Location tracker) | In progress; the page plays them on sample data |
+| Help requests and relief teams on the server: the help run on the same clock, team positions on an Amazon Location tracker | Built, tested |
 | Voice notes (Transcribe and the Strands drafter), Polly clips, geofence check-ins, roll-call, IRS Form 001 briefing | Next, in that order of cutting |
 
-`pytest -q`: 126 tests pass. `sam validate --lint` passes. _Update this table on Sunday._
+`pytest -q`: 140 tests pass, including real captured SACHET, FMISC, Open-Meteo and Step Functions responses. `sam validate --lint` passes.
 
 ## Where AWS fits
 
@@ -105,7 +105,7 @@ The rules are in code and IAM, not in a prompt. Details: [docs/safety.md](docs/s
 | --- | --- |
 | Tap to first page (median, worst), five judge-path runs | _from `make evidence`_ |
 | A missed page climbs to the next person after | 60 s on demo clocks (10 min in real use) |
-| Tests | 126 pass, plus 3 that run on real captured FMISC, Open-Meteo and Step Functions responses |
+| Tests | 140 pass, on real captured SACHET, FMISC, Open-Meteo and Step Functions responses |
 | People who checked their river with "Nadi ka haal" this weekend | _N people from M villages; counts only_ |
 
 ## Questions we expect
@@ -151,6 +151,7 @@ _Add any other tool you used. The rules require naming every one._
 | `docs/SPEC.md` | The build spec and the contract between page and API |
 | `docs/reference/` | The two integration blueprints for a statewide pilot |
 | `docs/ANTIGRAVITY_PLAN.md` | How the backend is deployed and finished |
+| `docs/pilot/` | The pilot pack for the Government of Bihar: concept notes (Hindi, English), pilot proposal, pitch deck |
 
 ## License
 

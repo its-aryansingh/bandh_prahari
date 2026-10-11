@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Baandh Prahari: concept note</title>
+<link rel="stylesheet" href="pilot.css">
+<style>.foot { font-size: 7.9pt; } .sources li { font-size: 7.7pt; line-height: 1.32; } .lede { font-size: 10.6pt; }</style>
+</head>
+<body>
+<div class="band"></div>
+<div class="mast">
+  <div>
+    <h1>Baandh Prahari<span class="en-sub">बाँध प्रहरी · Jawab Ghadi, the answer clock, for Bihar's flood embankments</span></h1>
+  </div>
+  <div class="tag">Concept note for the Water Resources Department,the Disaster Management Department and BSDMA · October 2026 · <span class="stamp">Student project · not adopted by any department</span></div>
+</div>
+
+<p class="lede"><strong>Every warning sign on an embankment gets an owner, a deadline and a next person.</strong> A patrol worker reports seepage on WhatsApp. Within a minute the village behind the bank is told to get ready, and the junior engineer on duty is paged. If nobody answers within 10 minutes, the page climbs to the assistant engineer, then the executive engineer and the district. Every step is recorded as it happens.</p>
+
+<h2>The gap this season showed</h2>
+<p>On the night of 29–30 September 2026 the Gandak breached its embankments at Haijalpur (Maker, Saran) and Sheetalpur (Baikunthpur, Gopalganj). Officials cited "seepage and piping at several locations" before the breaches.<sup>1</sup> On 4 October the department suspended seven engineers, saying some had "left the breach sites instead of responding immediately", and that coordination with residents was weak.<sup>2</sup> It is not new: the department counted 408 breaches between 1987 and 2018.<sup>3</sup></p>
+<p>The state already has the parts: one patrol worker per kilometre on 3,808 km of embankments, embankment ambulances, 72-hour forecasts and the helpline 1800 345 6145;<sup>4</sup> since 27 May 2026, fourteen flood-fighting forces reporting to the Central Flood Control Room;<sup>5</sup> and on 25 September, an order to report seepage, overtopping and erosion at once.<sup>6</sup> <strong>What is missing is the wire between them:</strong> nothing timed, escalating and recorded runs from the person who sees the danger, to the person who must act, to the families who must move.</p>
+
+<h2>What Baandh Prahari changes</h2>
+<div class="grid3">
+  <div class="card haldi">
+    <h3>For the family behind the bank</h3>
+    <ul class="small">
+      <li>"Nadi ka haal": send a village name on WhatsApp and get today's official gauge reading in Hindi, with its source and time.</li>
+      <li>"Get ready" within a minute of a confirmed danger sign: grain up, cattle to high ground, papers in a bag. "Move" only when an engineer confirms.</li>
+      <li>A dated record of which villages were behind the breach, for relief lists.</li>
+    </ul>
+  </div>
+  <div class="card kesar">
+    <h3>For engineers and the district</h3>
+    <ul class="small">
+      <li>One page with the kilometre, a photo, the river's trend and the nearest repair team.</li>
+      <li>A 10-minute clock that climbs the department's own chain, including the zone's flood-fighting force.</li>
+      <li>A draft public alert in the national CAP format for the district's officer to approve, and an IRS Form 001 briefing.</li>
+    </ul>
+  </div>
+  <div class="card dhaan">
+    <h3>For relief groups</h3>
+    <ul class="small">
+      <li>A live map of the stretch: who asked for help, where the water is, which team is nearest.</li>
+      <li>The same clock for rescue: a team that says "on my way" has 20 minutes, then the next team is asked and the district is told.</li>
+      <li>The public sees counts per village only; exact locations go only to relief teams and the district.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>It adds to the department's systems; it replaces none</h2>
+<p>It reads NDMA's SACHET feed (CWC river alerts) every 15 minutes and the department's FMISC gauge service every three hours; carries LGD codes for every village; follows the chain set by the 27 May resolution; drafts alerts in CAP 1.2 for SACHET and the Cell Broadcast System, but never sends them; and hands relief officers village and ward lists that match how Aapda Sampoorti pays families. Everything runs in the department's own AWS account in Mumbai, a MeitY-empanelled region.</p>
+
+<h2>What already works</h2>
+<table>
+  <tr><th>Part</th><th>State, October 2026</th></tr>
+  <tr><td>The answer clock: page, climb, answer, warning, close, with a record that cannot be edited</td><td class="ok">Built and tested (AWS Step Functions, DynamoDB, S3 Object Lock)</td></tr>
+  <tr><td>SACHET alerts and FMISC gauges in; "Nadi ka haal" in Hindi</td><td class="ok">Built, tested on real government responses</td></tr>
+  <tr><td>CAP 1.2 alert drafts, marked Exercise, checked against the OASIS schema</td><td class="ok">Built and tested</td></tr>
+  <tr><td>WhatsApp through AWS, with delivery receipts (a page nobody received moves on in two minutes)</td><td class="ok">Built and tested</td></tr>
+  <tr><td>Public page: replay of the 29–30 September night, live map of the Haijalpur stretch from satellite data, control-room form for helpline calls</td><td class="ok">Built</td></tr>
+  <tr><td>Relief requests and team positions on the server; Hindi voice notes; geofenced check-ins; IRS Form 001 briefing</td><td>In progress</td></tr>
+</table>
+<p class="small dim">The roster is fictional and the replay is a re-enactment. Real river readings and alerts are used and credited. Open source: github.com/its-aryansingh/bandh_prahari</p>
+
+<h2>The ask: one district, one monsoon</h2>
+<div class="grid2">
+  <div class="card gandak">
+    <h3>A pilot in Saran for the 2027 monsoon</h3>
+    <ul class="small">
+      <li>A nodal officer in the Water Resources Department, and one in the district.</li>
+      <li>The division's roster of engineers and patrol workers, with WhatsApp numbers, and the list of stretches by chainage.</li>
+      <li>A WhatsApp business number in the department's name.</li>
+      <li>A 30-minute briefing for patrol workers. Nothing is installed in the field.</li>
+      <li>The relief teams the district already uses (Aapda Mitra volunteers, SDRF boats) on the map.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>What it costs and how we would know it worked</h3>
+    <ul class="small">
+      <li><strong>About $155 for a district's monsoon</strong> on AWS's published prices (150 km of embankment, 150 patrol workers, 500 reports), most of it WhatsApp messages. For scale, the 2024 Gandak flood cost ₹512 crore.<sup>7</sup></li>
+      <li>Measured every week: minutes to the first answer, share of P1 warnings answered within 10 minutes, roll-call coverage on high-water nights, households marked ready before the water, help requests closed safe.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Safeguards</h2>
+<ul class="small">
+  <li><strong>Rules decide, AI only drafts.</strong> Priority comes from published rules; no model sets or lowers it.</li>
+  <li><strong>Nothing official is sent without the authority.</strong> Every alert draft is marked Exercise until the district's officer sends it through its own channel.</li>
+  <li><strong>Privacy under the DPDP Act 2023.</strong> No names in help requests; phone numbers hashed; public counts only; team positions only from teams on duty.</li>
+  <li><strong>Government-grade on AWS.</strong> Data in India, logs kept 180 days as CERT-In asks, encryption, least-privilege access, and the state owns the code and the account.</li>
+</ul>
+
+<div class="foot">
+  <ol class="sources">
+    <li>Rozana Spokesman (PTI), 30 September 2026, Gandak embankments breach in Gopalganj and Saran.</li>
+    <li>Daily Excelsior and Aaj Tak, 4–5 October 2026, seven engineers suspended.</li>
+    <li>Dialogue Earth, 408 breaches from 1987 to 2018 (department figures).</li>
+    <li>Patna Press, July 2025, embankment patrols, ambulances and 72-hour alerts.</li>
+    <li>Water Resources Department resolution of 27 May 2026 on flood-fighting forces.</li>
+    <li>ThePrint (PTI), 25 September 2026, vigil along the Gandak and Kosi.</li>
+    <li>Patna Press, May 2025, the 2024 Gandak flood's ₹512 crore loss. Cost estimate: docs/pilot/pilot-proposal (assumptions shown).</li>
+  </ol>
+  Baandh Prahari is a student project built for Environmental Hacks (WeMakeDevs × AWS). It has no government affiliation, and no department has agreed to a pilot. Contact: [name, phone, email].
+</div>
+</body>
+</html>
