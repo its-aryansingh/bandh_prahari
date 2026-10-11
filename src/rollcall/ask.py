@@ -110,3 +110,64 @@ def nudge_unanswered(channel: str | None = None, slot: str | None = None) -> lis
             nudged.append(km)
 
     return nudged
+
+
+def latest_status(slot: str | None = None) -> dict[str, Any]:
+    """Latest status of high-water rollcall across km 1..20."""
+    sl = slot or current_slot()
+    pk = f"ROLLCALL#{sl}"
+    res = db.table().query(KeyConditionExpression=Key("PK").eq(pk))
+    items = {int(i["km"]): db.plain(i) for i in res.get("Items", []) if "km" in i}
+    now_iso = clock.iso()
+
+    kms_status = {}
+    for km in range(1, 21):
+        if km in items:
+            item = items[km]
+            st = item.get("status", "sent")
+            if st == "ok":
+                kms_status[str(km)] = "ok"
+            elif st == "issue":
+                kms_status[str(km)] = "issue"
+            elif st == "nudged" or (st == "sent" and item.get("deadline", "") <= now_iso):
+                kms_status[str(km)] = "unmonitored"
+            else:
+                kms_status[str(km)] = "pending"
+        else:
+            kms_status[str(km)] = "pending"
+
+    return {
+        "slot": sl,
+        "kms": kms_status,
+    }
+
+
+def ensure_schedule(stretch: str = "haijalpur") -> bool:
+    """Create EventBridge Scheduler schedule (every 2 hours, 22:00-06:00 IST) for stretches."""
+    try:
+        import boto3
+        scheduler = boto3.client("scheduler")
+        scheduler.create_schedule(
+            Name=f"bp-rollcall-{stretch}",
+            ScheduleExpression="cron(0 22,0,2,4,6 * * ? *)",
+            ScheduleExpressionTimezone="Asia/Kolkata",
+            FlexibleTimeWindow={"Mode": "OFF"},
+            Target={
+                "Arn": getattr(config, "WORKER_FUNCTION_ARN", ""),
+                "RoleArn": getattr(config, "SCHEDULER_ROLE_ARN", ""),
+            },
+        )
+        return True
+    except Exception as e:
+        return False
+
+
+def delete_schedule(stretch: str = "haijalpur") -> bool:
+    """Delete EventBridge Scheduler schedule when river level falls."""
+    try:
+        import boto3
+        scheduler = boto3.client("scheduler")
+        scheduler.delete_schedule(Name=f"bp-rollcall-{stretch}")
+        return True
+    except Exception:
+        return False

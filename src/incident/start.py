@@ -92,6 +92,8 @@ def start(
     }
     if test_to:
         inc["test_to"] = ids.digits(test_to)
+    rep_hash = ids.phone_hash(reporter) if reporter else ids.phone_hash(test_to) if test_to else source
+    inc["reporter_hash"] = rep_hash
     db.put_incident(inc)
     who = {"helpline": ("नियंत्रण कक्ष (हेल्पलाइन कॉल)", "Control room (helpline call)"), "screen": ("प्रहरी (डेमो फ़ोन)", "Patrol worker (demo phone)")}
     w_hi, w_en = who.get(source, (roster.role_hi("patrol"), roster.role_en("patrol")))
@@ -104,6 +106,8 @@ def start(
         km=int(km),
         sign=sign,
     )
+    # SPEC step 6: two P1 reports from different phones within 300 m and 30 minutes triggers Nikal chalo
+    check_dual_p1(inc)
     try:
         res = sfn().start_execution(
             stateMachineArn=config.STATE_MACHINE_ARN,
@@ -116,6 +120,40 @@ def start(
     db.update_incident(inc["id"], execution_arn=res["executionArn"])
     inc["execution_arn"] = res["executionArn"]
     return inc
+
+
+def check_dual_p1(inc: dict) -> bool:
+    """Two P1 reports within 300m and 30 min from different phones triggers Nikal chalo."""
+    if inc.get("priority") != "P1":
+        return False
+    recent = db.open_incidents(limit=50)
+    now_dt = clock.now()
+    km = inc.get("km", 14)
+    my_rep = inc.get("reporter_hash", "")
+    for o in recent:
+        if o.get("id") == inc.get("id") or o.get("priority") != "P1":
+            continue
+        if abs(o.get("km", -999) - km) == 0:  # within 300m / same km
+            opened = o.get("opened", "")
+            if opened:
+                try:
+                    diff_m = abs((now_dt - clock.from_iso(opened)).total_seconds()) / 60.0
+                    other_rep = o.get("reporter_hash") or o.get("source") or ""
+                    if diff_m <= 30.0 and (not my_rep or other_rep != my_rep):
+                        from incident import warn
+                        db.event(
+                            inc["id"],
+                            "dual_p1_evacuate",
+                            "30 मिनट और 300 मी. के अंदर दो P1 रिपोर्ट: तुरंत 'निकल चलो'",
+                            "Two P1 reports within 30 min and 300 m: immediate 'move now'",
+                            actor="system",
+                            other_incident=o.get("id"),
+                        )
+                        warn.handler({"incident": inc, "level": "nikal_chalo"})
+                        return True
+                except Exception as e:
+                    print({"check_dual_p1_error": repr(e)})
+    return False
 
 
 def public(inc: dict) -> dict:

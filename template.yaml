@@ -746,6 +746,9 @@ Resources:
         MapGrid:
           Type: HttpApi
           Properties: { ApiId: !Ref HttpApi, Method: GET, Path: "/map/{stretch}" }
+        RollcallLatest:
+          Type: HttpApi
+          Properties: { ApiId: !Ref HttpApi, Method: GET, Path: /rollcall/latest }
   RiverApiLogs:
     Type: AWS::Logs::LogGroup
     Properties: { LogGroupName: /aws/lambda/bp-api-river, RetentionInDays: 180 }

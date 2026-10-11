@@ -23,6 +23,9 @@ def parse(s: str) -> datetime:
     return datetime.fromisoformat(s).astimezone(IST)
 
 
+from_iso = parse
+
+
 def after(seconds: float) -> str:
     """The IST time this many seconds from now, as ISO text."""
     return iso(now() + timedelta(seconds=seconds))

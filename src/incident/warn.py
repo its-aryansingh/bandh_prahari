@@ -43,14 +43,19 @@ def handler(event: dict, _ctx=None) -> dict:
         for v in villages:
             people.extend(subscribers(v))
     button = [{"id": f"r:{inc['id']}:{level}", "hi": words.BUTTONS["ready"][0], "en": words.BUTTONS["ready"][1]}]
+    mukhiya_buttons = [
+        {"id": f"r:{inc['id']}:{level}", "hi": words.BUTTONS["ready"][0], "en": words.BUTTONS["ready"][1]},
+        {"id": f"r:{inc['id']}:cfa", "hi": "गलत अलार्म रद्द करें", "en": "Cancel false alarm"},
+    ]
     sent = 0
     for p in people:
         if level == "khatra_tala":
             send_text(channel, p, msg, incident_id=inc["id"])
+        elif p.get("role") == "mukhiya":
+            send_buttons(channel, p, msg, mukhiya_buttons, incident_id=inc["id"])
+            send_text(channel, p, LOUDSPEAKER, incident_id=inc["id"])
         else:
             send_buttons(channel, p, msg, button, incident_id=inc["id"])
-        if p.get("role") == "mukhiya":
-            send_text(channel, p, LOUDSPEAKER, incident_id=inc["id"])
         sent += 1
     L = words.LEVELS[level]
     n_v = len(villages)

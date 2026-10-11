@@ -124,8 +124,11 @@ def tap(channel: str, to: dict, reply_id: str, roles: list[str]) -> None:
             send_text(channel, to, footer({"hi": "देर हो गई: बात आगे बढ़ चुकी है।", "en": "Too late: it has already climbed."}))
         return
     if parts[0] == "r" and len(parts) == 3:
-        incident_id, level = parts[1], parts[2]
-        db.table().put_item(Item={"PK": f"READY#{incident_id}", "SK": f"{level}#{ids.phone_hash(to['phone'])}", "at": clock.iso()})
+        incident_id, action_or_level = parts[1], parts[2]
+        if action_or_level == "cfa":
+            cancel_false_alarm(channel, to, incident_id)
+            return
+        db.table().put_item(Item={"PK": f"READY#{incident_id}", "SK": f"{action_or_level}#{ids.phone_hash(to['phone'])}", "at": clock.iso()})
         send_text(channel, to, footer({"hi": "धन्यवाद, दर्ज हो गया।", "en": "Thank you, noted."}))
         return
     if parts[0] == "s" and len(parts) == 2 and roles:
@@ -151,7 +154,37 @@ def tap(channel: str, to: dict, reply_id: str, roles: list[str]) -> None:
         except Exception as e:
             print({"rollcall_reply_error": repr(e)})
         return
+    if parts[0] == "cfa" and len(parts) == 2:
+        inc_id = parts[1]
+        cancel_false_alarm(channel, to, inc_id)
+        return
     help_menu(channel, to)
+
+
+def cancel_false_alarm(channel: str, to: dict, incident_id: str) -> None:
+    inc = db.get_incident(incident_id)
+    if not inc:
+        return
+    phone_h = ids.phone_hash(to.get("phone", ""))
+    db.event(
+        incident_id,
+        "false_alarm_cancelled",
+        "मुखिया द्वारा गलत अलार्म रद्द किया गया; स्थिति सामान्य",
+        "False alarm cancelled by mukhiya; normal status restored",
+        actor="mukhiya",
+        by=phone_h,
+    )
+    from incident import warn
+    warn.handler({"incident": inc, "level": "khatra_tala"})
+    db.update_incident(incident_id, status="cancelled", cancelled_reason="false_alarm_cancelled_by_mukhiya")
+    send_text(
+        channel,
+        to,
+        footer({
+            "hi": f"घटना {incident_id}: गलत अलार्म रद्द किया गया। गाँवों को 'खतरा टला' सूचना भेज दी गई है।",
+            "en": f"Incident {incident_id}: false alarm cancelled. All-clear notification sent to villages.",
+        }),
+    )
 
 
 def handler(m: dict, _ctx=None) -> dict:

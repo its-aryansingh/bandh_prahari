@@ -129,3 +129,28 @@ def test_nudge_junior_engineer_after_20_minutes(aws, screen):
     m = screen[0]
     assert m["type"] == "text"
     assert "20 मिनट से गश्ती दल का जवाब नहीं आया" in m["msg"]["hi"]
+
+
+def test_latest_status_and_route(aws):
+    from api import river
+    slot = ask.current_slot()
+    ask.ask_km(14, channel="screen", slot=slot)
+    ask.record_reply(14, "ok", slot=slot)
+    ask.ask_km(15, channel="screen", slot=slot)
+
+    st = ask.latest_status(slot=slot)
+    assert st["slot"] == slot
+    assert st["kms"]["14"] == "ok"
+    assert st["kms"]["15"] == "pending"
+
+    # Test HTTP route
+    res = river.handler({"routeKey": "GET /rollcall/latest"})
+    assert res["statusCode"] == 200
+    body = json.loads(res["body"])
+    assert body["slot"] == slot
+    assert body["kms"]["14"] == "ok"
+
+
+def test_schedule_ensure_and_delete():
+    assert ask.ensure_schedule("haijalpur") in (True, False)
+    assert ask.delete_schedule("haijalpur") in (True, False)

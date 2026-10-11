@@ -127,4 +127,7 @@ def handler(event: dict, _ctx=None) -> dict:
         st = http.path(event, "stretch")
         g = map_grid(st)
         return http.respond(200, g) if g else http.respond(404, {"error": "not_found"})
+    if r == "GET /rollcall/latest":
+        from rollcall import ask as rollcall_ask
+        return http.respond(200, rollcall_ask.latest_status())
     return http.respond(404, {"error": "no_route"})
