@@ -61,11 +61,15 @@ The same clock runs relief: a family's "मदद" (help) goes to the nearest fr
 | SACHET's Bihar alerts and the department's gauges in; GloFAS as the fallback; "Nadi ka haal" in Hindi | Built, tested on real captured responses |
 | CAP 1.2 alert drafts out, always status Exercise, checked against the OASIS schema | Built, tested |
 | WhatsApp through AWS End User Messaging Social, with delivery receipts; Telegram switchable | Built, tested |
-| The public page: replay, live map, four warning levels, control room, government and AWS views, Hindi first | Built |
+| The public page: replay, live map (3D WebGL + 2D fallback), four warning levels, control room, government and AWS views, Hindi first | Built, tested |
 | Help requests and relief teams on the server: the help run on the same clock, team positions on an Amazon Location tracker | Built, tested |
-| Voice notes (Transcribe and the Strands drafter), Polly clips, geofence check-ins, roll-call, IRS Form 001 briefing | Next, in that order of cutting |
+| High-water night roll-call (`GET /rollcall/latest`, EventBridge Scheduler, 20-min JE escalation) | Built, tested |
+| IRS Form 001 bilingual HTML briefing (`GET /briefing/{id}`, S3 Object Lock archive) | Built, tested |
+| Dual P1 auto-evacuation ("Nikal chalo"), Mukhiya false alarm cancellation (`r:{id}:cfa`), Roster CSV ingest | Built, tested |
+| CloudWatch EMF custom metrics (TapToPage, Climbs, MinutesToAnswer), alarms, and operational dashboard | Built, tested |
+| Hindi voice notes (Transcribe and Bedrock Strands drafter), Polly voice warnings | Next / Pilot phase |
 
-`pytest -q`: 140 tests pass, including real captured SACHET, FMISC, Open-Meteo and Step Functions responses. `sam validate --lint` passes.
+`pytest -q`: **163 backend tests pass**, on real captured SACHET, FMISC, Open-Meteo and Step Functions responses. `tests/web_smoke.py`: **7 automated Playwright browser tests pass** across desktop and mobile viewports. `sam validate --lint` passes with 0 warnings.
 
 ## Where AWS fits
 
@@ -76,12 +80,13 @@ Everything runs in Mumbai (ap-south-1), in one SAM template.
 | AWS End User Messaging Social | A real WhatsApp number run from AWS; messages and delivery receipts arrive on SNS | `src/channels/whatsapp.py`, `src/intake/` |
 | Amazon SNS (KMS-encrypted) | Inbound messages and status events | `template.yaml` (InboundTopic) |
 | AWS Step Functions (Standard) | The answer clock: each page waits for a task token, then climbs. Its history is the audit trail | `statemachine/incident.asl.json`, `src/incident/` |
-| AWS Lambda (Python 3.12, arm64) | Intake, rules, paging, answers, warnings, feeds, the API: 18 functions, one least-privilege role each | `src/` |
+| AWS Lambda (Python 3.12, arm64) | Intake, rules, paging, answers, warnings, feeds, the API: 21 functions, one least-privilege role each | `src/` |
 | Amazon DynamoDB | Incidents, timelines, wait IDs for task tokens, gauges, alerts, subscriptions | `src/common/db.py` |
 | Amazon S3 with Object Lock | A record nobody can quietly change after a breach | `template.yaml` (Bucket) |
-| Amazon EventBridge Scheduler | SACHET every 15 minutes, the gauges every three hours, GloFAS daily; the two-minute delivery check after each page | `src/gov/`, `src/river/poll.py`, `src/incident/delivery.py` |
-| Amazon API Gateway (HTTP API) | The public page, the judge path and the CAP feed, throttled | `src/api/` |
+| Amazon EventBridge Scheduler | SACHET every 15 minutes, gauges every 3 hours, GloFAS daily; delivery check & night roll-call | `src/gov/`, `src/river/poll.py`, `src/incident/delivery.py`, `src/rollcall/` |
+| Amazon API Gateway (HTTP API) | The public page, the judge path, live map grid, IRS briefings, roll-call and CAP feed, throttled | `src/api/` |
 | AWS Systems Manager Parameter Store | Roster phone numbers and role tokens, never in git | `data/roster.json` names them |
+| Amazon CloudWatch | Custom EMF metrics (`TapToPage`, `Climbs`, `MinutesToAnswer`), alarms (`P1Unanswered`, `LambdaErrors`), and dashboard | `src/common/metrics.py`, `template.yaml` |
 | AWS KMS, Amazon CloudWatch Logs | Encryption; every log group kept 180 days | `template.yaml` |
 | AWS Amplify Hosting | The public page | `web/` |
 | AWS Open Data | The live map: Copernicus DEM, ESA WorldCover, Sentinel-2 L2A via Earth Search (`tools/build_map.py`); Overture Maps buildings, roads, bridges and places (`tools/build_features.py`) | `web/src/map/view3d.ts` |
@@ -107,7 +112,7 @@ The rules are in code and IAM, not in a prompt. Details: [docs/safety.md](docs/s
 | --- | --- |
 | Tap to first page (median, worst), five judge-path runs | _from `make evidence`_ |
 | A missed page climbs to the next person after | 60 s on demo clocks (10 min in real use) |
-| Tests | 140 pass, on real captured SACHET, FMISC, Open-Meteo and Step Functions responses |
+| Tests | **163 backend tests pass** + **7 Playwright E2E browser tests pass** |
 | People who checked their river with "Nadi ka haal" this weekend | _N people from M villages; counts only_ |
 
 ## Questions we expect
