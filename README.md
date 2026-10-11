@@ -84,7 +84,8 @@ Everything runs in Mumbai (ap-south-1), in one SAM template.
 | AWS KMS, Amazon CloudWatch Logs | Encryption; every log group kept 180 days | `template.yaml` |
 | AWS Amplify Hosting | The public page | `web/` |
 | AWS Open Data | The live map: Copernicus DEM, ESA WorldCover, Sentinel-2 L2A via Earth Search | `tools/build_map.py` |
-| Next: Amazon Transcribe, Amazon Bedrock with Strands Agents (AWS open source), Amazon Polly, Amazon Location Service | Hindi voice notes, drafts, voice warnings, team positions and geofences | `docs/SPEC.md` |
+| Amazon Location Service | Relief teams' positions on a tracker, and a 200 m geofence round each family's pin | `src/teams/position.py`, `statemachine/help.asl.json` |
+| Next: Amazon Transcribe, Amazon Bedrock with Strands Agents (AWS open source), Amazon Polly | Hindi voice notes, drafts, voice warnings | `docs/SPEC.md` |
 
 Details and the diagram: [docs/architecture.md](docs/architecture.md).
 
