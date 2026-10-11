@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from channels import send_buttons, send_text
 from channels import whatsapp
-from common import clock, db, ids, roster, words
+from common import clock, db, ids, metrics, roster, words
 from incident import delivery
 
 CLIMB_REASON = {
@@ -79,6 +79,16 @@ def page(event: dict) -> dict:
             reason=prev.get("Error", "States.Timeout"),
             level=level,
         )
+        try:
+            metrics.emit("Climbs", 1.0, unit="Count", dimensions={"Level": str(level), "Priority": inc.get("priority", "P1")})
+        except Exception:
+            pass
+    elif level == 1 and inc.get("opened"):
+        try:
+            sec = max(0.0, (clock.now() - clock.from_iso(inc["opened"])).total_seconds())
+            metrics.emit("TapToPage", sec, unit="Seconds", dimensions={"Priority": inc.get("priority", "P1")})
+        except Exception:
+            pass
     mins = max(1, round(timeout_s / 60))
     deadline = clock.after(timeout_s)
     db.event(

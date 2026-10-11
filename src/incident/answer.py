@@ -69,6 +69,16 @@ def answer(wait_id: str, action: str, role: str | None = None, *, only_channel: 
             return {"ok": False, "reason": "late"}
         raise
     hi, en = words.BUTTONS[action]
+    if w.get("kind") == "page" and action == "onway":
+        try:
+            from common import metrics
+            inc = db.get_incident(w.get("incident", "")) or {}
+            opened_iso = inc.get("opened") or w.get("created")
+            if opened_iso:
+                mins = max(0.0, (clock.now() - clock.from_iso(opened_iso)).total_seconds() / 60.0)
+                metrics.emit("MinutesToAnswer", mins, unit="Seconds", dimensions={"Priority": inc.get("priority", "P1")})
+        except Exception as e:
+            print({"metrics_error": repr(e)})
     try:
         db.event(
             w["incident"],

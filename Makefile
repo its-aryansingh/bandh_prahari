@@ -1,7 +1,7 @@
 # Baandh Prahari. On Windows, docs/DEPLOY.md gives the same commands for PowerShell.
 API ?= $(shell aws cloudformation describe-stacks --stack-name bp --region ap-south-1 --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text)
 
-.PHONY: test lint asl build deploy seed fast-incident
+.PHONY: test lint asl build deploy seed fast-incident evidence
 
 test:
 	pytest -q
@@ -23,3 +23,6 @@ seed:
 
 fast-incident:
 	python scripts/fast_incident.py $(API)
+
+evidence:
+	python scripts/evidence.py $(API)

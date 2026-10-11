@@ -1205,6 +1205,107 @@ Resources:
                 Action: ssm:GetParameter
                 Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/bp/tokens/*"
 
+  # ------------------------------------------------------------------ CloudWatch Observability (Alarms & Dashboard)
+  P1UnansweredAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: bp-p1-unanswered-10min
+      AlarmDescription: "P1 incident without answer after 10 minutes"
+      Namespace: BaandhPrahari
+      MetricName: MinutesToAnswer
+      Dimensions:
+        - Name: Priority
+          Value: P1
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 10
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  LambdaErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: bp-lambda-errors
+      AlarmDescription: "Lambda execution errors across Baandh Prahari"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Statistic: Sum
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  BpDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: bp-dashboard
+      DashboardBody: !Sub |
+        {
+          "widgets": [
+            {
+              "type": "metric",
+              "x": 0, "y": 0, "width": 12, "height": 6,
+              "properties": {
+                "title": "Incident Response: Minutes to Answer",
+                "view": "timeSeries",
+                "stacked": false,
+                "metrics": [
+                  [ "BaandhPrahari", "MinutesToAnswer", "Priority", "P1", { "stat": "Average" } ],
+                  [ "...", "P2", { "stat": "Average" } ]
+                ],
+                "region": "${AWS::Region}",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12, "y": 0, "width": 12, "height": 6,
+              "properties": {
+                "title": "Incident Escalations (Climbs)",
+                "view": "timeSeries",
+                "stacked": true,
+                "metrics": [
+                  [ "BaandhPrahari", "Climbs", { "stat": "Sum" } ]
+                ],
+                "region": "${AWS::Region}",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "x": 0, "y": 6, "width": 12, "height": 6,
+              "properties": {
+                "title": "Step Functions Executions",
+                "view": "timeSeries",
+                "metrics": [
+                  [ "AWS/States", "ExecutionsStarted", "StateMachineArn", "${IncidentRun}", { "stat": "Sum" } ],
+                  [ ".", "ExecutionsSucceeded", ".", ".", { "stat": "Sum" } ],
+                  [ ".", "ExecutionsFailed", ".", ".", { "stat": "Sum" } ],
+                  [ ".", "ExecutionsTimedOut", ".", ".", { "stat": "Sum" } ]
+                ],
+                "region": "${AWS::Region}",
+                "period": 300
+              }
+            },
+            {
+              "type": "metric",
+              "x": 12, "y": 6, "width": 12, "height": 6,
+              "properties": {
+                "title": "API Gateway HTTP Errors (4xx / 5xx)",
+                "view": "timeSeries",
+                "metrics": [
+                  [ "AWS/ApiGateway", "4xx", "ApiId", "${HttpApi}", { "stat": "Sum" } ],
+                  [ ".", "5xx", ".", ".", { "stat": "Sum" } ]
+                ],
+                "region": "${AWS::Region}",
+                "period": 300
+              }
+            }
+          ]
+        }
+
 Outputs:
   ApiUrl:
     Description: Put this in the site's VITE_API_BASE
