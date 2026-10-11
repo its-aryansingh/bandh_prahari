@@ -153,6 +153,7 @@ _Add any other tool you used. The rules require naming every one._
 | `docs/SPEC.md` | The build spec and the contract between page and API |
 | `docs/reference/` | The two integration blueprints for a statewide pilot |
 | `docs/ANTIGRAVITY_PLAN.md` | How the backend is deployed and finished |
+| `docs/ROADMAP.md` | From this MVP to statewide: pilot hardening, terrain tiles, the relief ledger, volunteer routing, resilient comms, prediction |
 | `docs/pilot/` | The pilot pack for the Government of Bihar: concept notes (Hindi, English), pilot proposal, pitch deck |
 
 ## License
