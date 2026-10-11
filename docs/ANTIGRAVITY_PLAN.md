@@ -21,12 +21,13 @@ Most of the backend is already written and merged into `main`: 126 tests pass an
 
 ## Who touches what
 
-| Antigravity (backend) | Claude (page and docs) |
-| --- | --- |
-| `template.yaml`, `statemachine/`, `src/`, `tests/`, `scripts/`, `data/`, `Makefile`, `docs/DEPLOY.md` | `web/`, `README.md`, `docs/` except `DEPLOY.md` |
-| Never edits `web/`, except `web/.env.local` on your PC (never committed) | Never edits the backend files |
+From Sunday 11 October, 8:50 AM: **Antigravity owns all testing, the backend and the API integration, including small fixes in `web/` needed to integrate.** Claude only plans (this file, `docs/ROADMAP.md`, new SPEC sections). The page is feature-complete; don't add page features.
 
-`docs/SPEC.md` is the contract. If either side changes a route or a field, it changes SPEC and `web/src/types.ts` in the same commit. **Run `git pull` before every prompt**, because Claude pushes page work to `main` too.
+| Antigravity | Claude |
+| --- | --- |
+| `template.yaml`, `statemachine/`, `src/`, `tests/`, `scripts/`, `data/`, `Makefile`, `docs/DEPLOY.md`; integration fixes in `web/` (small diffs, no new features) | Plans: this file, `docs/ROADMAP.md`, new SPEC sections |
+
+`docs/SPEC.md` is the contract. If either side changes a route or a field, it changes SPEC and `web/src/types.ts` in the same commit. **Run `git pull` before every prompt**, because Claude may push plan updates to `main`.
 
 ## Time left (deadline Sunday 5 PM IST)
 
@@ -191,6 +192,45 @@ Build src/sat/grid.py exactly per docs/SPEC.md "The live map" (the grid): the da
 ```
 
 Run `make evidence` (or the Python behind it) and send the numbers to Claude for the README.
+
+## Step 8: integrate and test the page against the live API (1 to 2 hours)
+
+When `VITE_API_BASE` is set, the page reads the routes below. Every response must match `web/src/types.ts` and the matching file in `web/mock/`.
+
+| Route | Page part | Fields the page relies on |
+| --- | --- | --- |
+| `GET /stretch`, `GET /gauges` | river panel, Nadi ka haal, live strip, the map's gauge chip | `readings[].site, wl_m, dl_m`; Rewaghat must be present |
+| `GET /incidents?status=open` | control room; **the 3D map's incident beacons and patrol rings** (read every 4 s) | `id, km, priority, status, with_role, deadline` |
+| `GET /incidents/{id}/timeline`, `/execution` | replay, judge panel | state names, timestamps |
+| `POST /demo/runs`, `POST /demo/answer`, `GET /demo/runs/current` | judge panel | |
+| `GET /help?status=open`, `GET /teams`, `POST /help…`, `POST /teams/{id}/position` | live map, all three roles | as `web/mock/help.json`, `teams.json` |
+| `GET /map/{stretch}` | live map grid | **Not built yet; the page falls back to the grid it ships with** (`web/mock/map.haijalpur.json`: Sentinel-2 of 6 Oct, `s2_before` of 20 Sep, `photo` names). Step 5 makes it live. |
+
+The page also loads two sets of static files from Amplify:
+- `web/public/map/haijalpur-features.json`: 2.8 MB, about 0.9 MB compressed. These are the real buildings, roads, places and trees for the 3D map.
+- `web/public/sat/*.jpg`: the satellite photos.
+
+Check that Amplify serves them compressed with a long cache.
+
+Prompt:
+
+```
+Integrate and test the page (web/) against the deployed API at <ApiUrl>. Don't add features; small fixes only.
+1. For each route in the table in docs/ANTIGRAVITY_PLAN.md step 8, call it and compare the JSON with web/src/types.ts and web/mock/. Fix the backend if they differ; if the page is wrong, fix the page with the smallest diff.
+2. CORS: the Amplify URL and http://localhost:5173 only.
+3. A Playwright smoke test at 1440x900 and 390x844, in Hindi, English and both: no console errors, no horizontal overflow; the replay plays to its end card; the judge panel starts a real run and shows its states; the live map loads (3D canvas or 2D painting); "Play that night on the map" reaches its end card; the before/after satellite switch and the 2D/3D button work.
+4. Headless browsers draw WebGL in software, so the 3D map runs at under 1 frame a second there. Don't judge 3D speed headless; I'll check it on real devices.
+Run the tests, then tell me what you could not verify.
+```
+
+Check these yourself, on real devices over mobile data:
+- **A cheap Android phone on 4G:**
+  - The 3D map should appear within about 10 seconds, and turning and zooming should be smooth.
+  - If it isn't, tell Antigravity: "Default the live map to 2D on phones; keep the 3D button."
+- **Two phones, one opened with `?role=relief`:**
+  - A family's request should reach the relief phone within a few seconds.
+  - An incident filed from the control room should show its beacon on both.
+- **Play the night with sound on.** It's the best 40 seconds for the video.
 
 ## Putting the page live
 
