@@ -27,6 +27,7 @@ On the live page, with no login and no WhatsApp:
 
 1. **"रात दोबारा चलाएँ / Replay the night"**: 29–30 September at Haijalpur, the whole night in about 70 seconds. The report, the page, the silence, the climb, the answer, the Hindi "get ready", the village marking "Ho gaya".
 2. **"उस रात को नक़्शे पर चलाएँ / Play that night on the map"**: the same night on the Mithila map built from AWS Open Data satellite layers. The river climbs, the bank gives way at km 14, water fills the Saran side, a family asks for a boat and the nearest relief team goes on a 20-minute clock.
+   The map is **3D** (WebGL), built only from real data: Copernicus DEM ground, every one of the ~39,000 building footprints, roads, bridges and public places in the 11 × 10 km window (Overture Maps on AWS Open Data), trees from ESA WorldCover, and Sentinel-2 water and photos from before the breach (20 Sep) and after it (6 Oct). For a district patrol desk it shows each open incident as a column of light over its kilometre with the answer clock's minutes left, and the patrol at every kilometre stone turning from green to the incident's colour.
 3. **"रन शुरू करें / Start a run"** in the judge panel: a real AWS Step Functions run in Mumbai, with phones drawn on the page and one-minute clocks. Don't answer and watch it climb, then answer from the next phone. The panel shows the execution history straight from AWS.
 4. **On WhatsApp** (_add the number_): send a village name such as "Haijalpur" for today's official river reading in Hindi, or `TEST` to play patrol worker and engineer on one-minute clocks.
 
@@ -83,7 +84,7 @@ Everything runs in Mumbai (ap-south-1), in one SAM template.
 | AWS Systems Manager Parameter Store | Roster phone numbers and role tokens, never in git | `data/roster.json` names them |
 | AWS KMS, Amazon CloudWatch Logs | Encryption; every log group kept 180 days | `template.yaml` |
 | AWS Amplify Hosting | The public page | `web/` |
-| AWS Open Data | The live map: Copernicus DEM, ESA WorldCover, Sentinel-2 L2A via Earth Search | `tools/build_map.py` |
+| AWS Open Data | The live map: Copernicus DEM, ESA WorldCover, Sentinel-2 L2A via Earth Search (`tools/build_map.py`); Overture Maps buildings, roads, bridges and places (`tools/build_features.py`) | `web/src/map/view3d.ts` |
 | Amazon Location Service | Relief teams' positions on a tracker, and a 200 m geofence round each family's pin | `src/teams/position.py`, `statemachine/help.asl.json` |
 | Next: Amazon Transcribe, Amazon Bedrock with Strands Agents (AWS open source), Amazon Polly | Hindi voice notes, drafts, voice warnings | `docs/SPEC.md` |
 
@@ -130,7 +131,7 @@ The rules are in code and IAM, not in a prompt. Details: [docs/safety.md](docs/s
 
 ## Data, credited
 
-NDMA's SACHET CAP feed · the Water Resources Department's gauge map service (FMISC; read gently, not an official API) · CWC alerts via SACHET · GloFAS via the Open-Meteo Flood API (CC BY 4.0) · Copernicus DEM GLO-30, ESA WorldCover 2021 and Sentinel-2 L2A from the Registry of Open Data on AWS · OpenStreetMap (ODbL) · LGD codes from the Local Government Directory.
+NDMA's SACHET CAP feed · the Water Resources Department's gauge map service (FMISC; read gently, not an official API) · CWC alerts via SACHET · GloFAS via the Open-Meteo Flood API (CC BY 4.0) · Copernicus DEM GLO-30, ESA WorldCover 2021 and Sentinel-2 L2A from the Registry of Open Data on AWS · Overture Maps Foundation on AWS Open Data for buildings, roads, bridges and places (© OpenStreetMap contributors, ODbL; Microsoft and Google building footprints) · LGD codes from the Local Government Directory.
 
 ## AI tools used
 

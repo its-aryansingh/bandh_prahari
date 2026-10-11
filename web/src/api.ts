@@ -68,8 +68,12 @@ export const api = {
   execution: (id: string) => get<Execution>(`/incidents/${encodeURIComponent(id)}/execution`, executionMock),
 
   /** The live map's grid: terrain, land cover and the latest satellite water (daily Lambda). */
-  map: async (stretch: string) =>
-    get<MapGrid>(`/map/${encodeURIComponent(stretch)}`, usingMocks ? (await import("../mock/map.haijalpur.json")).default : null),
+  map: async (stretch: string): Promise<MapGrid> => {
+    const built = async () => structuredClone((await import("../mock/map.haijalpur.json")).default) as unknown as MapGrid;
+    if (usingMocks) return built();
+    // until the daily satellite Lambda serves GET /map, the grid built from AWS Open Data ships with the page
+    return get<MapGrid>(`/map/${encodeURIComponent(stretch)}`, null).catch(built);
+  },
   /** Open help requests. Without a relief or district token, counts per village only. */
   help: (token?: string) => get<HelpList>("/help?status=open", helpMock, token),
   /** Relief teams' latest positions from the Amazon Location Service tracker. */

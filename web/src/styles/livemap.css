@@ -362,3 +362,12 @@ html[data-lang="both"] .lm-story-line > .en { font-size: 0.82em; font-weight: 60
   .lm-story-steps li { width: 12px; }
   .lm-story-steps li.now { width: 22px; }
 }
+
+/* ---- the 3D view: WebGL below, a flat label layer above, the HUD on top ---- */
+.lm-canvas3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; outline: none; }
+.lm-canvas3d:active { cursor: grabbing; }
+.lm-labels3d { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+.lm .lm-3d b { font: 400 17px/1 var(--font-display); }
+.lm .lm-3d[aria-pressed="true"] b { color: var(--chuna); }
+
+.lm.is3d .lm-bl { display: none; }

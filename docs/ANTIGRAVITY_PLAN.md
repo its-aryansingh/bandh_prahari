@@ -15,7 +15,7 @@ Most of the backend is already written and merged into `main`: 126 tests pass an
 | CAP 1.2 drafts out, always Exercise (`/cap/rss.xml`, `/cap/{file}`), checked against the OASIS XSD | Built, tested | — |
 | WhatsApp through End User Messaging Social, SNS intake, delivery climb; Telegram switchable | Built, tested | Link the number and switch it on (step 3) |
 | Help run and relief teams for the live map (`src/help/`, `src/api/help.py`, `statemachine/help.asl.json`) | **Half built, not in the template** | Step 4 |
-| `/map/{stretch}` and the daily satellite Lambda (`src/sat/`) | Not started | Step 5 (the page keeps the 3 October grid if cut) |
+| `/map/{stretch}` and the daily satellite Lambda (`src/sat/`) | Not started | Step 5 (until then the page uses the grid it ships with: Sentinel-2 of 6 Oct, and 20 Sep for before the breach) |
 | IRS Form 001 briefing, voice notes, roll-call, geofence check-in | Not started | Step 6, in cut order |
 | CloudWatch dashboard, evidence run, `docs/DEPLOY.md` | Not started | Step 7 |
 
@@ -172,7 +172,7 @@ Then put the role tokens in SSM (`/bp/tokens/relief`, `/bp/tokens/district`, lon
 ## Step 5: the satellite Lambda (1 to 2 hours, cut if late)
 
 ```
-Build src/sat/grid.py exactly per docs/SPEC.md "The live map" (the grid): the daily Lambda (60 s timeout, EventBridge Scheduler every morning) searches Earth Search STAC sentinel-2-l2a for the bbox, reduces the least cloudy pass of the last ten days to the 56 x 46 grid the way tools/build_map.py does (NDWI > 0.05, SCL 3, 8, 9, 10 masked as cloud), writes map/haijalpur/<date>.json and latest.json to S3 and a MAP# row. GET /map/{stretch} returns latest.json. Its role reads only the public buckets and writes only map/*. Keep Sentinel-1 a TODO. Test the grid's shape against tools/build_map.py on a saved window of one real scene. If rasterio is too big for a Lambda zip, say so and propose the smallest option before building.
+Build src/sat/grid.py exactly per docs/SPEC.md "The live map" (the grid): the daily Lambda (60 s timeout, EventBridge Scheduler every morning) searches Earth Search STAC sentinel-2-l2a for the bbox, reduces the least cloudy pass of the last ten days to the 56 x 46 grid the way tools/build_map.py does (NDWI > 0.05, SCL 3, 8, 9, 10 masked as cloud), writes map/haijalpur/<date>.json and latest.json to S3 and a MAP# row. GET /map/{stretch} returns latest.json. Its role reads only the public buckets and writes only map/*. Also write s2_before (the last clear pass before 29 Sep) and each pass's true-colour picture (photo), exactly as tools/build_map.py does now. Keep Sentinel-1 a TODO. Test the grid's shape against tools/build_map.py on a saved window of one real scene. If rasterio is too big for a Lambda zip, say so and propose the smallest option before building.
 ```
 
 ## Step 6: if there's time, one prompt at a time

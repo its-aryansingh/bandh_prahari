@@ -15,9 +15,13 @@ The planning/ folder is for the human. Don't read it unless asked.
   everything else calls channels.send_*() so Telegram can replace WhatsApp.
 - Bedrock through the Strands Agents SDK. The model ID comes from env var MODEL_ID.
 - Web: Vite and plain TypeScript in web/, following web/DESIGN.md (Mithila style:
-  indigo ink, flat token fills, Yatra One + Baloo 2). The live map is a canvas-2D
-  isometric renderer of the GET /map grid: no map library, no UI framework, no
-  gradients, no neon, no dark-mode-first. Hindi first, big type. Help pins are never
+  indigo ink, flat token fills, Yatra One + Baloo 2). No UI framework, no gradients,
+  no neon, no dark-mode-first. Hindi first, big type.
+- The live map renders the GET /map grid two ways: a 3D WebGL view (three.js, the only
+  3D library, chosen by the owner on 11 Oct 2026) and the canvas-2D isometric painting as
+  the fallback. Everything standing on the map is real data, never placed at random:
+  buildings, roads, bridges and places from Overture Maps on AWS Open Data
+  (tools/build_features.py), trees from ESA WorldCover pixels. Help pins are never
   public: the public view shows counts per village only.
 
 ## Hard rules

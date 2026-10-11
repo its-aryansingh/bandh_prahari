@@ -206,6 +206,8 @@ export interface SatPass {
   cloud_cover?: number;
   water: number[];
   cloud?: number[];
+  /** File name of the pass's true-colour picture of the window (web/public/sat/). */
+  photo?: string;
 }
 
 /** The stretch as a grid of about 200 m cells, built from AWS Open Data (tools/build_map.py, then the daily Lambda). */
@@ -224,6 +226,8 @@ export interface MapGrid {
   built: number[];
   /** Sentinel-2 L2A optical pass: water from NDWI, cloud from the SCL band. */
   s2: SatPass | null;
+  /** The last clear Sentinel-2 pass before the 29-30 September breach, for before and after. */
+  s2_before?: SatPass | null;
   /** Sentinel-1 GRD radar pass: sees through cloud. Null until the daily Lambda runs with the account's credentials. */
   s1?: SatPass | null;
   sources: Record<string, string>;

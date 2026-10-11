@@ -15,7 +15,8 @@ import { Iso, type Rot } from "../map/iso";
 import { CLS, CREST_M, buildModel, cellLatLon, type MapVillage, type Model, type Pt } from "../map/model";
 import { Relief, type Route, type TeamState } from "../map/sim";
 import { drawSpriteAt } from "../map/sprites";
-import type { Gauges, HelpNeed, HelpRequest, Reading, Stretch } from "../types";
+import type { Gauges, HelpNeed, HelpRequest, Incident, Reading, Stretch } from "../types";
+import type { Pick3D, State3D, View3D } from "../map/view3d";
 
 type Role = "family" | "relief" | "district";
 type Sel =
@@ -89,7 +90,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     level: today,
     shown: today,
     breach: false,
-    layers: { observed: true, camps: true, routes: true, help: true },
+    layers: { observed: true, camps: true, routes: true, help: true, photo: false },
     sel: null as Sel | null,
     home: haijalpur ? haijalpur.cell : Math.floor(m.N / 2),
     people: 4,
@@ -131,6 +132,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
           <button type="button" class="lm-gauge" data-sel="gauge"></button>
         </div>
         <div class="lm-hud lm-tr" role="group" aria-label="${esc(L("नक़्शा घुमाएँ और ज़ूम करें", "Rotate and zoom the map"))}">
+          <button type="button" class="icon-btn lm-3d" aria-pressed="false" hidden title="${esc(L("3D नक़्शा या चित्र", "3D map or the painting"))}"><b>3D</b></button>
           <button type="button" class="icon-btn lm-rot" aria-label="${esc(L("90° घुमाएँ", "Rotate 90°"))}">${ROT_ICON}</button>
           <button type="button" class="icon-btn lm-zin" aria-label="${esc(L("पास से", "Zoom in"))}">${PLUS_ICON}</button>
           <button type="button" class="icon-btn lm-zout" aria-label="${esc(L("दूर से", "Zoom out"))}">${MINUS_ICON}</button>
@@ -180,6 +182,8 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
         <p class="lm-layers-title small">${bil("परतें", "Layers")}</p>
         <button type="button" class="chip" data-layer="observed" aria-pressed="true"><i class="sw s-seen"></i>${bil(`उपग्रह ने देखा पानी, ${s2DateHi(m)}`, `Water seen by satellite, ${s2DateEn(m)}`)}</button>
         <button type="button" class="chip" disabled title="${esc(L("रोज़ की Lambda चलने पर", "After the daily Lambda runs"))}"><i class="sw s-radar"></i>${bil("रडार (Sentinel-1): जल्द", "Radar (Sentinel-1): soon")}</button>
+        ${grid.s2?.photo ? `<button type="button" class="chip" data-layer="photo" aria-pressed="false">${icon("camera")}${bil(`उपग्रह की असली तस्वीर, ${s2DateHi(m)}`, `The satellite's photo, ${s2DateEn(m)}`)}</button>` : ""}
+        ${grid.s2_before ? `<button type="button" class="chip lm-pass" aria-pressed="false">${bil(`टूटने से पहले: ${dateHi(grid.s2_before.date)}`, `Before the breach: ${dateEn(grid.s2_before.date)}`)}</button>` : ""}
         <button type="button" class="chip" data-layer="camps" aria-pressed="true">${icon("tent")}${bil("राहत शिविर", "Relief camps")}</button>
         <button type="button" class="chip" data-layer="routes" aria-pressed="true"><i class="sw s-route"></i>${bil("सुरक्षित रास्ते", "Safe routes")}</button>
         <button type="button" class="chip" data-layer="help" aria-pressed="true"><i class="sw s-pin"></i>${bil("मदद और टीमें", "Help and teams")}</button>
@@ -193,8 +197,8 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     </div>`;
 
   $("#lm-sources").innerHTML = bi(
-    `ज़मीन की ऊँचाई: Copernicus DEM GLO-30। ज़मीन का उपयोग: ESA WorldCover 2021। पानी: Sentinel-2 L2A, ${s2DateHi(m)} 2026 (${m.s2?.id ?? "-"}, बादल ${m.s2?.cloud_cover ?? "-"}%)। सब AWS Open Data से, लगभग 200 मी. के खानों में। उपग्रह हर कुछ दिन में लौटता है, इसलिए यह पानी आज का नहीं। टीमों की जगह असली सिस्टम में Amazon Location Service से आती है; यहाँ सब नमूना है।`,
-    `Height: Copernicus DEM GLO-30. Land cover: ESA WorldCover 2021. Water: Sentinel-2 L2A, ${s2DateEn(m)} 2026 (${m.s2?.id ?? "-"}, ${m.s2?.cloud_cover ?? "-"}% cloud). All from AWS Open Data, in cells of about 200 m. Satellites come back every few days, so this water is not today's. In the real system team positions come from Amazon Location Service; here they are samples.`,
+    `ज़मीन की ऊँचाई: Copernicus DEM GLO-30। ज़मीन का उपयोग: ESA WorldCover 2021। पानी: Sentinel-2 L2A, ${s2DateHi(m)} 2026 (${m.s2?.id ?? "-"}, बादल ${m.s2?.cloud_cover ?? "-"}%)। सब AWS Open Data से, लगभग 200 मी. के खानों में। उपग्रह हर कुछ दिन में लौटता है, इसलिए यह पानी आज का नहीं। टीमों की जगह असली सिस्टम में Amazon Location Service से आती है; यहाँ सब नमूना है। 3D में हर घर, सड़क, पुल और जगह असली है: Overture Maps (AWS Open Data; © OpenStreetMap योगदानकर्ता, ODbL; Microsoft और Google के भवन-नक़्शे), पेड़ ESA WorldCover के 10 मी. पिक्सेल से। उपग्रह की तस्वीर: Copernicus Sentinel-2।`,
+    `Height: Copernicus DEM GLO-30. Land cover: ESA WorldCover 2021. Water: Sentinel-2 L2A, ${s2DateEn(m)} 2026 (${m.s2?.id ?? "-"}, ${m.s2?.cloud_cover ?? "-"}% cloud). All from AWS Open Data, in cells of about 200 m. Satellites come back every few days, so this water is not today's. In the real system team positions come from Amazon Location Service; here they are samples. In 3D every building, road, bridge and named place is real: Overture Maps on AWS Open Data (© OpenStreetMap contributors, ODbL; Microsoft and Google building footprints), and trees come from ESA WorldCover's 10 m pixels. Satellite photo: Copernicus Sentinel-2.`,
   );
 
   const stage = $(".lm-stage", host);
@@ -209,9 +213,231 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   const gaugeBtn = $(".lm-gauge", host);
   const iso = new Iso(m, canvas);
 
+  // ---------------- the 3D view (WebGL), over the same grid and state ----------------
+  // The painting above stays as the fallback: on a browser without WebGL, or by choice.
+  let v3: View3D | null = null;
+  let v3on = false;
+  let incidents: Incident[] = [];
+  const loadIncidents = () =>
+    api
+      .openIncidents()
+      .then((r) => {
+        incidents = r.incidents;
+        need();
+      })
+      .catch(() => undefined);
+  loadIncidents();
+  const ROLE_HI: Record<string, string> = {
+    junior_engineer: "कनीय अभियंता",
+    assistant_engineer: "सहायक अभियंता",
+    executive_engineer: "कार्यपालक अभियंता",
+    flood_fighting_force: "बाढ़ संघर्षात्मक बल",
+    district_control_room: "ज़िला नियंत्रण कक्ष",
+  };
+  const PRIO_COL: Record<string, string> = { P1: C.sindoor, P2: C.kesar, P3: C.haldi };
+  const open = (i: Incident) => !/^closed/.test(i.status);
+  function state3d(): State3D {
+    const teams = S.layers.help
+      ? relief.teams.map((t) => {
+          let heading = 0;
+          if (t.drive) {
+            const k = clamp((relief.now - t.drive.t0) / t.drive.ms);
+            const ahead = remaining(t.drive.pts, t.drive.acc, Math.min(1, k + 0.02));
+            const q = ahead[Math.min(1, ahead.length - 1)] ?? t.pos;
+            heading = Math.atan2(q[1] - t.pos[1], q[0] - t.pos[0]);
+          }
+          const kind: "boat" | "sdrf" | "tractor" = t.team.kind === "sdrf" ? "sdrf" : t.team.kind === "boat" ? "boat" : "tractor";
+          return {
+            id: t.team.id,
+            kind,
+            pos: t.pos,
+            heading,
+            name: [t.team.name_hi, t.team.name_en] as [string, string],
+            selected: (S.sel?.k === "team" && S.sel.id === t.team.id) || t.team.id === relief.myTeam,
+            moving: !!t.drive,
+          };
+        })
+      : [];
+    const pins =
+      S.layers.help && S.role !== "family"
+        ? relief.requests
+            .filter((r) => relief.cellOf(r) >= 0 && !(r.status === "rescued" && relief.minutesSince(r.rescued) > 30))
+            .map((r) => ({ id: r.id, cell: relief.cellOf(r), colour: STATUS_TONE[r.status] ?? C.sindoor, mine: false }))
+        : relief.requests
+            .filter((r) => r.id === relief.mine)
+            .map((r) => ({ id: r.id, cell: relief.cellOf(r), colour: STATUS_TONE[r.status] ?? C.sindoor, mine: true }));
+    const live = story.on ? [] : incidents.filter(open);
+    const beacons = live.map((i) => {
+      const left = Math.round((Date.parse(i.deadline) - relief.now) / 60000);
+      const who = ROLE_HI[i.with_role] ?? i.with_role;
+      const whoEn = i.with_role.replace(/_/g, " ");
+      const due = left >= 0;
+      return {
+        id: i.id,
+        km: i.km,
+        priority: i.priority,
+        label: [
+          `${i.priority} · किमी ${i.km} · ${who}: ${due ? `${left} मिनट बाक़ी` : `${-left} मिनट देर`}`,
+          `${i.priority} · km ${i.km} · ${whoEn}: ${due ? `${left} min left` : `${-left} min late`}`,
+        ] as [string, string],
+      };
+    });
+    const routes: { pts: Pt[]; colour: string }[] = [];
+    if (S.layers.routes) {
+      for (const t of relief.teams) {
+        if (!t.drive) continue;
+        const k = clamp((relief.now - t.drive.t0) / t.drive.ms);
+        routes.push({ pts: remaining(t.drive.pts, t.drive.acc, k), colour: C.kesarDeep });
+      }
+      const fam = familyRoute();
+      if (fam && (S.role === "family" || S.sel?.k === "cell")) routes.push({ pts: fam.cells.map(cellPt), colour: C.dhaanDeep });
+      const sr = selectedTeamRoute();
+      if (sr) routes.push({ pts: sr.cells.map(cellPt), colour: C.neel });
+    }
+    const counts =
+      S.layers.help && S.role === "family" ? new Map(relief.counts().map((c) => [c.village, [c.open, c.on_the_way, c.safe] as [number, number, number]])) : null;
+    return {
+      lang,
+      night: story.night,
+      sun: story.sun,
+      breachKm: S.breach ? BREACH_KM : null,
+      ringKm: story.ringKm,
+      teams,
+      pins,
+      beacons,
+      routes,
+      patrolAlarm: new Map(live.map((i) => [i.km, PRIO_COL[i.priority] ?? C.kesar])),
+      selCell: S.sel?.k === "cell" ? S.sel.i : null,
+      photo: S.layers.photo,
+      villageCounts: counts,
+    };
+  }
+  let p3timer = 0;
+  let p3last = 0;
+  function paint3d() {
+    if (!v3 || !v3on) return;
+    const run = () => {
+      p3last = performance.now();
+      v3?.setPaint({ level: S.shown, flood: flood(), observed: S.layers.observed, camps: S.layers.camps }, S.layers.photo);
+    };
+    clearTimeout(p3timer);
+    if (performance.now() - p3last > 140) run();
+    else p3timer = window.setTimeout(run, 140);
+  }
+  const btn3d = $<HTMLButtonElement>(".lm-3d", host);
+  const webgl = (() => {
+    try {
+      const c = document.createElement("canvas");
+      return !!(c.getContext("webgl2") || c.getContext("webgl"));
+    } catch {
+      return false;
+    }
+  })();
+  btn3d.hidden = !webgl;
+  async function set3d(on: boolean) {
+    if (on && !webgl) return;
+    v3on = on;
+    btn3d.setAttribute("aria-pressed", String(on));
+    host.classList.toggle("is3d", on);
+    if (on && !v3) {
+      flashHint(L("3D नक़्शा बन रहा है: 39 हज़ार असली घर…", "Building the 3D map: 39 thousand real buildings…"), 6000);
+      const [mod, feats] = await Promise.all([
+        import("../map/view3d"),
+        (import.meta.env.DEV && new URLSearchParams(location.search).has("lite") ? Promise.reject() : fetch(`${import.meta.env.BASE_URL}map/haijalpur-features.json`))
+          .then((r) => (r.ok ? r.json() : null))
+          .catch(() => null),
+      ]);
+      v3 = new mod.View3D(m, stage, state3d, feats);
+      if (grid.s2?.photo) v3.setPhoto(`${import.meta.env.BASE_URL}sat/${grid.s2.photo}`);
+      v3.afterLabels = (g, w, h, now) => {
+        if (story.night > 0.01 || story.sun > 0) sky(g, now, w, h);
+        frameBorder(g, w, h);
+      };
+      wire3d(v3);
+      // start close to Haijalpur, tilted like the painting, so the 3D reads at once
+      if (haijalpur) v3.view([(haijalpur.cell % m.C) + 2, Math.floor(haijalpur.cell / m.C) + 2], iso.size[0] < 700 ? 16 : 19);
+      if (import.meta.env.DEV) (window as unknown as { __bp3d: View3D }).__bp3d = v3;
+      hint.hidden = true;
+      if (!v3on) return v3.setVisible(false);
+    }
+    canvas.hidden = on;
+    if (v3) {
+      v3.setVisible(on && visible);
+      if (on) paint3d();
+    }
+    if (!on) {
+      iso.resize();
+      paint(false);
+    }
+    measureHud();
+    need();
+  }
+  btn3d.addEventListener("click", () => set3d(!v3on));
+
+  // before and after the breach, as the satellite saw them
+  const passes = {
+    after: { meta: m.s2, water: m.s2water, cloud: m.s2cloud, photo: grid.s2?.photo ?? null },
+    before: grid.s2_before
+      ? {
+          meta: { id: grid.s2_before.id, date: grid.s2_before.date, cloud_cover: grid.s2_before.cloud_cover ?? 0 },
+          water: Uint8Array.from(grid.s2_before.water),
+          cloud: Uint8Array.from(grid.s2_before.cloud ?? new Array(m.N).fill(0)),
+          photo: grid.s2_before.photo ?? null,
+        }
+      : null,
+  };
+  host.querySelector<HTMLButtonElement>(".lm-pass")?.addEventListener("click", (e) => {
+    const b = e.currentTarget as HTMLButtonElement;
+    const before = b.getAttribute("aria-pressed") !== "true";
+    const p = before && passes.before ? passes.before : passes.after;
+    b.setAttribute("aria-pressed", String(before));
+    m.s2 = p.meta;
+    m.s2water = p.water;
+    m.s2cloud = p.cloud;
+    const seen = host.querySelector('[data-layer="observed"]');
+    if (seen) seen.innerHTML = `<i class="sw s-seen"></i>${bil(`उपग्रह ने देखा पानी, ${s2DateHi(m)}`, `Water seen by satellite, ${s2DateEn(m)}`)}`;
+    const ph = host.querySelector('[data-layer="photo"]');
+    if (ph) ph.innerHTML = `${icon("camera")}${bil(`उपग्रह की असली तस्वीर, ${s2DateHi(m)}`, `The satellite's photo, ${s2DateEn(m)}`)}`;
+    flashHint(before ? L(`टूटने से पहले: ${s2DateHi(m)} का उपग्रह`, `Before the breach: the satellite on ${s2DateEn(m)}`) : L(`टूटने के बाद: ${s2DateHi(m)} का उपग्रह`, `After the breach: the satellite on ${s2DateEn(m)}`), 2600);
+    v3?.setPhoto(p.photo ? `${import.meta.env.BASE_URL}sat/${p.photo}` : null);
+    v3?.invalidate();
+    if (!v3on) iso.paint({ level: S.shown, flood: flood(), observed: S.layers.observed, camps: S.layers.camps }, true);
+    paint3d();
+    renderCard();
+    need();
+  });
+
+  function wire3d(v: View3D) {
+    let down: { x: number; y: number; t: number } | null = null;
+    const local3 = (e: PointerEvent) => {
+      const r = v.canvas.getBoundingClientRect();
+      return { x: e.clientX - r.left, y: e.clientY - r.top };
+    };
+    v.canvas.addEventListener("pointerdown", (e) => {
+      down = { ...local3(e), t: performance.now() };
+      if (story.on) story.follow = null;
+    });
+    v.canvas.addEventListener("pointerup", (e) => {
+      const p = local3(e);
+      if (!down || Math.hypot(p.x - down.x, p.y - down.y) > 6 || performance.now() - down.t > 500) return;
+      down = null;
+      const hit: Pick3D | null = v.pick(p.x, p.y);
+      if (!hit) return select(null);
+      if (hit.k === "place") {
+        flashHint(hit.name, 2600);
+        return select({ k: "cell", i: hit.cell }, p.x, p.y);
+      }
+      if (hit.k === "help" && S.role === "family") return;
+      select(hit, p.x, p.y);
+    });
+  }
+
   // ---------------- painting ----------------
   let repaintTimer = 0;
-  const paint = (draft = false) => iso.paint({ level: S.shown, flood: flood(), observed: S.layers.observed, camps: S.layers.camps, draft });
+  const paint = (draft = false) => {
+    if (!v3on) iso.paint({ level: S.shown, flood: flood(), observed: S.layers.observed, camps: S.layers.camps, draft });
+    paint3d();
+  };
   const fullPaintSoon = () => {
     clearTimeout(repaintTimer);
     repaintTimer = window.setTimeout(() => {
@@ -270,8 +496,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
       lastTick = now;
       tickTexts();
     }
-    const ctx = iso.blit();
-    drawOverlay(ctx, now);
+    if (!v3on) drawOverlay(iso.blit(), now);
     const pulsing = S.layers.help && S.role !== "family" && relief.requests.some((r) => r.status === "open" || r.status === "paged");
     if (visible && (anim || relief.busy || pulsing || dragging || story.on || story.night > 0)) raf = requestAnimationFrame(frame);
   }
@@ -762,6 +987,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
       const k = b.dataset.layer as keyof typeof S.layers;
       S.layers[k] = !S.layers[k];
       b.setAttribute("aria-pressed", String(S.layers[k]));
+      if (k === "photo" && S.layers.photo && !v3on) set3d(true);
       famCache.key = "";
       paint(false);
       renderSide();
@@ -771,6 +997,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
 
   // ---------------- view controls ----------------
   const rotate = () => {
+    if (v3on && v3) return v3.rotate();
     const next = ((iso.rot + 1) % 4) as Rot;
     const apply = () => {
       iso.setRot(next);
@@ -789,6 +1016,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   };
   $(".lm-rot", host).addEventListener("click", rotate);
   const zoomBy = (f: number) => {
+    if (v3on && v3) return v3.zoomBy(1 / f);
     const [w, h] = iso.size;
     iso.zoomAt(f, w / 2, h / 2);
     sharpenSoon();
@@ -1252,6 +1480,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   }
   async function refresh() {
     if (relief.inStory) return;
+    loadIncidents();
     const [h, t] = await Promise.all([api.help(roleToken() || undefined), api.teams()]);
     relief.load(h, t);
     renderSide();
@@ -1762,6 +1991,11 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
     if (story.night < story.nightTo) story.night = Math.min(story.nightTo, story.night + k / 1600);
     else if (story.night > story.nightTo) story.night = Math.max(story.nightTo, story.night - k / 2600);
     if (story.sun > 0 && story.sun < 1) story.sun = Math.min(1, story.sun + k / 2600);
+    if (v3on && v3) {
+      const p = story.follow?.() ?? null;
+      v3.focus(p, story.zoomTo ? (iso.size[0] < 700 ? 13 : 11) : 0);
+      return;
+    }
     if (dragging) return;
     const p = story.follow?.();
     if (p) {
@@ -1809,8 +2043,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   }
 
   // the sky inside the frame, painted as in Madhubani: a moon with stars, then a sun with a face
-  function sky(ctx: CanvasRenderingContext2D, now: number) {
-    const [w, h] = iso.size;
+  function sky(ctx: CanvasRenderingContext2D, now: number, w = iso.size[0], h = iso.size[1]) {
     // top right, beside the zoom buttons, where the diorama's corner leaves sky
     const x = w - (w < 700 ? 112 : 142);
     const y = Math.min(64, h * 0.12);
@@ -1963,7 +2196,7 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
       paint(false);
       updateScale();
       // a resized canvas is blank until drawn, so draw now rather than on the next frame
-      drawOverlay(iso.blit(), performance.now());
+      if (!v3on) drawOverlay(iso.blit(), performance.now());
       need();
     }
   }).observe(stage);
@@ -1984,8 +2217,11 @@ export async function initLiveMap(stretch: Stretch, gauges: Gauges): Promise<voi
   updateScale();
   renderSide();
   tickTexts();
+  // the 3D map is the default wherever WebGL works; the painting stays one tap away
+  if (webgl) set3d(true);
   watchVisible(host, (v) => {
     visible = v;
+    v3?.setVisible(v3on && v);
     if (v) {
       lastT = performance.now();
       need();
@@ -2160,6 +2396,12 @@ function flower(g: CanvasRenderingContext2D, x: number, y: number) {
 const clockHiEn = (iso: string) => `${clockHi(iso)} (${clockEn(iso)})`;
 const MON_HI = ["जनवरी", "फ़रवरी", "मार्च", "अप्रैल", "मई", "जून", "जुलाई", "अगस्त", "सितंबर", "अक्टूबर", "नवंबर", "दिसंबर"];
 const MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+function dateHi(d: string): string {
+  return `${Number(d.slice(8, 10))} ${MON_HI[Number(d.slice(5, 7)) - 1]}`;
+}
+function dateEn(d: string): string {
+  return `${Number(d.slice(8, 10))} ${MON_EN[Number(d.slice(5, 7)) - 1]}`;
+}
 function s2DateHi(m: Model): string {
   const d = m.s2?.date;
   return d ? `${Number(d.slice(8, 10))} ${MON_HI[Number(d.slice(5, 7)) - 1]}` : "-";
