@@ -72,6 +72,12 @@ def test_page_loads_and_has_no_console_errors(browser, vp, lang):
     overflow = page.evaluate("() => document.documentElement.scrollWidth > document.documentElement.clientWidth")
     assert not overflow, f"Horizontal overflow detected on {url} ({vp['name']})"
 
+    # Scroll to the live map section to trigger lazy load
+    naksha = page.locator("#naksha")
+    if naksha.count() > 0:
+        naksha.scroll_into_view_if_needed()
+        page.wait_for_selector("canvas.lm-canvas", timeout=10000)
+
     # Check map canvas exists
     canvas = page.locator("canvas.lm-canvas")
     assert canvas.count() > 0, "Live map canvas not found on page"
@@ -87,6 +93,11 @@ def test_map_and_replay_controls(browser):
         page.goto(WEB_URL, wait_until="networkidle", timeout=15000)
     except Exception as e:
         pytest.skip(f"Web server at {WEB_URL} not reachable: {e}")
+
+    naksha = page.locator("#naksha")
+    if naksha.count() > 0:
+        naksha.scroll_into_view_if_needed()
+        page.wait_for_selector("canvas.lm-canvas", timeout=10000)
 
     # Live map 2D / 3D button toggle
     btn_3d = page.locator("button.lm-3d")
