@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/python-3.12-3776ab)](template.yaml)
 [![Built on AWS](https://img.shields.io/badge/built%20on-AWS%20ap--south--1-ff9900)](docs/architecture.md)
 
-**Live page:** _add the Amplify URL_ · **Video (3 min):** _add the YouTube link_ · Environmental Hacks (WeMakeDevs × AWS), Heat and Water track
+**Live page:** [https://bandhprahari-production.up.railway.app](https://bandhprahari-production.up.railway.app) · **Video (3 min):** _add the YouTube link_ · Environmental Hacks (WeMakeDevs × AWS), Heat and Water track
 
 > A student project. It has no government affiliation, it is not an official warning service, and every public alert it drafts is marked **Exercise**. In an emergency call **1070** or the Water Resources Department's helpline **1800 345 6145**.
 
