@@ -9,3 +9,14 @@ samconfig.toml
 data/roster.local.json
 video-assets/
 planning/
+.browser_profile/
+scripts/do_login.py
+scripts/check_root.py
+scripts/inspect_page.py
+scripts/do_iam_login.py
+scripts/test_root_login.py
+scripts/root_login.py
+scripts/auto_aws.py
+scripts/headless_aws_login.py
+scripts/aws_login_flow.py
+scripts/browser_runner.py
